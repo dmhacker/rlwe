@@ -4,8 +4,11 @@
 #include <NTL/GF2X.h>
 #include <NTL/RR.h>
 #include <cassert>
+#include <random>
 
 using namespace rlwe;
+
+const float GAUSSIAN_STANDARD_DEVIATION = 3.192f;
 
 ZZX random::UniformSample(long degree, long field_modulus, bool flip_bits) {
   ZZX poly;
@@ -28,6 +31,20 @@ ZZX random::UniformSample(long degree, long field_modulus, bool flip_bits) {
         SetCoeff(poly, i, -coeff(poly, i));
       }
     }
+  }
+
+  return poly;
+}
+
+// TODO: Replace with a high-quality discrete number generator (e.g. rejection sampler, Knuth-Yao algorithm)
+ZZX random::GaussianSample(long degree, float standard_deviation) {
+  std::random_device device;
+  std::mt19937 spigot(device());
+  std::normal_distribution<float> distribution(0.0f, standard_deviation);
+
+  ZZX poly;
+  for (long i = 0; i < degree; i++) {
+    SetCoeff(poly, i, std::round(distribution(spigot)));
   }
 
   return poly;
@@ -69,8 +86,8 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
   // Copy private key parameters into polynomial over finite field
   ZZ_pX s = conv<ZZ_pX>(priv.GetS());
 
-  // TODO: Draw error polynomial from discrete Gaussian distribution
-  ZZ_pX e;
+  // Draw error polynomial from discrete Gaussian distribution
+  ZZ_pX e = conv<ZZ_pX>(random::GaussianSample(n, GAUSSIAN_STANDARD_DEVIATION));
 
   // Compute b = -(a * s + e)
   ZZ_pX b;
@@ -94,9 +111,9 @@ Ciphertext PublicKey::Encrypt(ZZX plaintext) {
   // Draw u from GF2 (coefficients are in integers mod 2)
   ZZ_pX u = conv<ZZ_pX>(random::UniformSample(params.GetPolyModulusDegree(), 2, true));
 
-  // TODO: Draw error polynomials from discrete Gaussian distribution
-  ZZ_pX e1;
-  ZZ_pX e2;
+  // Draw error polynomials from discrete Gaussian distribution
+  ZZ_pX e1 = conv<ZZ_pX>(random::GaussianSample(params.GetPolyModulusDegree(), GAUSSIAN_STANDARD_DEVIATION));
+  ZZ_pX e2 = conv<ZZ_pX>(random::GaussianSample(params.GetPolyModulusDegree(), GAUSSIAN_STANDARD_DEVIATION));
 
   // Set up a temporary buffer to hold the results of multiplications
   ZZ_pX buffer;

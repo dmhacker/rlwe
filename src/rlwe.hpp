@@ -6,6 +6,7 @@ using namespace NTL;
 namespace rlwe {
   namespace random {
     ZZX UniformSample(long degree, long field_modulus, bool flip_bits);
+    ZZX GaussianSample(long degree, float standard_deviation); 
   }
 
   class PublicKey;
