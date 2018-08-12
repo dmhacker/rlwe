@@ -33,9 +33,7 @@ NTL::ZZX decrypted_plaintext = priv.Decrypt(ciphertext);
 std::cout << params.DecodeInteger(decrypted_plaintext) << std::endl;
 ```
 
-Internally, librlwe uses [NTL](http://www.shoup.net/ntl/) for doing fast polynomial arthimetic. 
+Internally, librlwe uses [NTL](http://www.shoup.net/ntl/) for doing fast polynomial arithmetic. 
 `NTL:ZZX` refers to any arbitrary polynomial whose coefficients are over the set of integers.
-However, as RLWE necessitates, any polynomials found in public or private keys are in the ring 
-`Z_q/(f)` where `f` is a cyclotomic polynomial of the form `x^n + 1`.
-Whenever operations are performed on them, they are usually converted to `NTL::ZZ_pX`.
-A temporary modulus is pushed until the operation completes.
+However, all polynomials generated or used by librlwe are in the ring `Z_q/(f)` where `f` is a cyclotomic polynomial of the form `x^n + 1`.
+Whenever operations are performed on them, they are usually converted to `NTL::ZZ_pX` and a temporary modulus is pushed until the operation completes.
