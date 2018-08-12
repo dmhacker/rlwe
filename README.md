@@ -4,7 +4,7 @@
 
 For anyone without significant background on RLWE, I would recommend you check out these links:
 * [N1 Analytic's Blog on Homomorphic Encryption using RLWE](https://blog.n1analytics.com/homomorphic-encryption-illustrated-primer/)
-* [Homomorphic Encryption from RLWE](https://cryptosith.org/michael/data/talks/2012-01-10-MSR-Cambridge.pdf) - presentation given at Cambridge
+* [Homomorphic Encryption from RLWE](https://cryptosith.org/michael/data/talks/2012-01-10-MSR-Cambridge.pdf) - presentation given at MSR Cambridge
 * [Microsoft's SEAL Library Manual](https://www.microsoft.com/en-us/research/wp-content/uploads/2017/12/sealmanual.pdf) - of which this is based off of
 * [Parameters for RLWE Cryptography](http://www.ringlwe.info/parameters-for-rlwe.html)
 
