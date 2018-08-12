@@ -10,7 +10,7 @@ TEST_CASE("Uniform sampling over several fields") {
 
   for (int m = 2; m < 100; m += 50) {
     // Generate a polynomial uniformly randomly
-    NTL::ZZX poly = rlwe::random::UniformSample(DEGREE, m, false);
+    NTL::ZZX poly = rlwe::random::UniformSample(DEGREE, ZZ(m), false);
 
     // Check to make sure each coefficient is in the modulus range
     for (long i = 0; i < DEGREE; i++) {
@@ -26,7 +26,7 @@ TEST_CASE("Uniform sampling with sign bit flipping") {
 
   for (int m = 2; m < 100; m += 50) {
     // Generate a polynomial uniformly randomly
-    NTL::ZZX poly = rlwe::random::UniformSample(DEGREE, m, true);
+    NTL::ZZX poly = rlwe::random::UniformSample(DEGREE, ZZ(m), true);
 
     // Check to make sure each coefficient is in the modulus range
     for (long i = 0; i < DEGREE; i++) {

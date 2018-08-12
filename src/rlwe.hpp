@@ -5,7 +5,7 @@ using namespace NTL;
 
 namespace rlwe {
   namespace random {
-    ZZX UniformSample(long degree, long field_modulus, bool flip_bits);
+    ZZX UniformSample(long degree, ZZ field_modulus, bool flip_bits);
     ZZX GaussianSample(long degree, float standard_deviation); 
   }
 
@@ -33,6 +33,11 @@ namespace rlwe {
       /* Key generation */
       PrivateKey GeneratePrivateKey() const;
       PublicKey GeneratePublicKey(const PrivateKey & priv) const;
+
+      /* Display to output stream */
+      friend std::ostream& operator<< (std::ostream& stream, const KeyParameters& params) {
+        return stream << "n = " << params.n << ", q = " << params.q << ", t = " << params.t;
+      }
   };
 
   class Ciphertext {
@@ -46,6 +51,11 @@ namespace rlwe {
       /* Getters */
       ZZX GetC0() const { return c0; }
       ZZX GetC1() const { return c1; }
+
+      /* Display to output stream */
+      friend std::ostream& operator<< (std::ostream& stream, const Ciphertext& ct) {
+        return stream << ct.c0 << ", " << ct.c1;
+      }
   };
 
   class PublicKey {
@@ -63,6 +73,11 @@ namespace rlwe {
 
       /* Public key encryption */
       Ciphertext Encrypt(ZZX plaintext); 
+
+      /* Display to output stream */
+      friend std::ostream& operator<< (std::ostream& stream, const PublicKey& pub) {
+        return stream << pub.p0 << ", " << pub.p1;
+      }
   };
 
   class PrivateKey {
@@ -78,5 +93,10 @@ namespace rlwe {
 
       /* Private key decryption */
       ZZX Decrypt(Ciphertext ciphertext);
+
+      /* Display to output stream */
+      friend std::ostream& operator<< (std::ostream& stream, const PrivateKey& priv) {
+        return stream << priv.s;
+      }
   };
 }

@@ -10,7 +10,7 @@ using namespace rlwe;
 
 const float GAUSSIAN_STANDARD_DEVIATION = 3.192f;
 
-ZZX random::UniformSample(long degree, long field_modulus, bool flip_bits) {
+ZZX random::UniformSample(long degree, ZZ field_modulus, bool flip_bits) {
   ZZX poly;
   if (field_modulus == 2) {
     // If the finite field is modulo 2, we can use the GF2X class 
@@ -19,7 +19,7 @@ ZZX random::UniformSample(long degree, long field_modulus, bool flip_bits) {
   else {
     // Otherwise, we set a temporary modulus and use the ZZ_pX class
     ZZ_pPush push;
-    ZZ_p::init(ZZ(field_modulus));
+    ZZ_p::init(field_modulus);
     poly = conv<ZZX>(random_ZZ_pX(degree));
   }
 
@@ -71,7 +71,7 @@ KeyParameters::KeyParameters(long n0, NTL::ZZ q0, NTL::ZZ t0) : n(n0), q(q0), t(
 
 PrivateKey KeyParameters::GeneratePrivateKey() const {
   // Create private key based off of secret polynomial drawn from polynomial ring over GF2 
-  PrivateKey priv(random::UniformSample(n, 2, false), *this);
+  PrivateKey priv(random::UniformSample(n, ZZ(2), true), *this);
   return priv;
 }
 
@@ -81,7 +81,7 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
   ZZ_p::init(q);
 
   // Compute a, where the coefficients are drawn uniformly from the finite field (integers mod q) 
-  ZZ_pX a = conv<ZZ_pX>(random::UniformSample(n, conv<long>(q), false));
+  ZZ_pX a = conv<ZZ_pX>(random::UniformSample(n, q, false));
 
   // Copy private key parameters into polynomial over finite field
   ZZ_pX s = conv<ZZ_pX>(priv.GetS());
@@ -109,7 +109,7 @@ Ciphertext PublicKey::Encrypt(ZZX plaintext) {
   ZZ_pX m = conv<ZZ_pX>(plaintext) * conv<ZZ_p>(params.GetPlainToCoeffScalar());
 
   // Draw u from GF2 (coefficients are in integers mod 2)
-  ZZ_pX u = conv<ZZ_pX>(random::UniformSample(params.GetPolyModulusDegree(), 2, true));
+  ZZ_pX u = conv<ZZ_pX>(random::UniformSample(params.GetPolyModulusDegree(), ZZ(2), true));
 
   // Draw error polynomials from discrete Gaussian distribution
   ZZ_pX e1 = conv<ZZ_pX>(random::GaussianSample(params.GetPolyModulusDegree(), GAUSSIAN_STANDARD_DEVIATION));
@@ -155,7 +155,7 @@ ZZX PrivateKey::Decrypt(Ciphertext ciphertext) {
 
     // Compute round(coefficient * t / q)
     RR rounded_coefficient = round(conv<RR>(coefficient * params.GetPlainModulus()) / conv<RR>(params.GetCoeffModulus()));
-  
+
     // Get rid of negative numbers by taking the modulus again
     SetCoeff(plaintext, i, conv<ZZ>(rounded_coefficient) % params.GetPlainModulus());
   }
