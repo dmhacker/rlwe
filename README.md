@@ -2,7 +2,13 @@
 
 *librlwe* is a lightweight, easy-to-use library for doing ring-learning with errors (RLWE) cryptography.
 
-Here's an example:
+For anyone without significant background on RLWE, I would recommend you check out these links:
+* [N1 Analytic's Blog on Homomorphic Encryption using RLWE](https://blog.n1analytics.com/homomorphic-encryption-illustrated-primer/)
+* [Homomorphic Encryption from RLWE](https://cryptosith.org/michael/data/talks/2012-01-10-MSR-Cambridge.pdf) - presentation given at Cambridge
+* [Microsoft's SEAL Library Manual](https://www.microsoft.com/en-us/research/wp-content/uploads/2017/12/sealmanual.pdf) - of which this is based off of
+* [Parameters for RLWE Cryptography](http://www.ringlwe.info/parameters-for-rlwe.html)
+
+Here's an example of what you can do with this library:
 
 ```
 // Set up some parameters for the RLWE algorithm
