@@ -4,6 +4,10 @@
 using namespace NTL;
 
 namespace rlwe {
+  namespace random {
+    ZZX UniformSample(long degree, long field_modulus);
+  }
+
   class PublicKey;
   class PrivateKey;
 
@@ -30,29 +34,29 @@ namespace rlwe {
 
   class Ciphertext {
     private:
+      ZZX c0;
       ZZX c1;
-      ZZX c2;
     public:
       /* Constructors */
-      Ciphertext(ZZX c1_0, ZZX c2_0) : c1(c1_0), c2(c2_0) {}
+      Ciphertext(ZZX c0_0, ZZX c1_0) : c0(c0_0), c1(c1_0) {}
 
       /* Getters */
+      ZZX GetC0() const { return c0; }
       ZZX GetC1() const { return c1; }
-      ZZX GetC2() const { return c2; }
   };
 
   class PublicKey {
     private:
-      ZZX a;
-      ZZX b;
+      ZZX p0;
+      ZZX p1;
       const KeyParameters & params;
     public:
       /* Constructors */
-      PublicKey(ZZX a0, ZZX b0, const KeyParameters & p0) : a(a0), b(b0), params(p0) {}
+      PublicKey(ZZX p0_0, ZZX p1_0, const KeyParameters & params0) : p0(p0_0), p1(p1_0), params(params0) {}
 
       /* Getters */
-      ZZX GetA() const { return a; }
-      ZZX GetB() const { return b; } 
+      ZZX GetP0() const { return p0; }
+      ZZX GetP1() const { return p1; } 
 
       /* Public key encryption */
       Ciphertext Encrypt(ZZX plaintext); 
@@ -60,16 +64,14 @@ namespace rlwe {
 
   class PrivateKey {
     private:
-      ZZX e;
       ZZX s;
       const KeyParameters & params;
     public:
       /* Constructors */
-      PrivateKey(ZZX e0, ZZX s0, const KeyParameters & p0) : e(e0), s(s0), params(p0) {}
+      PrivateKey(ZZX s0, const KeyParameters & params0) : s(s0), params(params0) {}
 
       /* Getters */
-      ZZX GetE() const { return e; }
-      ZZX GetS() const { return s; }
+      ZZX GetSK() const { return s; }
 
       /* Private key decryption */
       ZZX Decrypt(Ciphertext ciphertext);
