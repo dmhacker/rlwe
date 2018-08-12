@@ -42,7 +42,7 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
   ZZ_pX s = conv<ZZ_pX>(priv.GetS());
 
   // Draw error polynomial from discrete Gaussian distribution
-  ZZ_pX e = conv<ZZ_pX>(random::GaussianSample(n, STANDARD_DEVIATION));
+  ZZ_pX e = conv<ZZ_pX>(random::GaussianSample(n));
 
   // Compute b = -(a * s + e)
   ZZ_pX b;

@@ -8,10 +8,7 @@ using namespace rlwe;
 void CenterCoefficients(ZZX & poly, ZZ mod) {
   ZZ center_point = mod / 2;
   for (long i = 0; i <= deg(poly); i++) {
-    // Get the ith coefficient
     ZZ coefficient = coeff(poly, i);
-
-    // Convert upper side of the finite field to their negative counterparts
     if (coefficient > center_point) {
       SetCoeff(poly, i, coefficient - mod);
     }   
@@ -21,15 +18,12 @@ void CenterCoefficients(ZZX & poly, ZZ mod) {
 void DownscaleCoefficients(ZZX & poly, ZZ t, ZZ q) {
   RR scalar = conv<RR>(t) / conv<RR>(q);
   for (long i = 0; i <= deg(poly); i++) {
-    // Compute round(coefficient * t / q)
     RR rounded_coefficient = round(conv<RR>(coeff(poly, i)) * scalar); 
-
-    // Get rid of negative numbers by taking the modulus again
     SetCoeff(poly, i, conv<ZZ>(rounded_coefficient) % t);
   }
 }
 
-Ciphertext PublicKey::Encrypt(ZZX & plaintext) {
+Ciphertext PublicKey::Encrypt(const ZZX & plaintext) const {
   // Set finite field modulus to be q
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
@@ -41,8 +35,8 @@ Ciphertext PublicKey::Encrypt(ZZX & plaintext) {
   ZZ_pX u = conv<ZZ_pX>(random::UniformSample(params.GetPolyModulusDegree(), ZZ(2), true));
 
   // Draw error polynomials from discrete Gaussian distribution
-  ZZ_pX e1 = conv<ZZ_pX>(random::GaussianSample(params.GetPolyModulusDegree(), STANDARD_DEVIATION));
-  ZZ_pX e2 = conv<ZZ_pX>(random::GaussianSample(params.GetPolyModulusDegree(), STANDARD_DEVIATION));
+  ZZ_pX e1 = conv<ZZ_pX>(random::GaussianSample(params.GetPolyModulusDegree())); 
+  ZZ_pX e2 = conv<ZZ_pX>(random::GaussianSample(params.GetPolyModulusDegree()));
 
   // Set up a temporary buffer to hold the results of multiplications
   ZZ_pX buffer;
@@ -59,7 +53,7 @@ Ciphertext PublicKey::Encrypt(ZZX & plaintext) {
   return ciphertext;
 }
 
-ZZX PrivateKey::Decrypt(Ciphertext & ciphertext) {
+ZZX PrivateKey::Decrypt(const Ciphertext & ciphertext) const {
   // Set finite field modulus to be q
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());

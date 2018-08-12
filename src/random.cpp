@@ -6,6 +6,8 @@
 
 using namespace rlwe;
 
+const float STANDARD_DEVIATION = 3.192f;
+
 ZZX random::UniformSample(long degree, ZZ field_modulus, bool flip_bits) {
   ZZX poly;
   if (field_modulus == 2) {
@@ -23,7 +25,7 @@ ZZX random::UniformSample(long degree, ZZ field_modulus, bool flip_bits) {
   if (flip_bits) {
     for (long i = 0; i < degree; i++) {
       // 50% random chance that the coefficient will be negative
-      if (rand() & 1) {
+      if (RandomBits_long(1)) {
         SetCoeff(poly, i, -coeff(poly, i));
       }
     }
@@ -33,14 +35,15 @@ ZZX random::UniformSample(long degree, ZZ field_modulus, bool flip_bits) {
 }
 
 // TODO: Replace with a high-quality discrete number generator (e.g. rejection sampler, Knuth-Yao algorithm)
-ZZX random::GaussianSample(long degree, float standard_deviation) {
+ZZX random::GaussianSample(long degree) {
   std::random_device device;
   std::mt19937 spigot(device());
-  std::normal_distribution<float> distribution(0.0f, standard_deviation);
+  std::normal_distribution<float> distribution(0.0f, STANDARD_DEVIATION);
 
   ZZX poly;
   for (long i = 0; i < degree; i++) {
-    SetCoeff(poly, i, std::round(distribution(spigot)));
+    ZZ coefficient = ZZ(std::round(distribution(spigot)));
+    SetCoeff(poly, i, RandomBits_long(1) ? coefficient : -coefficient); 
   }
 
   return poly;
