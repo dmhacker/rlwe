@@ -38,7 +38,8 @@ However, accessing the key internals is trivial.
 
 ```
 // Get the secret from the private key
-// This is will be a polynomial in Z[x]/(f) over the finite field GF2
+// This is will be a polynomial in Z[x]/(f) over the finite field Fq
+// Coeffients are either 1 or (q) - 1
 NTL::ZZX secret = priv.GetS();
 
 // Get the two elements that compose the public key
