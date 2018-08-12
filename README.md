@@ -1,6 +1,6 @@
 # librlwe
 
-*librlwe* is a lightweight, easy-to-use library for doing ring-learning with errors (RLWE) cryptography.
+**librlwe** is a lightweight, easy-to-use library for doing ring-learning with errors (RLWE) cryptography.
 
 For anyone without significant background on RLWE, I would recommend you check out these links:
 * [N1 Analytic's Blog on Homomorphic Encryption using RLWE](https://blog.n1analytics.com/homomorphic-encryption-illustrated-primer/)
