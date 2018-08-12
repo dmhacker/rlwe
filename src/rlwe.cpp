@@ -2,6 +2,7 @@
 
 #include <NTL/ZZ_pX.h>
 #include <NTL/GF2X.h>
+#include <NTL/RR.h>
 #include <cassert>
 
 using namespace rlwe;
@@ -32,7 +33,7 @@ ZZX random::UniformSample(long degree, long field_modulus, bool flip_bits) {
   return poly;
 }
 
-KeyParameters::KeyParameters(long n0, NTL::ZZ q0, NTL::ZZ t0) : n(n0), q(q0), t(t0) {
+KeyParameters::KeyParameters(long n0, NTL::ZZ q0, NTL::ZZ t0) : n(n0), q(q0), t(t0), q_div_t(q0 / t0) {
   // Assert that n is even, assume that it is a power of 2
   assert(n % 2 == 0);
 
@@ -66,7 +67,7 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
   ZZ_pX a = random_ZZ_pX(n);
 
   // Copy private key parameters into polynomial over finite field
-  ZZ_pX s = conv<ZZ_pX>(priv.GetSK());
+  ZZ_pX s = conv<ZZ_pX>(priv.GetS());
 
   // TODO: Draw error polynomial from discrete Gaussian distribution
   ZZ_pX e;
@@ -88,7 +89,7 @@ Ciphertext PublicKey::Encrypt(ZZX plaintext) {
   ZZ_p::init(params.GetCoeffModulus());
 
   // Upscale plaintext to be in ciphertext ring
-  ZZ_pX m = conv<ZZ_pX>(plaintext) * conv<ZZ_p>(params.GetCoeffModulus() / params.GetPlainModulus());
+  ZZ_pX m = conv<ZZ_pX>(plaintext) * conv<ZZ_p>(params.GetPlainToCoeffScalar());
 
   // Draw u from GF2 (coefficients are in integers mod 2)
   ZZ_pX u = conv<ZZ_pX>(random::UniformSample(params.GetPolyModulusDegree(), 2, true));
@@ -123,5 +124,11 @@ ZZX PrivateKey::Decrypt(Ciphertext ciphertext) {
   m += conv<ZZ_pX>(ciphertext.GetC0());
 
   // Downscale m to be in plaintext ring
-  return conv<ZZX>(m) * params.GetPlainModulus() / params.GetCoeffModulus(); 
+  ZZX plaintext = conv<ZZX>(m) * params.GetPlainModulus();
+  for (long i = 0; i < params.GetPolyModulusDegree(); i++) {
+    RR rounded_coefficient = round(conv<RR>(coeff(plaintext, i)) / conv<RR>(params.GetCoeffModulus()));
+    SetCoeff(plaintext, i, conv<ZZ>(rounded_coefficient));
+  }
+
+  return plaintext; 
 }

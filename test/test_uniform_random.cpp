@@ -1,7 +1,5 @@
-#define CATCH_CONFIG_MAIN
-
-#include "catch.hpp"
 #include "../src/rlwe.hpp"
+#include "catch.hpp"
 
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>

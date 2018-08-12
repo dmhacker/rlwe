@@ -16,6 +16,7 @@ namespace rlwe {
       long n;
       ZZ q;
       ZZ t;
+      ZZ q_div_t;
       ZZ_pXModulus phi;
     public:
       /* Constructors */
@@ -24,6 +25,7 @@ namespace rlwe {
       /* Getters */
       ZZ GetCoeffModulus() const { return q; }
       ZZ GetPlainModulus() const { return t; }
+      ZZ GetPlainToCoeffScalar() const { return q_div_t; }
       ZZ_pXModulus GetPolyModulus() const { return phi; }
       long GetPolyModulusDegree() const { return n; }
 
@@ -71,7 +73,7 @@ namespace rlwe {
       PrivateKey(ZZX s0, const KeyParameters & params0) : s(s0), params(params0) {}
 
       /* Getters */
-      ZZX GetSK() const { return s; }
+      ZZX GetS() const { return s; }
 
       /* Private key decryption */
       ZZX Decrypt(Ciphertext ciphertext);
