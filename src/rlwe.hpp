@@ -5,7 +5,7 @@ using namespace NTL;
 
 namespace rlwe {
   namespace random {
-    ZZX UniformSample(long degree, long field_modulus);
+    ZZX UniformSample(long degree, long field_modulus, bool flip_bits);
   }
 
   class PublicKey;

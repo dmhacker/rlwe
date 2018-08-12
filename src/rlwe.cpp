@@ -6,16 +6,30 @@
 
 using namespace rlwe;
 
-ZZX random::UniformSample(long degree, long field_modulus) {
+ZZX random::UniformSample(long degree, long field_modulus, bool flip_bits) {
+  ZZX poly;
   if (field_modulus == 2) {
     // If the finite field is modulo 2, we can use the GF2X class 
-    return conv<ZZX>(random_GF2X(degree));
+    poly = conv<ZZX>(random_GF2X(degree));
   }
   else {
     // Otherwise, we set a temporary modulus and use the ZZ_pX class
-    ZZ_pPush(ZZ(field_modulus));
-    return conv<ZZX>(random_ZZ_pX(degree));
+    ZZ_pPush push;
+    ZZ_p::init(ZZ(field_modulus));
+    poly = conv<ZZX>(random_ZZ_pX(degree));
   }
+
+  // Iterate through each coefficient
+  if (flip_bits) {
+    for (long i = 0; i < degree; i++) {
+      // 50% random chance that the coefficient will be negative
+      if (rand() & 1) {
+        SetCoeff(poly, i, -coeff(poly, i));
+      }
+    }
+  }
+
+  return poly;
 }
 
 KeyParameters::KeyParameters(long n0, NTL::ZZ q0, NTL::ZZ t0) : n(n0), q(q0), t(t0) {
@@ -23,7 +37,8 @@ KeyParameters::KeyParameters(long n0, NTL::ZZ q0, NTL::ZZ t0) : n(n0), q(q0), t(
   assert(n % 2 == 0);
 
   // Doesn't matter what this is, since the max coefficient is 1 for the cyclotomic polynomial
-  ZZ_pPush push(q); 
+  ZZ_pPush push;
+  ZZ_p::init(q);
 
   // Create a cyclotomic polynomial that serves as the modulus for the ring
   ZZ_pX cyclotomic;
@@ -38,13 +53,14 @@ KeyParameters::KeyParameters(long n0, NTL::ZZ q0, NTL::ZZ t0) : n(n0), q(q0), t(
 
 PrivateKey KeyParameters::GeneratePrivateKey() const {
   // Create private key based off of secret polynomial drawn from polynomial ring over GF2 
-  PrivateKey priv(random::UniformSample(n, 2), *this);
+  PrivateKey priv(random::UniformSample(n, 2, false), *this);
   return priv;
 }
 
 PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
   // Set finite field modulus to be q
-  ZZ_pPush push(q); 
+  ZZ_pPush push;
+  ZZ_p::init(q);
 
   // Compute a, where the coefficients are drawn uniformly from the finite field (integers mod q) 
   ZZ_pX a = random_ZZ_pX(n);
@@ -68,13 +84,14 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
 
 Ciphertext PublicKey::Encrypt(ZZX plaintext) {
   // Set finite field modulus to be q
-  ZZ_pPush push(params.GetCoeffModulus()); 
+  ZZ_pPush push;
+  ZZ_p::init(params.GetCoeffModulus());
 
   // Upscale plaintext to be in ciphertext ring
   ZZ_pX m = conv<ZZ_pX>(plaintext) * conv<ZZ_p>(params.GetCoeffModulus() / params.GetPlainModulus());
 
   // Draw u from GF2 (coefficients are in integers mod 2)
-  ZZ_pX u = conv<ZZ_pX>(random::UniformSample(params.GetPolyModulusDegree(), 2));
+  ZZ_pX u = conv<ZZ_pX>(random::UniformSample(params.GetPolyModulusDegree(), 2, true));
 
   // TODO: Draw error polynomials from discrete Gaussian distribution
   ZZ_pX e1;
@@ -97,7 +114,8 @@ Ciphertext PublicKey::Encrypt(ZZX plaintext) {
 
 ZZX PrivateKey::Decrypt(Ciphertext ciphertext) {
   // Set finite field modulus to be q
-  ZZ_pPush push(params.GetCoeffModulus()); 
+  ZZ_pPush push;
+  ZZ_p::init(params.GetCoeffModulus());
 
   // m = c1 + c2 * s
   ZZ_pX m;
