@@ -18,8 +18,8 @@ rlwe::KeyParameters params(1024, NTL::ZZ(9214347247561474048), NTL::ZZ(290764801
 rlwe::PrivateKey priv = params.GeneratePrivateKey();
 rlwe::PublicKey pub = params.GeneratePublicKey();
 
-// Encode some plaintext message as a polynomial in the plaintext ring
-NTL::ZZX encoded_plaintext = params.Encode("wowee");
+// Encode some plaintext integer as a polynomial in the plaintext ring
+NTL::ZZX encoded_plaintext = params.EncodeInteger(NTL:ZZ(1337));
 
 // Encrypt the plaintext using the public key 
 rlwe::Ciphertext ciphertext = pub.Encrypt(encoded_plaintext);
@@ -29,8 +29,8 @@ rlwe::Ciphertext ciphertext = pub.Encrypt(encoded_plaintext);
 // Decrypt the plaintext using the private key
 NTL::ZZX decrypted_plaintext = priv.Decrypt(ciphertext);
 
-// Prints "wowee"
-std::cout << params.Decode(decrypted_plaintext) << std::endl;
+// Prints "1337"
+std::cout << params.DecodeInteger(decrypted_plaintext) << std::endl;
 ```
 
 All of the RLWE algorithmic details have been abstracted away for user convenience. 

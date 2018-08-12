@@ -4,6 +4,8 @@
 using namespace NTL;
 
 namespace rlwe {
+  const float STANDARD_DEVIATION = 3.192f;
+
   namespace random {
     ZZX UniformSample(long degree, ZZ field_modulus, bool flip_bits);
     ZZX GaussianSample(long degree, float standard_deviation); 
@@ -33,6 +35,10 @@ namespace rlwe {
       /* Key generation */
       PrivateKey GeneratePrivateKey() const;
       PublicKey GeneratePublicKey(const PrivateKey & priv) const;
+
+      /* Encoding and decoding */
+      ZZX EncodeInteger(ZZ plaintext);
+      ZZ DecodeInteger(ZZX plaintext_polynomial);
 
       /* Display to output stream */
       friend std::ostream& operator<< (std::ostream& stream, const KeyParameters& params) {
@@ -72,7 +78,7 @@ namespace rlwe {
       ZZX GetP1() const { return p1; } 
 
       /* Public key encryption */
-      Ciphertext Encrypt(ZZX plaintext); 
+      Ciphertext Encrypt(ZZX & plaintext); 
 
       /* Display to output stream */
       friend std::ostream& operator<< (std::ostream& stream, const PublicKey& pub) {
@@ -92,7 +98,7 @@ namespace rlwe {
       ZZX GetS() const { return s; }
 
       /* Private key decryption */
-      ZZX Decrypt(Ciphertext ciphertext);
+      ZZX Decrypt(Ciphertext & ciphertext);
 
       /* Display to output stream */
       friend std::ostream& operator<< (std::ostream& stream, const PrivateKey& priv) {
