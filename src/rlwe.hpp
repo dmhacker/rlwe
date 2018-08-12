@@ -10,6 +10,7 @@ namespace rlwe {
     ZZX GaussianSample(long degree); 
   }
 
+  class Plaintext;
   class PublicKey;
   class PrivateKey;
 
@@ -36,12 +37,33 @@ namespace rlwe {
       PublicKey GeneratePublicKey(const PrivateKey & priv) const;
 
       /* Encoding and decoding */
-      ZZX EncodeInteger(const ZZ & plaintext) const;
-      ZZ DecodeInteger(const ZZX & encoding) const;
+      Plaintext EncodeInteger(const ZZ & integer) const;
+      ZZ DecodeInteger(const Plaintext & plaintext) const;
 
       /* Display to output stream */
       friend std::ostream& operator<< (std::ostream& stream, const KeyParameters& params) {
         return stream << "n = " << params.n << ", q = " << params.q << ", t = " << params.t;
+      }
+  };
+  
+  class Plaintext {
+    private:
+      ZZX m;
+    public:
+      /* Constructors */
+      Plaintext(ZZX m0) : m(m0) {}
+
+      /* Getters */
+      ZZX GetM() const { return m; }
+
+      /* Equality */
+      bool operator== (const Plaintext & pt) const {
+        return m == pt.m;
+      }
+
+      /* Display to output stream */
+      friend std::ostream& operator<< (std::ostream& stream, const Plaintext& pt) {
+        return stream << pt.m; 
       }
   };
 
@@ -56,6 +78,11 @@ namespace rlwe {
       /* Getters */
       ZZX GetC0() const { return c0; }
       ZZX GetC1() const { return c1; }
+
+      /* Equality */
+      bool operator== (const Ciphertext & ct) const {
+        return c0 == ct.c0 && c1 == ct.c1;
+      }
 
       /* Display to output stream */
       friend std::ostream& operator<< (std::ostream& stream, const Ciphertext& ct) {
@@ -77,7 +104,7 @@ namespace rlwe {
       ZZX GetP1() const { return p1; } 
 
       /* Public key encryption */
-      Ciphertext Encrypt(const ZZX & plaintext) const; 
+      Ciphertext Encrypt(const Plaintext & plaintext) const; 
 
       /* Display to output stream */
       friend std::ostream& operator<< (std::ostream& stream, const PublicKey& pub) {
@@ -97,7 +124,7 @@ namespace rlwe {
       ZZX GetS() const { return s; }
 
       /* Private key decryption */
-      ZZX Decrypt(const Ciphertext & ciphertext) const;
+      Plaintext Decrypt(const Ciphertext & ciphertext) const;
 
       /* Display to output stream */
       friend std::ostream& operator<< (std::ostream& stream, const PrivateKey& priv) {

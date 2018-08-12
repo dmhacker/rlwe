@@ -19,7 +19,7 @@ rlwe::PrivateKey priv = params.GeneratePrivateKey();
 rlwe::PublicKey pub = params.GeneratePublicKey();
 
 // Encode some plaintext integer as a polynomial in the plaintext ring
-NTL::ZZX encoded_plaintext = params.EncodeInteger(NTL:ZZ(1337));
+rlwe::Plaintext encoded_plaintext = params.EncodeInteger(NTL:ZZ(1337));
 
 // Encrypt the plaintext using the public key 
 rlwe::Ciphertext ciphertext = pub.Encrypt(encoded_plaintext);
@@ -27,7 +27,7 @@ rlwe::Ciphertext ciphertext = pub.Encrypt(encoded_plaintext);
 [...]
 
 // Decrypt the plaintext using the private key
-NTL::ZZX decrypted_plaintext = priv.Decrypt(ciphertext);
+rlwe::Plaintext decrypted_plaintext = priv.Decrypt(ciphertext);
 
 // Prints "1337"
 std::cout << params.DecodeInteger(decrypted_plaintext) << std::endl;

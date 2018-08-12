@@ -9,7 +9,7 @@ TEST_CASE("Encoding & decoding positive integer") {
 
   NTL:ZZ plaintext(1337);
 
-  NTL::ZZX encoded = params.EncodeInteger(plaintext);
+  rlwe::Plaintext encoded = params.EncodeInteger(plaintext);
   NTL::ZZ decoded = params.DecodeInteger(encoded);
 
   // Make sure the decrypted plaintext equals the original 
@@ -22,7 +22,7 @@ TEST_CASE("Encoding & decoding negative integer") {
 
   NTL:ZZ plaintext(-1337);
 
-  NTL::ZZX encoded = params.EncodeInteger(plaintext);
+  rlwe::Plaintext encoded = params.EncodeInteger(plaintext);
   NTL::ZZ decoded = params.DecodeInteger(encoded);
 
   // Make sure the decrypted plaintext equals the original 
@@ -38,17 +38,17 @@ TEST_CASE("Encryption & decryption with encoding") {
   rlwe::PublicKey pub = params.GeneratePublicKey(priv);
 
   // Generate random plaintext
-  NTL::ZZ plaintext = NTL::RandomBits_ZZ(params.GetPolyModulusDegree());
+  NTL::ZZ integer = NTL::RandomBits_ZZ(params.GetPolyModulusDegree());
   if (NTL::RandomBits_long(1)) {
-    plaintext *= -1;
+    integer *= -1;
   }
 
   // Convert plaintext -> encoding -> ciphertext -> decrypted -> decoding 
-  NTL::ZZX encoding = params.EncodeInteger(plaintext);
-  rlwe::Ciphertext ciphertext = pub.Encrypt(encoding);
-  NTL::ZZX decrypted = priv.Decrypt(ciphertext);
-  NTL:ZZ decoding = params.DecodeInteger(decrypted);
+  rlwe::Plaintext encoded = params.EncodeInteger(integer);
+  rlwe::Ciphertext ciphertext = pub.Encrypt(encoded);
+  rlwe::Plaintext decrypted = priv.Decrypt(ciphertext);
+  NTL:ZZ decoded = params.DecodeInteger(decrypted);
 
   // Make sure the decrypted plaintext equals the original 
-  REQUIRE(plaintext == decoding);
+  REQUIRE(integer == decoded);
 }

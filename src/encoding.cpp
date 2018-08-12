@@ -2,36 +2,39 @@
 
 using namespace rlwe;
 
-ZZX KeyParameters::EncodeInteger(const ZZ & plaintext) const {
+Plaintext KeyParameters::EncodeInteger(const ZZ & integer) const {
   ZZX encoding = ZZX::zero();
 
-  ZZ pos_one(1);
-  ZZ neg_one(t - 1);
+  ZZ global_coeff(1);
+  if (integer < 0) {
+    global_coeff = t - 1;
+  }
 
-  for (long i = 0; i < NumBits(plaintext); i++) {
-    if (bit(plaintext, i)) {
-      SetCoeff(encoding, i, plaintext < 0 ? neg_one : pos_one);
+  for (long i = 0; i < NumBits(integer); i++) {
+    if (bit(integer, i)) {
+      SetCoeff(encoding, i, global_coeff); 
     }
   }
 
-  return encoding;
+  return Plaintext(encoding);
 }
 
-ZZ KeyParameters::DecodeInteger(const ZZX & encoding) const {
-  ZZ plaintext = ZZ::zero();
+ZZ KeyParameters::DecodeInteger(const Plaintext & encoding) const {
+  ZZX message = encoding.GetM();
+  ZZ integer = ZZ::zero();
   long sign = 1;
 
-  for (long i = deg(encoding); i >= 0; i--) {
-    plaintext <<= 1;
+  for (long i = deg(message); i >= 0; i--) {
+    integer <<= 1;
 
-    ZZ coefficient = coeff(encoding, i);
+    ZZ coefficient = coeff(message, i);
     if (coefficient < 0 || coefficient > t / 2) {
       sign = -1;
     }
     if (coefficient != 0) {
-      plaintext |= 1;
+      integer |= 1;
     }
   }
 
-  return sign * plaintext;
+  return sign * integer;
 }

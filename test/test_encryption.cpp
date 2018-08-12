@@ -10,11 +10,11 @@ TEST_CASE("Encryption & decryption using small parameters") {
   rlwe::PublicKey pub = params.GeneratePublicKey(priv);
 
   // Generate random plaintext
-  NTL::ZZX plaintext = rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus(), false);
+  rlwe::Plaintext plaintext(rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus(), false));
 
   // Convert to ciphertext and then back to plaintext
   rlwe::Ciphertext ciphertext = pub.Encrypt(plaintext);
-  NTL::ZZX decrypted = priv.Decrypt(ciphertext);
+  rlwe::Plaintext decrypted = priv.Decrypt(ciphertext);
 
   // Make sure the decrypted plaintext equals the original 
   REQUIRE(plaintext == decrypted);
@@ -29,11 +29,11 @@ TEST_CASE("Encryption & decryption using large parameters") {
   rlwe::PublicKey pub = params.GeneratePublicKey(priv);
 
   // Generate random plaintext
-  NTL::ZZX plaintext = rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus(), false);
+  rlwe::Plaintext plaintext(rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus(), false));
 
   // Convert to ciphertext and then back to plaintext
   rlwe::Ciphertext ciphertext = pub.Encrypt(plaintext);
-  NTL::ZZX decrypted = priv.Decrypt(ciphertext);
+  rlwe::Plaintext decrypted = priv.Decrypt(ciphertext);
 
   // Make sure the decrypted plaintext equals the original 
   REQUIRE(plaintext == decrypted);

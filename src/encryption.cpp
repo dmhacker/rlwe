@@ -23,13 +23,13 @@ void DownscaleCoefficients(ZZX & poly, ZZ t, ZZ q) {
   }
 }
 
-Ciphertext PublicKey::Encrypt(const ZZX & plaintext) const {
+Ciphertext PublicKey::Encrypt(const Plaintext & plaintext) const {
   // Set finite field modulus to be q
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
 
   // Upscale plaintext to be in ciphertext ring
-  ZZ_pX m = conv<ZZ_pX>(plaintext) * conv<ZZ_p>(params.GetPlainToCoeffScalar());
+  ZZ_pX m = conv<ZZ_pX>(plaintext.GetM()) * conv<ZZ_p>(params.GetPlainToCoeffScalar());
 
   // Draw u from GF2 (coefficients are in integers mod 2)
   ZZ_pX u = conv<ZZ_pX>(random::UniformSample(params.GetPolyModulusDegree(), ZZ(2), true));
@@ -53,7 +53,7 @@ Ciphertext PublicKey::Encrypt(const ZZX & plaintext) const {
   return ciphertext;
 }
 
-ZZX PrivateKey::Decrypt(const Ciphertext & ciphertext) const {
+Plaintext PrivateKey::Decrypt(const Ciphertext & ciphertext) const {
   // Set finite field modulus to be q
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
@@ -68,5 +68,5 @@ ZZX PrivateKey::Decrypt(const Ciphertext & ciphertext) const {
   CenterCoefficients(plaintext, params.GetCoeffModulus());
   DownscaleCoefficients(plaintext, params.GetPlainModulus(), params.GetCoeffModulus());  
 
-  return plaintext;
+  return Plaintext(plaintext);
 }
