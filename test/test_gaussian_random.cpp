@@ -7,5 +7,5 @@ TEST_CASE("Gaussian sampling over generic standard deviation") {
 
   NTL::ZZX poly = rlwe::random::GaussianSample(DEGREE, STANDARD_DEVIATION);
 
-  REQUIRE(NTL::deg(poly) == DEGREE - 1);
+  REQUIRE(NTL::deg(poly) < DEGREE);
 }

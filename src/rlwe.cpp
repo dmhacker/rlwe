@@ -81,7 +81,7 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
   ZZ_p::init(q);
 
   // Compute a, where the coefficients are drawn uniformly from the finite field (integers mod q) 
-  ZZ_pX a = random_ZZ_pX(n);
+  ZZ_pX a = conv<ZZ_pX>(random::UniformSample(n, conv<long>(q), false));
 
   // Copy private key parameters into polynomial over finite field
   ZZ_pX s = conv<ZZ_pX>(priv.GetS());
@@ -91,9 +91,11 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
 
   // Compute b = -(a * s + e)
   ZZ_pX b;
-  MulMod(b, a, s, phi);
+  MulMod(b, a, s, phi); 
   b += e;
   b = -b;
+
+  std::cerr << e << std::endl;
 
   // Create public key based off of a & b polynomials
   PublicKey pub(conv<ZZX>(b), conv<ZZX>(a), *this);

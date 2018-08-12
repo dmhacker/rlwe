@@ -27,6 +27,17 @@ TEST_CASE("Private key is small polynomial") {
 }
 
 TEST_CASE("Public key is computed correctly") {
-  rlwe::KeyParameters params(16, ZZ(874), ZZ(7));  
+  rlwe::KeyParameters params(8, ZZ(97), ZZ(2));  
+  rlwe::PrivateKey priv = params.GeneratePrivateKey();
+  rlwe::PublicKey pub = params.GeneratePublicKey(priv);
 
+  NTL::ZZ_pPush push;
+  NTL::ZZ_p::init(params.GetCoeffModulus());
+
+  // Work out the error polynomial by computing -p0 - (p1 * s) = -b - (a * s)
+  NTL::ZZ_pX buffer;
+  MulMod(buffer, conv<NTL::ZZ_pX>(pub.GetP1()), conv<NTL::ZZ_pX>(priv.GetS()), params.GetPolyModulus());
+  NTL::ZZ_pX error = -conv<NTL::ZZ_pX>(pub.GetP0()) - buffer;
+
+  REQUIRE(NTL::deg(error) > 0);
 }

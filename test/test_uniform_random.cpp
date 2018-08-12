@@ -8,7 +8,7 @@
 TEST_CASE("Uniform sampling over several fields") {
   const int DEGREE = 10;
 
-  for (int m = 2; m < 100; m += 10) {
+  for (int m = 2; m < 100; m += 50) {
     // Generate a polynomial uniformly randomly
     NTL::ZZX poly = rlwe::random::UniformSample(DEGREE, m, false);
 
@@ -24,7 +24,7 @@ TEST_CASE("Uniform sampling over several fields") {
 TEST_CASE("Uniform sampling with sign bit flipping") {
   const int DEGREE = 10;
 
-  for (int m = 2; m < 100; m += 10) {
+  for (int m = 2; m < 100; m += 50) {
     // Generate a polynomial uniformly randomly
     NTL::ZZX poly = rlwe::random::UniformSample(DEGREE, m, true);
 
