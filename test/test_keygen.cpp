@@ -27,7 +27,7 @@ TEST_CASE("Private key is small polynomial") {
 }
 
 TEST_CASE("Public key is computed correctly") {
-  rlwe::KeyParameters params(8, ZZ(97), ZZ(2));  
+  rlwe::KeyParameters params(16, ZZ(874), ZZ(7));  
   rlwe::PrivateKey priv = params.GeneratePrivateKey();
   rlwe::PublicKey pub = params.GeneratePublicKey(priv);
 

@@ -95,8 +95,6 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
   b += e;
   b = -b;
 
-  std::cerr << e << std::endl;
-
   // Create public key based off of a & b polynomials
   PublicKey pub(conv<ZZX>(b), conv<ZZX>(a), *this);
   return pub;
@@ -143,11 +141,24 @@ ZZX PrivateKey::Decrypt(Ciphertext ciphertext) {
   m += conv<ZZ_pX>(ciphertext.GetC0());
 
   // Downscale m to be in plaintext ring
-  ZZX plaintext = conv<ZZX>(m) * params.GetPlainModulus();
+  // TODO: Optimize to use more NTL functions
+  ZZX plaintext = conv<ZZX>(m);
+  ZZ negation_point = params.GetCoeffModulus() / 2;
   for (long i = 0; i < params.GetPolyModulusDegree(); i++) {
-    RR rounded_coefficient = round(conv<RR>(coeff(plaintext, i)) / conv<RR>(params.GetCoeffModulus()));
-    SetCoeff(plaintext, i, conv<ZZ>(rounded_coefficient));
+    // Get the ith coefficient
+    ZZ coefficient = coeff(plaintext, i);
+
+    // Convert upper side of the finite field to their negative counterparts
+    if (coefficient > negation_point) {
+      coefficient -= params.GetCoeffModulus();
+    }
+
+    // Compute round(coefficient * t / q)
+    RR rounded_coefficient = round(conv<RR>(coefficient * params.GetPlainModulus()) / conv<RR>(params.GetCoeffModulus()));
+  
+    // Get rid of negative numbers by taking the modulus again
+    SetCoeff(plaintext, i, conv<ZZ>(rounded_coefficient) % params.GetPlainModulus());
   }
 
-  return plaintext; 
+  return plaintext;
 }
