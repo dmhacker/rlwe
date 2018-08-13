@@ -32,7 +32,7 @@ Ciphertext PublicKey::Encrypt(const Plaintext & plaintext) const {
   ZZ_pX m = conv<ZZ_pX>(plaintext.GetM()) * conv<ZZ_p>(params.GetPlainToCoeffScalar());
 
   // Draw u from GF2 (coefficients are in integers mod 2)
-  ZZ_pX u = conv<ZZ_pX>(random::UniformSample(params.GetPolyModulusDegree(), ZZ(2), true));
+  ZZ_pX u = conv<ZZ_pX>(random::UniformSample(params.GetPolyModulusDegree(), ZZ(-1), ZZ(2)));
 
   // Draw error polynomials from discrete Gaussian distribution
   ZZ_pX e1 = conv<ZZ_pX>(random::GaussianSample(params.GetPolyModulusDegree())); 

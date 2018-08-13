@@ -25,9 +25,14 @@ KeyParameters::KeyParameters(long n0, ZZ q0, ZZ t0) : n(n0), q(q0), t(t0), q_div
 }
 
 PrivateKey KeyParameters::GeneratePrivateKey() const {
-  // Create private key based off of secret polynomial drawn from polynomial ring over GF2 
-  PrivateKey priv(random::UniformSample(n, ZZ(2), true), *this);
-  return priv;
+  // Set finite field modulus to be q
+  ZZ_pPush push;
+  ZZ_p::init(q);
+
+  // Create private key based off of small secret polynomial 
+  ZZ_pX secret = conv<ZZ_pX>(random::UniformSample(n, ZZ(-1), ZZ(2)));
+
+  return PrivateKey(conv<ZZX>(secret), *this);
 }
 
 PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
@@ -36,7 +41,7 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
   ZZ_p::init(q);
 
   // Compute a, where the coefficients are drawn uniformly from the finite field (integers mod q) 
-  ZZ_pX a = conv<ZZ_pX>(random::UniformSample(n, q, false));
+  ZZ_pX a = conv<ZZ_pX>(random::UniformSample(n, q));
 
   // Copy private key parameters into polynomial over finite field
   ZZ_pX s = conv<ZZ_pX>(priv.GetS());
@@ -51,6 +56,5 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
   b = -b;
 
   // Create public key based off of a & b polynomials
-  PublicKey pub(conv<ZZX>(b), conv<ZZX>(a), *this);
-  return pub;
+  return PublicKey(conv<ZZX>(b), conv<ZZX>(a), *this);
 }

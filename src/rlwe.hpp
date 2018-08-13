@@ -6,7 +6,8 @@ using namespace NTL;
 namespace rlwe {
 
   namespace random {
-    ZZX UniformSample(long degree, ZZ field_modulus, bool flip_bits);
+    ZZX UniformSample(long degree, ZZ minimum_inclusive, ZZ maximum_exclusive);
+    ZZX UniformSample(long degree, ZZ maximum_exclusive);
     ZZX GaussianSample(long degree); 
   }
 

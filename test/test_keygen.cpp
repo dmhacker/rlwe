@@ -21,11 +21,11 @@ TEST_CASE("Private key is small polynomial") {
 
   for (long i = 0; i < params.GetPolyModulusDegree(); i++) {
     NTL::ZZ coefficient = NTL::coeff(priv.GetS(), i);
-    if (coefficient > 0) { 
-      REQUIRE(coefficient == 1);
+    if (coefficient > params.GetCoeffModulus() / 2) { 
+      REQUIRE(coefficient == params.GetCoeffModulus() - 1); 
     }
-    else if (coefficient < 0) {
-      REQUIRE(coefficient == -1); 
+    else if (coefficient > 0) {
+      REQUIRE(coefficient == 1);
     }
   }
 }

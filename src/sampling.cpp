@@ -8,27 +8,29 @@ using namespace rlwe;
 
 const float STANDARD_DEVIATION = 3.192f;
 
-ZZX random::UniformSample(long degree, ZZ field_modulus, bool flip_bits) {
+ZZX random::UniformSample(long degree, ZZ maximum) {
   ZZX poly;
-  if (field_modulus == 2) {
-    // If the finite field is modulo 2, we can use the GF2X class 
+  if (maximum == 2) {
+    // If the maximum is 2, we can use the GF2X class 
     poly = conv<ZZX>(random_GF2X(degree));
   }
   else {
     // Otherwise, we set a temporary modulus and use the ZZ_pX class
     ZZ_pPush push;
-    ZZ_p::init(field_modulus);
+    ZZ_p::init(maximum);
     poly = conv<ZZX>(random_ZZ_pX(degree));
   }
 
-  // Iterate through each coefficient
-  if (flip_bits) {
-    for (long i = 0; i < degree; i++) {
-      // 50% random chance that the coefficient will be negative
-      if (RandomBits_long(1)) {
-        SetCoeff(poly, i, -coeff(poly, i));
-      }
-    }
+  return poly;
+}
+
+ZZX random::UniformSample(long degree, ZZ minimum, ZZ maximum) {
+  ZZ range = maximum - minimum;
+  ZZX poly = random::UniformSample(degree, range);
+
+  // Iterate through each coefficient and add the minimum 
+  for (long i = 0; i < degree; i++) {
+    SetCoeff(poly, i, minimum + coeff(poly, i));
   }
 
   return poly;
