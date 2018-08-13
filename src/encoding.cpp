@@ -21,7 +21,7 @@ Plaintext KeyParameters::EncodeInteger(const ZZ & integer) const {
     }
   }
 
-  return Plaintext(encoding);
+  return Plaintext(encoding, *this);
 }
 
 ZZ KeyParameters::DecodeInteger(const Plaintext & encoding) const {

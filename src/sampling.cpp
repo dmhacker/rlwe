@@ -6,8 +6,6 @@
 
 using namespace rlwe;
 
-const float STANDARD_DEVIATION = 3.192f;
-
 ZZX random::UniformSample(long degree, ZZ maximum) {
   ZZX poly;
   if (maximum == 2) {
@@ -37,10 +35,10 @@ ZZX random::UniformSample(long degree, ZZ minimum, ZZ maximum) {
 }
 
 // TODO: Replace with a high-quality discrete number generator (e.g. rejection sampler, Knuth-Yao algorithm)
-ZZX random::GaussianSample(long degree) {
+ZZX random::GaussianSample(long degree, float standard_deviation) {
   std::random_device device;
   std::mt19937 spigot(device());
-  std::normal_distribution<float> distribution(0.0f, STANDARD_DEVIATION);
+  std::normal_distribution<float> distribution(0, standard_deviation);
 
   ZZX poly;
   for (long i = 0; i < degree; i++) {

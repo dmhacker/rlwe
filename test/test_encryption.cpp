@@ -10,7 +10,7 @@ TEST_CASE("Encryption & decryption using small parameters") {
   rlwe::PublicKey pub = params.GeneratePublicKey(priv);
 
   // Generate random plaintext
-  rlwe::Plaintext plaintext(rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()));
+  rlwe::Plaintext plaintext(rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
 
   // Convert to ciphertext and then back to plaintext
   rlwe::Ciphertext ciphertext = pub.Encrypt(plaintext);
@@ -29,7 +29,7 @@ TEST_CASE("Encryption & decryption using large parameters") {
   rlwe::PublicKey pub = params.GeneratePublicKey(priv);
 
   // Generate random plaintext
-  rlwe::Plaintext plaintext(rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()));
+  rlwe::Plaintext plaintext(rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
 
   // Convert to ciphertext and then back to plaintext
   rlwe::Ciphertext ciphertext = pub.Encrypt(plaintext);

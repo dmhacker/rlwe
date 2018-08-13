@@ -2,10 +2,16 @@
 
 **librlwe** is a fast, lightweight, and easy-to-use library for doing ring-learning with errors (RLWE) cryptography.
 
+Specifically, librlwe implements the Fan-Vercauteren fully homomorphic cryptosystem, which is based off of the RLWE problem. 
+It contains support for RLWE-based encryption, decryption, key exchange, signing, and homomorphic addition & multiplication.
+Note that it does its best to stick to the cryptosystem outlined in the FV paper. 
+As such, relinearization is performed immediately after every homomorphic multiplication.
+
 For anyone without significant background on RLWE, I would recommend checking out these links:
-* [N1 Analytic's Blog on Homomorphic Encryption using RLWE](https://blog.n1analytics.com/homomorphic-encryption-illustrated-primer/)
+* [Somewhat Practical Fully Homomorphic Encryption](https://eprint.iacr.org/2012/144.pdf) - Junfeng Fan and Frederik Vercauteren's original paper on FV-style FHE
 * [Homomorphic Encryption from RLWE](https://cryptosith.org/michael/data/talks/2012-01-10-MSR-Cambridge.pdf) - presentation given at MSR Cambridge
 * [Microsoft's SEAL Library Manual](https://www.microsoft.com/en-us/research/wp-content/uploads/2017/12/sealmanual.pdf) - of which this is based off of
+* [N1 Analytic's Blog on Homomorphic Encryption using RLWE](https://blog.n1analytics.com/homomorphic-encryption-illustrated-primer/)
 * [Parameters for RLWE Cryptography](http://www.ringlwe.info/parameters-for-rlwe.html)
 
 However, it is possible to still use this library without in-depth knowledge of how the RLWE cryptographic system works.

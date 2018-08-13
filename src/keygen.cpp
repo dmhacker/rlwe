@@ -5,7 +5,7 @@
 
 using namespace rlwe;
 
-KeyParameters::KeyParameters(long n0, ZZ q0, ZZ t0) : n(n0), q(q0), t(t0), q_div_t(q0 / t0) {
+KeyParameters::KeyParameters(long n0, ZZ q0, ZZ t0, float sigma0) : n(n0), q(q0), t(t0), delta(q0 / t0), sigma(sigma0) {
   // Assert that n is even, assume that it is a power of 2
   assert(n % 2 == 0);
 
@@ -47,7 +47,7 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
   ZZ_pX s = conv<ZZ_pX>(priv.GetS());
 
   // Draw error polynomial from discrete Gaussian distribution
-  ZZ_pX e = conv<ZZ_pX>(random::GaussianSample(n));
+  ZZ_pX e = conv<ZZ_pX>(random::GaussianSample(n, sigma));
 
   // Compute b = -(a * s + e)
   ZZ_pX b;
