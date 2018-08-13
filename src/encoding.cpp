@@ -2,6 +2,11 @@
 
 using namespace rlwe;
 
+Plaintext KeyParameters::EncodeInteger(long integer) const {
+  // Convert long into a NTL:ZZ big integer and defer to other function
+  return EncodeInteger(ZZ(integer));
+}
+
 Plaintext KeyParameters::EncodeInteger(const ZZ & integer) const {
   ZZX encoding = ZZX::zero();
 

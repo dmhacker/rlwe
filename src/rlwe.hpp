@@ -40,6 +40,7 @@ namespace rlwe {
 
       /* Encoding and decoding */
       Plaintext EncodeInteger(const ZZ & integer) const;
+      Plaintext EncodeInteger(long integer) const;
       ZZ DecodeInteger(const Plaintext & plaintext) const;
 
       /* Display to output stream */

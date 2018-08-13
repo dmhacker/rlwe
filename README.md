@@ -13,7 +13,7 @@ This is because most of the algorithmic details have been abstracted away.
 
 Here's an example of what you can do with librlwe:
 
-```
+```c++
 // Set up some parameters for the RLWE algorithm
 rlwe::KeyParameters params(1024, 9214347247561474048, 290764801);
 
@@ -22,7 +22,8 @@ rlwe::PrivateKey priv = params.GeneratePrivateKey();
 rlwe::PublicKey pub = params.GeneratePublicKey();
 
 // Encode some plaintext integer as a polynomial in the plaintext ring
-rlwe::Plaintext encoded_plaintext = params.EncodeInteger(NTL:ZZ(1337));
+// The coefficients of the polynomial are equal to the binary representation of the integer
+rlwe::Plaintext encoded_plaintext = params.EncodeInteger(1337);
 
 // Encrypt the plaintext using the public key 
 rlwe::Ciphertext ciphertext = pub.Encrypt(encoded_plaintext);
