@@ -18,7 +18,7 @@ TEST_CASE("FV-style homomorphic addition") {
   rlwe::Ciphertext ct2 = pub.Encrypt(pt2);
 
   // Perform homomorphic addition
-  rlwe::Ciphertext ct = ct1 + ct2;
+  rlwe::Ciphertext ct = ct1.Add(ct2);
 
   // Decrypt resultant ciphertext
   rlwe::Plaintext pt = priv.Decrypt(ct);

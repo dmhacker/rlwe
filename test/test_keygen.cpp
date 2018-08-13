@@ -45,3 +45,11 @@ TEST_CASE("Public key is computed correctly") {
 
   REQUIRE(NTL::deg(error) > 0);
 }
+
+TEST_CASE("Relinearization key is correct size") {
+  rlwe::KeyParameters params(16, 874, 7);  
+  rlwe::PrivateKey priv = params.GeneratePrivateKey();
+  rlwe::RelinearizationKey rlk = params.GenerateEvaluationKey(priv);
+
+  REQUIRE(rlk.GetR0Vector().length() == rlk.GetR1Vector().length());
+}

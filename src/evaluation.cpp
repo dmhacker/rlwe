@@ -23,7 +23,7 @@ Ciphertext Ciphertext::Add(const Ciphertext & ct) const {
 }
 
 // TODO: Implement FV-style multiplication and immediate relinearization
-Ciphertext Ciphertext::Multiply(const Ciphertext & ct) const {
+Ciphertext Ciphertext::Multiply(const Ciphertext & ct, const RelinearizationKey & rlk) const {
   return ct;
 }
 
