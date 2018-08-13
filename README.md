@@ -37,6 +37,21 @@ rlwe::Plaintext decrypted_plaintext = priv.Decrypt(ciphertext);
 std::cout << params.DecodeInteger(decrypted_plaintext) << std::endl;
 ```
 
+## Installation
+
+It's recommended you do an out-of-source build & install.
+
+After cloning and changing directory into this repository, run:
+
+```
+mkdir build && cd build
+cmake ..
+make
+make install
+```
+
+## Implementation Details
+
 Internally, librlwe uses [NTL](http://www.shoup.net/ntl/) for doing fast polynomial arithmetic. 
 All keys, plaintexts, and ciphertexts store their polynomials as `NTL:ZZX` objects.
 However, these polynomials are in the ring `Z_q/(f)` where `f` is a cyclotomic polynomial of the form `x^n + 1`.
