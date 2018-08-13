@@ -5,7 +5,7 @@
 
 TEST_CASE("Encoding & decoding positive integer") {
   // Set up parameters
-  rlwe::KeyParameters params(16, ZZ(874), ZZ(7));  
+  rlwe::KeyParameters params(16, 874, 7);  
 
   NTL:ZZ plaintext(1337);
 
@@ -18,7 +18,7 @@ TEST_CASE("Encoding & decoding positive integer") {
 
 TEST_CASE("Encoding & decoding negative integer") {
   // Set up parameters
-  rlwe::KeyParameters params(16, ZZ(874), ZZ(7));  
+  rlwe::KeyParameters params(16, 874, 7);  
 
   NTL:ZZ plaintext(-1337);
 
@@ -31,7 +31,7 @@ TEST_CASE("Encoding & decoding negative integer") {
 
 TEST_CASE("Encryption & decryption with encoding") {
   // Set up parameters
-  rlwe::KeyParameters params(16, ZZ(874), ZZ(7));  
+  rlwe::KeyParameters params(16, 874, 7);  
 
   // Compute keys
   rlwe::PrivateKey priv = params.GeneratePrivateKey();

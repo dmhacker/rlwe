@@ -24,6 +24,7 @@ namespace rlwe {
       ZZ_pXModulus phi;
     public:
       /* Constructors */
+      KeyParameters(long n0, long q0, long t0) : KeyParameters(n0, ZZ(q0), ZZ(t0)) {}
       KeyParameters(long n0, ZZ q0, ZZ t0);
 
       /* Getters */

@@ -3,7 +3,7 @@
 
 TEST_CASE("Encryption & decryption using small parameters") {
   // Set up parameters
-  rlwe::KeyParameters params(16, ZZ(874), ZZ(7));  
+  rlwe::KeyParameters params(16, 874, 7);  
 
   // Compute keys
   rlwe::PrivateKey priv = params.GeneratePrivateKey();
@@ -22,7 +22,7 @@ TEST_CASE("Encryption & decryption using small parameters") {
 
 TEST_CASE("Encryption & decryption using large parameters") {
   // Set up parameters
-  rlwe::KeyParameters params(4096, ZZ(9214347247561474048), ZZ(290764801));  
+  rlwe::KeyParameters params(4096, 9214347247561474048, 290764801);  
 
   // Compute keys
   rlwe::PrivateKey priv = params.GeneratePrivateKey();

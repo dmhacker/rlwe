@@ -2,7 +2,7 @@
 #include "../src/rlwe.hpp"
 
 TEST_CASE("Modulus is a cyclotomic polynomial") {
-  rlwe::KeyParameters params(16, ZZ(874), ZZ(7));  
+  rlwe::KeyParameters params(16, 874, 7);  
 
   NTL::ZZ_pPush push;
   NTL::ZZ_p::init(ZZ(874));
@@ -14,7 +14,7 @@ TEST_CASE("Modulus is a cyclotomic polynomial") {
 }
 
 TEST_CASE("Private key is small polynomial") {
-  rlwe::KeyParameters params(16, ZZ(874), ZZ(7));  
+  rlwe::KeyParameters params(16, 874, 7);  
   rlwe::PrivateKey priv = params.GeneratePrivateKey();
 
   REQUIRE(NTL::deg(priv.GetS()) < params.GetPolyModulusDegree());
@@ -31,7 +31,7 @@ TEST_CASE("Private key is small polynomial") {
 }
 
 TEST_CASE("Public key is computed correctly") {
-  rlwe::KeyParameters params(16, ZZ(874), ZZ(7));  
+  rlwe::KeyParameters params(16, 874, 7);  
   rlwe::PrivateKey priv = params.GeneratePrivateKey();
   rlwe::PublicKey pub = params.GeneratePublicKey(priv);
 

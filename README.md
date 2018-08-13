@@ -8,11 +8,14 @@ For anyone without significant background on RLWE, I would recommend checking ou
 * [Microsoft's SEAL Library Manual](https://www.microsoft.com/en-us/research/wp-content/uploads/2017/12/sealmanual.pdf) - of which this is based off of
 * [Parameters for RLWE Cryptography](http://www.ringlwe.info/parameters-for-rlwe.html)
 
+However, it is possible to use this library without an in-depth knowledge of how the RLWE cryptographic system works 
+as most of the algorithmic details have been abstracted away.
+
 Here's an example of what you can do with librlwe:
 
 ```
 // Set up some parameters for the RLWE algorithm
-rlwe::KeyParameters params(1024, NTL::ZZ(9214347247561474048), NTL::ZZ(290764801));
+rlwe::KeyParameters params(1024, 9214347247561474048, 290764801);
 
 // Generate a keypair
 rlwe::PrivateKey priv = params.GeneratePrivateKey();
