@@ -44,8 +44,7 @@ ZZX random::GaussianSample(long degree) {
 
   ZZX poly;
   for (long i = 0; i < degree; i++) {
-    ZZ coefficient = ZZ(std::round(distribution(spigot)));
-    SetCoeff(poly, i, RandomBits_long(1) ? coefficient : -coefficient); 
+    SetCoeff(poly, i, std::round(distribution(spigot))); 
   }
 
   return poly;
