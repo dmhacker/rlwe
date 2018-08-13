@@ -47,7 +47,7 @@ std::cout << params.DecodeInteger(decrypted_plaintext) << std::endl;
 
 It's recommended you do an out-of-source build & install.
 
-After cloning and changing directory into this repository, run:
+After cloning into this repository, run:
 
 ```
 mkdir build && cd build
