@@ -5,24 +5,6 @@
 
 using namespace rlwe;
 
-void CenterCoefficients(ZZX & poly, ZZ mod) {
-  ZZ center_point = mod / 2;
-  for (long i = 0; i <= deg(poly); i++) {
-    ZZ coefficient = coeff(poly, i);
-    if (coefficient > center_point) {
-      SetCoeff(poly, i, coefficient - mod);
-    }   
-  }
-}
-
-void DownscaleCoefficients(ZZX & poly, ZZ t, ZZ q) {
-  RR scalar = conv<RR>(t) / conv<RR>(q);
-  for (long i = 0; i <= deg(poly); i++) {
-    RR rounded_coefficient = round(conv<RR>(coeff(poly, i)) * scalar); 
-    SetCoeff(poly, i, conv<ZZ>(rounded_coefficient) % t);
-  }
-}
-
 Ciphertext PublicKey::Encrypt(const Plaintext & plaintext) const {
   // Set finite field modulus to be q
   ZZ_pPush push;
@@ -31,7 +13,7 @@ Ciphertext PublicKey::Encrypt(const Plaintext & plaintext) const {
   // Upscale plaintext to be in ciphertext ring
   ZZ_pX m = conv<ZZ_pX>(plaintext.GetM()) * conv<ZZ_p>(params.GetDeltaScalar());
 
-  // Draw u from GF2 (coefficients are in integers mod 2)
+  // Draw u from uniform distribution over {-1, 0, 1}
   ZZ_pX u = conv<ZZ_pX>(random::UniformSample(params.GetPolyModulusDegree(), ZZ(-1), ZZ(2)));
 
   // Draw error polynomials from discrete Gaussian distribution
@@ -57,15 +39,22 @@ Plaintext PrivateKey::Decrypt(const Ciphertext & ciphertext) const {
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
 
-  // m = c1 + c2 * s
+  ZZ_pX secret = conv<ZZ_pX>(s);
+
+  // m = c0 + c1 * s + c2 * s^2 + ...
   ZZ_pX m;
-  MulMod(m, conv<ZZ_pX>(ciphertext.GetC1()), conv<ZZ_pX>(s), params.GetPolyModulus());
-  m += conv<ZZ_pX>(ciphertext.GetC0());
+  ZZ_pX buffer0;
+  ZZ_pX buffer1;
+  for (long i = 0; i < ciphertext.length(); i++) {
+    PowerMod(buffer0, secret, i, params.GetPolyModulus());
+    MulMod(buffer1, conv<ZZ_pX>(ciphertext[i]), buffer0, params.GetPolyModulus());
+    m += buffer1;
+  }
 
   // Downscale m to be in plaintext ring
   ZZX plaintext = conv<ZZX>(m);
-  CenterCoefficients(plaintext, params.GetCoeffModulus());
-  DownscaleCoefficients(plaintext, params.GetPlainModulus(), params.GetCoeffModulus());  
+  util::CenterCoeffs(plaintext, params.GetCoeffModulus());
+  util::ScaleCoeffs(plaintext, params.GetPlainModulus(), params.GetCoeffModulus(), params.GetPlainModulus());  
 
   return Plaintext(plaintext, params);
 }

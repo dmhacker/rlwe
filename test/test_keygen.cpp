@@ -38,18 +38,9 @@ TEST_CASE("Public key is computed correctly") {
   NTL::ZZ_pPush push;
   NTL::ZZ_p::init(params.GetCoeffModulus());
 
-  // Work out the error polynomial by computing -p0 - (p1 * s) = -b - (a * s)
   NTL::ZZ_pX buffer;
   MulMod(buffer, conv<NTL::ZZ_pX>(pub.GetP1()), conv<NTL::ZZ_pX>(priv.GetS()), params.GetPolyModulus());
   NTL::ZZ_pX error = -conv<NTL::ZZ_pX>(pub.GetP0()) - buffer;
 
   REQUIRE(NTL::deg(error) > 0);
-}
-
-TEST_CASE("Relinearization key is correct size") {
-  rlwe::KeyParameters params(16, 874, 7);  
-  rlwe::PrivateKey priv = params.GeneratePrivateKey();
-  rlwe::RelinearizationKey rlk = params.GenerateEvaluationKey(priv);
-
-  REQUIRE(rlk.GetR0Vector().length() == rlk.GetR1Vector().length());
 }
