@@ -11,7 +11,7 @@ Ciphertext PublicKey::Encrypt(const Plaintext & plaintext) const {
   ZZ_p::init(params.GetCoeffModulus());
 
   // Upscale plaintext to be in ciphertext ring
-  ZZ_pX m = conv<ZZ_pX>(plaintext.GetM()) * conv<ZZ_p>(params.GetDeltaScalar());
+  ZZ_pX m = conv<ZZ_pX>(plaintext.GetM()) * conv<ZZ_p>(params.GetPlainToCoeffScalar());
 
   // Draw u from uniform distribution over {-1, 0, 1}
   ZZ_pX u = conv<ZZ_pX>(random::UniformSample(params.GetPolyModulusDegree(), ZZ(-1), ZZ(2)));
@@ -54,7 +54,7 @@ Plaintext PrivateKey::Decrypt(const Ciphertext & ciphertext) const {
   // Downscale m to be in plaintext ring
   ZZX plaintext = conv<ZZX>(m);
   util::CenterCoeffs(plaintext, params.GetCoeffModulus());
-  util::ScaleCoeffs(plaintext, params.GetPlainModulus(), params.GetCoeffModulus(), params.GetPlainModulus());  
+  util::ScaleCoeffs(plaintext, params.GetCoeffToPlainScalar(), params.GetPlainModulus());  
 
   return Plaintext(plaintext, params);
 }

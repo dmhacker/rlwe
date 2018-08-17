@@ -1,6 +1,6 @@
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>
-#include <NTL/pair.h>
+#include <NTL/RR.h>
 
 using namespace NTL;
 
@@ -13,8 +13,7 @@ namespace rlwe {
   }
 
   namespace util {
-    ZZX ScaleCoeffs(const ZZX & poly, const ZZ numer, const ZZ denom, const ZZ mod);
-    void ScaleCoeffs(ZZX & poly, const ZZ numer, const ZZ denom, const ZZ mod);
+    void ScaleCoeffs(ZZX & poly, const RR scalar, const ZZ mod);
     void CenterCoeffs(ZZX & poly, const ZZ mod);
   }
 
@@ -31,8 +30,9 @@ namespace rlwe {
     private:
       ZZ q;
       ZZ p;
-      ZZ delta;
       ZZ t;
+      ZZ delta;
+      RR downscale;
       long n;
       ZZ_pXModulus phi;
       float sigma;
@@ -51,7 +51,8 @@ namespace rlwe {
       /* Getters */
       ZZ GetCoeffModulus() const { return q; }
       ZZ GetPlainModulus() const { return t; }
-      ZZ GetDeltaScalar() const { return delta; }
+      ZZ GetPlainToCoeffScalar() const { return delta; }
+      RR GetCoeffToPlainScalar() const { return downscale; }
       ZZ GetEvalModulus() const { return p; }
       long GetPolyModulusDegree() const { return n; }
       ZZ_pXModulus GetPolyModulus() const { return phi; }

@@ -6,7 +6,9 @@
 using namespace rlwe;
 
 KeyParameters::KeyParameters(long n0, ZZ q0, ZZ t0, ZZ p0, float sigma0, float sigma_t0) : 
-  n(n0), q(q0), t(t0), p(p0), delta(q0 / t0), sigma(sigma0), sigma_t(sigma_t0) 
+  n(n0), q(q0), t(t0), p(p0), 
+  delta(q0 / t0), downscale(conv<RR>(t0) / conv<RR>(q0)), 
+  sigma(sigma0), sigma_t(sigma_t0) 
 {
   // Assert that n is even, assume that it is a power of 2
   assert(n % 2 == 0);
@@ -73,6 +75,7 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv, const ZZX & 
   return PublicKey(conv<ZZX>(b), conv<ZZX>(a), *this);
 }
 
+// TODO: Redo with relinearization version 1
 EvaluationKey KeyParameters::GenerateEvaluationKey(const PrivateKey & priv) const {
   // Set finite field modulus to be q
   ZZ_pPush push;

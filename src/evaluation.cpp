@@ -70,7 +70,7 @@ Ciphertext Ciphertext::Multiply(const Ciphertext & ct) const {
     }
 
     // Perform downscale to get rid of extra message scaling 
-    util::ScaleCoeffs(sum, params.GetPlainModulus(), params.GetCoeffModulus(), params.GetCoeffModulus());
+    util::ScaleCoeffs(sum, params.GetCoeffToPlainScalar(), params.GetCoeffModulus());
 
     // Add sum to ciphertext
     c_new[m] = sum;
