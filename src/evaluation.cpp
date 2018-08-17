@@ -46,10 +46,6 @@ Ciphertext Ciphertext::Add(const Ciphertext & ct) const {
 }
 
 Ciphertext Ciphertext::Multiply(const Ciphertext & ct) const {
-  // Set finite field modulus to be q
-  ZZ_pPush push;
-  ZZ_p::init(params.GetCoeffModulus());
-
   // Get ciphertext sizes
   long j = length() - 1;
   long k = ct.length() - 1;
