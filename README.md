@@ -4,8 +4,10 @@
 
 Specifically, librlwe implements the Fan-Vercauteren fully homomorphic cryptosystem, which is based off of the RLWE problem. 
 It contains support for RLWE-based encryption, decryption, key exchange, signing, and homomorphic addition & multiplication.
-Note that it does its best to stick to the cryptosystem outlined in the FV paper. 
-As such, relinearization is performed immediately after every homomorphic multiplication.
+Note that it does its best to stick to the cryptosystem outlined in the FV paper;
+however, relinearization is not immediately performed after every homomorphic multiplication and is instead
+separated into its own function. This means that the ciphertexts can grow in size without bound until the user decides
+that it is necessary to relinearize it.
 
 For anyone without significant background on RLWE, I would recommend checking out these links:
 * [Somewhat Practical Fully Homomorphic Encryption](https://eprint.iacr.org/2012/144.pdf) - Junfeng Fan and Frederik Vercauteren's original paper on FV-style FHE
