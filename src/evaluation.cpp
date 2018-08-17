@@ -2,6 +2,7 @@
 
 #include <NTL/ZZ_pX.h>
 #include <NTL/RR.h>
+#include <cassert>
 
 using namespace rlwe;
 
@@ -44,65 +45,51 @@ Ciphertext Ciphertext::Add(const Ciphertext & ct) const {
   return Ciphertext(c_new, params);
 }
 
-// TODO: Figure out why multiplication is failing
+// TODO: Extend multiplication to more than just the first two terms
 Ciphertext Ciphertext::Multiply(const Ciphertext & ct) const {
+  assert(c.length() == 2 && ct.c.length() == 2);
+
   // Set finite field modulus to be q
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
 
-  std::cerr << *this << std::endl;
-  std::cerr << ct << std::endl;
-  std::cerr << params.GetCoeffModulus() << std::endl;
-
-  // Compute centered versions of c0, c1, c2
+  // Create lifted versions of c0, c1, c2
   ZZX c0_ct1 = conv<ZZX>(c[0]);
   ZZX c0_ct2 = conv<ZZX>(ct.c[0]);
   ZZX c1_ct1 = conv<ZZX>(c[1]);
-  ZZX c1_ct2 = conv<ZZX>(ct[1]);
-  util::CenterCoeffs(c0_ct1, params.GetCoeffModulus()); 
-  util::CenterCoeffs(c0_ct2, params.GetCoeffModulus()); 
-  util::CenterCoeffs(c1_ct1, params.GetCoeffModulus()); 
-  util::CenterCoeffs(c1_ct2, params.GetCoeffModulus()); 
-
-  std::cerr << c0_ct1 << std::endl;
-  std::cerr << c0_ct2 << std::endl;
-  std::cerr << c1_ct1 << std::endl;
-  std::cerr << c1_ct2 << std::endl;
+  ZZX c1_ct2 = conv<ZZX>(ct.c[1]);
 
   // Compute new c0, c1, c2
-  ZZX c0_new;
-  ZZX c1_new;
-  ZZX c2_new;
+  ZZX c0_lifted;
+  ZZX c1_lifted;
+  ZZX c2_lifted;
   ZZX buffer;
 
   ZZX tmp_modulus = conv<ZZX>(params.GetPolyModulus().val()); 
 
-  MulMod(c0_new, c0_ct1, c0_ct2, tmp_modulus);
+  MulMod(c0_lifted, c0_ct1, c0_ct2, tmp_modulus);
 
-  MulMod(c1_new, c0_ct1, c1_ct2, tmp_modulus); 
+  MulMod(c1_lifted, c0_ct1, c1_ct2, tmp_modulus); 
   MulMod(buffer, c1_ct1, c0_ct2, tmp_modulus); 
-  c1_new += buffer;
+  c1_lifted += buffer;
 
-  MulMod(c2_new, c1_ct1, c1_ct2, tmp_modulus); 
-
-  std::cerr << c0_new << std::endl;
-  std::cerr << c1_new << std::endl;
-  std::cerr << c2_new << std::endl;
+  MulMod(c2_lifted, c1_ct1, c1_ct2, tmp_modulus); 
 
   // Remove extra scaling on message in ciphertext
-  ZZ_pX c0_new_p = conv<ZZ_pX>(util::ScaleCoeffs(conv<ZZX>(c0_new), params.GetPlainModulus(), params.GetCoeffModulus(), params.GetCoeffModulus()));
-  ZZ_pX c1_new_p = conv<ZZ_pX>(util::ScaleCoeffs(conv<ZZX>(c1_new), params.GetPlainModulus(), params.GetCoeffModulus(), params.GetCoeffModulus()));
-  ZZ_pX c2_new_p = conv<ZZ_pX>(util::ScaleCoeffs(conv<ZZX>(c2_new), params.GetPlainModulus(), params.GetCoeffModulus(), params.GetCoeffModulus()));
+  util::ScaleCoeffs(c0_lifted, params.GetPlainModulus(), params.GetCoeffModulus(), params.GetCoeffModulus());
+  util::ScaleCoeffs(c1_lifted, params.GetPlainModulus(), params.GetCoeffModulus(), params.GetCoeffModulus());
+  util::ScaleCoeffs(c2_lifted, params.GetPlainModulus(), params.GetCoeffModulus(), params.GetCoeffModulus());
 
-  std::cerr << c0_new_p << std::endl;
-  std::cerr << c1_new_p << std::endl;
-  std::cerr << c2_new_p << std::endl;
+  // Convert lifted polynomials back to finite field
+  ZZ_pX c0_new = conv<ZZ_pX>(c0_lifted);
+  ZZ_pX c1_new = conv<ZZ_pX>(c1_lifted);
+  ZZ_pX c2_new = conv<ZZ_pX>(c2_lifted);
 
   Vec<ZZX> c_new; 
   c_new.SetLength(3);
-  c_new[0] = conv<ZZX>(c0_new_p);
-  c_new[1] = conv<ZZX>(c1_new_p);
-  c_new[2] = conv<ZZX>(c2_new_p);
+  c_new[0] = conv<ZZX>(c0_new);
+  c_new[1] = conv<ZZX>(c1_new);
+  c_new[2] = conv<ZZX>(c2_new);
 
   return Ciphertext(c_new, params);
 }
