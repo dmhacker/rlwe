@@ -5,7 +5,7 @@
 
 TEST_CASE("FV-style homomorphic multiplication") {
   // Set up parameters
-  rlwe::KeyParameters params(16, 3 * 128 * 2048, 3);  
+  rlwe::KeyParameters params(16, 12289, 3);  
 
   // Compute keys
   rlwe::PrivateKey priv = params.GeneratePrivateKey();

@@ -40,18 +40,17 @@ PrivateKey KeyParameters::GeneratePrivateKey() const {
 }
 
 PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
-  // Set finite field modulus to be q
-  ZZ_pPush push;
-  ZZ_p::init(q);
-
   // Compute a, where the coefficients are drawn uniformly from the integers mod q 
-  ZZ_pX a = conv<ZZ_pX>(random::UniformSample(n, q));
+  ZZX a = random::UniformSample(n, q);
+
+  // Draw error polynomial from discrete Gaussian distribution
+  ZZX e = random::GaussianSample(n, sigma);
 
   // Delegate to separate constructor now that a is known
-  return KeyParameters::GeneratePublicKey(priv, conv<ZZX>(a));
+  return KeyParameters::GeneratePublicKey(priv, a, e);
 }
 
-PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv, const ZZX & a_random) const {
+PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv, const ZZX & a_random, const ZZX & e_random) const {
   // Set finite field modulus to be q
   ZZ_pPush push;
   ZZ_p::init(q);
@@ -59,11 +58,11 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv, const ZZX & 
   // a is given; just copy it into a ZZ_pX object
   ZZ_pX a = conv<ZZ_pX>(a_random);
 
+  // Do the same with e
+  ZZ_pX e = conv<ZZ_pX>(e_random);
+
   // Copy private key parameters into polynomial over finite field
   ZZ_pX s = conv<ZZ_pX>(priv.GetS());
-
-  // Draw error polynomial from discrete Gaussian distribution
-  ZZ_pX e = conv<ZZ_pX>(random::GaussianSample(n, sigma));
 
   // Compute b = -(a * s + e)
   ZZ_pX b;

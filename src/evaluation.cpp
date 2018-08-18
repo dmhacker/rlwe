@@ -6,6 +6,21 @@
 
 using namespace rlwe;
 
+Ciphertext Ciphertext::Negate() const {
+  // Set finite field modulus to be q
+  ZZ_pPush push;
+  ZZ_p::init(params.GetCoeffModulus());
+
+  Vec<ZZX> c_new;
+  c_new.SetLength(c.length());
+  for (long index = 0; index < c.length(); index++) {
+    ZZ_pX inverted = -conv<ZZ_pX>(c[index]);
+    c_new[index] = conv<ZZX>(inverted);
+  }
+
+  return Ciphertext(c_new, params);
+}
+
 Ciphertext Ciphertext::Add(const Ciphertext & ct) const {
   // Set finite field modulus to be q
   ZZ_pPush push;

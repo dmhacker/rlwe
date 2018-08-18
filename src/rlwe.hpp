@@ -62,7 +62,7 @@ namespace rlwe {
       /* Key generation */
       PrivateKey GeneratePrivateKey() const;
       PublicKey GeneratePublicKey(const PrivateKey & priv) const;
-      PublicKey GeneratePublicKey(const PrivateKey & priv, const ZZX & a_random) const;
+      PublicKey GeneratePublicKey(const PrivateKey & priv, const ZZX & a_random, const ZZX & e_random) const;
       EvaluationKey GenerateEvaluationKey(const PrivateKey & priv) const;
 
       /* Encoding and decoding */
@@ -123,6 +123,7 @@ namespace rlwe {
       long length() const { return c.length(); };
 
       /* Somewhat homomorphic encryption */
+      Ciphertext Negate() const;
       Ciphertext Add(const Ciphertext & ct) const;
       Ciphertext Multiply(const Ciphertext & ct) const;
       Ciphertext Relinearize(const EvaluationKey & elk) const;
