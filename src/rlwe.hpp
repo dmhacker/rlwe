@@ -115,6 +115,7 @@ namespace rlwe {
         c[1] = c1;
       }
       Ciphertext(Vec<ZZX> c_vector, const KeyParameters & params0) : c(c_vector), params(params0) {}
+      Ciphertext(const Ciphertext & ct) : c(ct.c), params(ct.params) {}
 
       /* Getters */
       const ZZX & operator[] (int index) const {
@@ -123,17 +124,26 @@ namespace rlwe {
       long length() const { return c.length(); };
 
       /* Somewhat homomorphic encryption */
-      Ciphertext Negate() const;
-      Ciphertext Add(const Ciphertext & ct) const;
-      Ciphertext Multiply(const Ciphertext & ct) const;
-      Ciphertext Relinearize(const EvaluationKey & elk) const;
+      Ciphertext & Negate();
+      Ciphertext & operator+= (const Ciphertext & ct);
+      Ciphertext & operator*= (const Ciphertext & ct);
+      Ciphertext & Relinearize(const EvaluationKey & elk);
 
       /* Arithmetic overloading */
+      friend Ciphertext operator- (const Ciphertext & ct) {
+        Ciphertext result(ct);
+        result.Negate();
+        return result;
+      }
       friend Ciphertext operator+ (const Ciphertext & ct1, const Ciphertext & ct2) {
-        return ct1.Add(ct2);
+        Ciphertext result(ct1); 
+        result += ct2;
+        return result;
       }
       friend Ciphertext operator* (const Ciphertext & ct1, const Ciphertext & ct2) {
-        return ct1.Multiply(ct2);
+        Ciphertext result(ct1);
+        result *= ct2;
+        return result;
       }
 
       /* Equality */

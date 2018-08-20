@@ -6,7 +6,7 @@
 
 using namespace rlwe;
 
-Ciphertext Ciphertext::Negate() const {
+Ciphertext & Ciphertext::Negate() {
   // Set finite field modulus to be q
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
@@ -18,10 +18,12 @@ Ciphertext Ciphertext::Negate() const {
     c_new[index] = conv<ZZX>(inverted);
   }
 
-  return Ciphertext(c_new, params);
+  this->c = c_new;
+
+  return *this; 
 }
 
-Ciphertext Ciphertext::Add(const Ciphertext & ct) const {
+Ciphertext & Ciphertext::operator+= (const Ciphertext & ct) {
   // Set finite field modulus to be q
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
@@ -57,10 +59,12 @@ Ciphertext Ciphertext::Add(const Ciphertext & ct) const {
     c_new[index] = longer[index];
   }
 
-  return Ciphertext(c_new, params);
+  this->c = c_new;
+
+  return *this; 
 }
 
-Ciphertext Ciphertext::Multiply(const Ciphertext & ct) const {
+Ciphertext & Ciphertext::operator*= (const Ciphertext & ct) {
   // Get ciphertext sizes
   long j = length() - 1;
   long k = ct.length() - 1;
@@ -91,10 +95,12 @@ Ciphertext Ciphertext::Multiply(const Ciphertext & ct) const {
     c_new[m] = sum;
   }
 
-  return Ciphertext(c_new, params);
+  this->c = c_new;
+
+  return *this; 
 }
 
 // TODO: Implement relinearization process
-Ciphertext Ciphertext::Relinearize(const EvaluationKey & elk) const {
+Ciphertext & Ciphertext::Relinearize(const EvaluationKey & elk) {
   return *this;
 }

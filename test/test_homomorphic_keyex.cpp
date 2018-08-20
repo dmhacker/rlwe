@@ -31,12 +31,12 @@ TEST_CASE("Experimental homomorphic key exchange") {
 
   // Alice calculates this privately and then publishes the result
   rlwe::Ciphertext key_bob_encrypted_bob = 
-    (hp_bob.Encrypt(rlwe::Plaintext(p_bob.GetP0(), leveled_params)).Negate() * hp_bob.Encrypt(rlwe::Plaintext(s_alice.GetS(), leveled_params))) + 
+    (-hp_bob.Encrypt(rlwe::Plaintext(p_bob.GetP0(), leveled_params)) * hp_bob.Encrypt(rlwe::Plaintext(s_alice.GetS(), leveled_params))) + 
     (hp_bob.Encrypt(rlwe::Plaintext(e_alice, leveled_params)) * s_bob_encrypted_bob);
 
   // Bob calculates this privately and then publishes the result
   rlwe::Ciphertext key_alice_encrypted_alice =
-    (hp_alice.Encrypt(rlwe::Plaintext(p_alice.GetP0(), leveled_params)).Negate() * hp_alice.Encrypt(rlwe::Plaintext(s_bob.GetS(), leveled_params))) + 
+    (-hp_alice.Encrypt(rlwe::Plaintext(p_alice.GetP0(), leveled_params)) * hp_alice.Encrypt(rlwe::Plaintext(s_bob.GetS(), leveled_params))) + 
     (hp_alice.Encrypt(rlwe::Plaintext(e_bob, leveled_params)) * s_alice_encrypted_alice);
 
   // Alice decrypts Bob's computations to get her key
