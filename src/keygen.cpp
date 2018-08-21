@@ -51,6 +51,9 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
 }
 
 PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv, const ZZX & a_random, const ZZX & e_random) const {
+  // Assert that private key parameters match up 
+  assert(*this == priv.GetParameters());
+
   // Set finite field modulus to be q
   ZZ_pPush push;
   ZZ_p::init(q);
@@ -76,7 +79,10 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv, const ZZX & 
 
 // TODO: Redo with relinearization version 1
 EvaluationKey KeyParameters::GenerateEvaluationKey(const PrivateKey & priv) const {
-  // Set finite field modulus to be q
+  // Assert that private key parameters match up 
+  assert(*this == priv.GetParameters());
+
+  // Set finite field modulus to be pq
   ZZ_pPush push;
   ZZ_p::init(p * q);
 

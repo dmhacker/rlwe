@@ -1,7 +1,6 @@
 #include "rlwe.hpp"
 
 #include <NTL/ZZ_pX.h>
-#include <NTL/RR.h>
 #include <cassert>
 
 using namespace rlwe;

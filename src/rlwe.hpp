@@ -1,6 +1,7 @@
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>
 #include <NTL/RR.h>
+#include <NTL/pair.h>
 
 using namespace NTL;
 
@@ -90,7 +91,12 @@ namespace rlwe {
       Plaintext(ZZX m0, const KeyParameters & params0) : m(m0), params(params0) {}
 
       /* Getters */
-      ZZX GetM() const { return m; }
+      const ZZX & GetM() const { 
+        return m; 
+      }
+      const KeyParameters & GetParameters() const { 
+        return params; 
+      }
 
       /* Equality */
       bool operator== (const Plaintext & pt) const {
@@ -121,7 +127,12 @@ namespace rlwe {
       const ZZX & operator[] (int index) const {
         return c[index]; 
       }
-      long length() const { return c.length(); };
+      long length() const { 
+        return c.length(); 
+      }
+      const KeyParameters & GetParameters() const { 
+        return params; 
+      }
 
       /* Somewhat homomorphic encryption */
       Ciphertext & Negate();
@@ -177,8 +188,15 @@ namespace rlwe {
       PublicKey(ZZX p0_0, ZZX p1_0, const KeyParameters & params0) : p0(p0_0), p1(p1_0), params(params0) {}
 
       /* Getters */
-      ZZX GetP0() const { return p0; }
-      ZZX GetP1() const { return p1; } 
+      const ZZX & GetP0() const { 
+        return p0; 
+      }
+      const ZZX & GetP1() const { 
+        return p1; 
+      } 
+      const KeyParameters & GetParameters() const { 
+        return params; 
+      }
 
       /* Public key encryption */
       Ciphertext Encrypt(const Plaintext & plaintext) const; 
@@ -198,7 +216,12 @@ namespace rlwe {
       PrivateKey(ZZX s0, const KeyParameters & params0) : s(s0), params(params0) {}
 
       /* Getters */
-      ZZX GetS() const { return s; }
+      ZZX GetS() const { 
+        return s; 
+      }
+      const KeyParameters & GetParameters() const { 
+        return params; 
+      }
 
       /* Private key decryption */
       Plaintext Decrypt(const Ciphertext & ciphertext) const;
@@ -221,6 +244,9 @@ namespace rlwe {
       /* Getters */
       const ZZX & operator[] (int index) const {
         return index % 2 ? r1 : r0; 
+      }
+      const KeyParameters & GetParameters() const { 
+        return params; 
       }
 
       /* Display to output stream */
