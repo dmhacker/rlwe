@@ -45,7 +45,7 @@ Plaintext PrivateKey::Decrypt(const Ciphertext & ciphertext) const {
   ZZ_pX m;
   ZZ_pX buffer0;
   ZZ_pX buffer1;
-  for (long i = 0; i < ciphertext.length(); i++) {
+  for (long i = 0; i < ciphertext.GetLength(); i++) {
     PowerMod(buffer0, secret, i, params.GetPolyModulus());
     MulMod(buffer1, conv<ZZ_pX>(ciphertext[i]), buffer0, params.GetPolyModulus());
     m += buffer1;

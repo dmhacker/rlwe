@@ -3,6 +3,9 @@
 #include <NTL/RR.h>
 #include <NTL/pair.h>
 
+#define DEFAULT_ERROR_STANDARD_DEVIATION 3.192f
+#define DEFAULT_DECOMPOSITION_BIT_COUNT 32
+
 using namespace NTL;
 
 namespace rlwe {
@@ -23,48 +26,47 @@ namespace rlwe {
   class PrivateKey;
   class EvaluationKey;
 
-  const float ERROR_STANDARD_DEVIATION = 3.192f;
-  const float EVAL_P_POWER = 3;
-  const float EVAL_STANDARD_DEVIATION = std::pow(ERROR_STANDARD_DEVIATION, EVAL_P_POWER + 1);
-
   class KeyParameters {
     private:
+      /* Given parameters */ 
+      long n;
       ZZ q;
-      ZZ p;
       ZZ t;
+      long log_w;
+      float sigma;
+      /* Calculated */
+      ZZ_pXModulus phi;
       ZZ delta;
       RR downscale;
-      long n;
-      ZZ_pXModulus phi;
-      float sigma;
-      float sigma_t;
+      ZZ w;
+      ZZ w_mask;
+      long l;
     public:
       /* Constructors */
-      KeyParameters(long n0, long q0, long t0) : 
-        KeyParameters(n0, ZZ(q0), ZZ(t0)) {}
-      KeyParameters(long n0, ZZ q0, ZZ t0) : 
-        KeyParameters(n0, q0, t0, 
-            power(q0, EVAL_P_POWER), 
-            ERROR_STANDARD_DEVIATION, 
-            EVAL_STANDARD_DEVIATION) {}
-      KeyParameters(long n0, ZZ q0, ZZ t0, ZZ p0, float sigma, float sigma_t);
+      KeyParameters(long n, long q, long t) : 
+        KeyParameters(n, ZZ(q), ZZ(t)) {}
+      KeyParameters(long n, ZZ q, ZZ t) : 
+        KeyParameters(n, q, t, DEFAULT_DECOMPOSITION_BIT_COUNT, DEFAULT_ERROR_STANDARD_DEVIATION) {}
+      KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma);
 
       /* Getters */
       ZZ GetCoeffModulus() const { return q; }
       ZZ GetPlainModulus() const { return t; }
       ZZ GetPlainToCoeffScalar() const { return delta; }
       RR GetCoeffToPlainScalar() const { return downscale; }
-      ZZ GetEvalModulus() const { return p; }
       long GetPolyModulusDegree() const { return n; }
       ZZ_pXModulus GetPolyModulus() const { return phi; }
       float GetErrorStandardDeviation() const { return sigma; }
-      float GetEvalStandardDeviation() const { return sigma_t; }
+      ZZ GetDecompositionBase() const { return w; }
+      ZZ GetDecompositionBitMask() const { return w_mask; }
+      long GetDecompositionBitCount() const { return log_w; }
+      long GetDecompositionTermCount() const { return l; }
 
       /* Key generation */
       PrivateKey GeneratePrivateKey() const;
       PublicKey GeneratePublicKey(const PrivateKey & priv) const;
       PublicKey GeneratePublicKey(const PrivateKey & priv, const ZZX & a_random, const ZZX & e_random) const;
-      EvaluationKey GenerateEvaluationKey(const PrivateKey & priv) const;
+      EvaluationKey GenerateEvaluationKey(const PrivateKey & priv, long level) const;
 
       /* Encoding and decoding */
       Plaintext EncodeInteger(const ZZ & integer) const;
@@ -78,7 +80,7 @@ namespace rlwe {
 
       /* Equality */
       bool operator== (const KeyParameters & kp) const {
-        return n == kp.n && q == kp.q && t == kp.t && phi.val() == kp.phi.val();
+        return n == kp.n && q == kp.q && t == kp.t && log_w == kp.log_w && sigma == kp.sigma && phi.val() == kp.phi.val();
       }
   };
 
@@ -88,7 +90,7 @@ namespace rlwe {
       const KeyParameters & params;
     public:
       /* Constructors */
-      Plaintext(ZZX m0, const KeyParameters & params0) : m(m0), params(params0) {}
+      Plaintext(ZZX m, const KeyParameters & params) : m(m), params(params) {}
 
       /* Getters */
       const ZZX & GetM() const { 
@@ -115,19 +117,19 @@ namespace rlwe {
       const KeyParameters & params;
     public:
       /* Constructors */
-      Ciphertext(ZZX c0, ZZX c1, const KeyParameters & params0) : params(params0) {
+      Ciphertext(ZZX c0, ZZX c1, const KeyParameters & params) : params(params) {
         c.SetLength(2);
         c[0] = c0;
         c[1] = c1;
       }
-      Ciphertext(Vec<ZZX> c_vector, const KeyParameters & params0) : c(c_vector), params(params0) {}
+      Ciphertext(Vec<ZZX> c, const KeyParameters & params) : c(c), params(params) {}
       Ciphertext(const Ciphertext & ct) : c(ct.c), params(ct.params) {}
 
       /* Getters */
       const ZZX & operator[] (int index) const {
         return c[index]; 
       }
-      long length() const { 
+      long GetLength() const { 
         return c.length(); 
       }
       const KeyParameters & GetParameters() const { 
@@ -185,7 +187,7 @@ namespace rlwe {
       const KeyParameters & params;
     public:
       /* Constructors */
-      PublicKey(ZZX p0_0, ZZX p1_0, const KeyParameters & params0) : p0(p0_0), p1(p1_0), params(params0) {}
+      PublicKey(ZZX p0, ZZX p1, const KeyParameters & params) : p0(p0), p1(p1), params(params) {}
 
       /* Getters */
       const ZZX & GetP0() const { 
@@ -213,7 +215,7 @@ namespace rlwe {
       const KeyParameters & params;
     public:
       /* Constructors */
-      PrivateKey(ZZX s0, const KeyParameters & params0) : s(s0), params(params0) {}
+      PrivateKey(ZZX s, const KeyParameters & params) : s(s), params(params) {}
 
       /* Getters */
       ZZX GetS() const { 
@@ -234,16 +236,22 @@ namespace rlwe {
 
   class EvaluationKey {
     private:
-      ZZX r0;
-      ZZX r1;
+      Vec<Pair<ZZX, ZZX>> r;
+      long level;
       const KeyParameters & params;
     public:
       /* Constructors */
-      EvaluationKey(ZZX r0_0, ZZX r1_0, const KeyParameters & params0) : r0(r0_0), r1(r1_0), params(params0) {}
+      EvaluationKey(Vec<Pair<ZZX, ZZX>> r, long level, const KeyParameters & params) : r(r), level(level), params(params) {}
 
       /* Getters */
-      const ZZX & operator[] (int index) const {
-        return index % 2 ? r1 : r0; 
+      const Pair<ZZX, ZZX> & operator[] (int index) const {
+        return r[index]; 
+      }
+      long GetLength() const { 
+        return r.length(); 
+      }
+      long GetLevel() const {
+        return level;
       }
       const KeyParameters & GetParameters() const { 
         return params; 
@@ -251,7 +259,7 @@ namespace rlwe {
 
       /* Display to output stream */
       friend std::ostream& operator<< (std::ostream& stream, const EvaluationKey & elk) {
-        return stream << elk.r0 << ", " << elk.r1;
+        return stream << elk.r; 
       }  
   };
 }

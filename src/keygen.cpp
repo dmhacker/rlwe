@@ -5,10 +5,9 @@
 
 using namespace rlwe;
 
-KeyParameters::KeyParameters(long n0, ZZ q0, ZZ t0, ZZ p0, float sigma0, float sigma_t0) : 
-  n(n0), q(q0), t(t0), p(p0), 
-  delta(q0 / t0), downscale(conv<RR>(t0) / conv<RR>(q0)), 
-  sigma(sigma0), sigma_t(sigma_t0) 
+KeyParameters::KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma) : 
+  n(n), q(q), t(t), log_w(log_w), sigma(sigma),
+  delta(q / t), downscale(conv<RR>(t) / conv<RR>(q))
 {
   // Assert that n is even, assume that it is a power of 2
   assert(n % 2 == 0);
@@ -26,6 +25,11 @@ KeyParameters::KeyParameters(long n0, ZZ q0, ZZ t0, ZZ p0, float sigma0, float s
 
   // Build the modulus using the cyclotomic polynomial representation
   build(phi, cyclotomic);
+
+  // Calculate decomposition base and mask
+  power2(w, log_w);
+  w_mask = w - 1; 
+  l = floor(log(q) / log(w));
 }
 
 PrivateKey KeyParameters::GeneratePrivateKey() const {
@@ -77,34 +81,47 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv, const ZZX & 
   return PublicKey(conv<ZZX>(b), conv<ZZX>(a), *this);
 }
 
-// TODO: Redo with relinearization version 1
-EvaluationKey KeyParameters::GenerateEvaluationKey(const PrivateKey & priv) const {
+EvaluationKey KeyParameters::GenerateEvaluationKey(const PrivateKey & priv, long level) const {
   // Assert that private key parameters match up 
   assert(*this == priv.GetParameters());
 
-  // Set finite field modulus to be pq
+  // Set finite field modulus to be q 
   ZZ_pPush push;
-  ZZ_p::init(p * q);
-
-  // Compute a, where the coefficients are drawn uniformly from the finite field (integers mod q) 
-  ZZ_pX a = conv<ZZ_pX>(random::UniformSample(n, p * q));
+  ZZ_p::init(q);
 
   // Copy private key parameters into polynomial over finite field
   ZZ_pX s = conv<ZZ_pX>(priv.GetS());
 
-  // Draw error polynomial from discrete Gaussian distribution
-  ZZ_pX e = conv<ZZ_pX>(random::GaussianSample(n, sigma_t));
+  // Compute s^(level)
+  ZZ_pX s_level;
+  PowerMod(s_level, s, level, phi);
 
-  // Compute b = -(a * s + e)
-  ZZ_pX b;
-  MulMod(b, a, s, phi); 
-  b += e;
-  b = -b;
+  // Set up vector of pairs of polynomials
+  Vec<Pair<ZZX, ZZX>> r;
+  r.SetLength(l + 1);
 
-  ZZ_pX buffer;
-  MulMod(buffer, s, s, phi);
-  buffer *= conv<ZZ_p>(p);
-  b += buffer;
+  // Create temporary base
+  ZZ_p tmp_w(1);
 
-  return EvaluationKey(conv<ZZX>(b), conv<ZZX>(a), *this);
+  for (long i = 0; i <= l; i++) {
+    // Compute a, where the coefficients are drawn uniformly from the finite field (integers mod q) 
+    ZZ_pX a = conv<ZZ_pX>(random::UniformSample(n, q));
+
+    // Draw error polynomial from discrete Gaussian distribution
+    ZZ_pX e = conv<ZZ_pX>(random::GaussianSample(n, sigma));
+
+    // Compute b = -(a * s + e)
+    ZZ_pX b;
+    MulMod(b, a, s, phi); 
+    b += e;
+    b = -b + tmp_w * s_level;
+
+    // Save b, a as pair in evaluation key
+    r[i] = Pair<ZZX, ZZX>(conv<ZZX>(b), conv<ZZX>(a)); 
+
+    // Right shift by the word size (e.g. multiply by the base)
+    tmp_w *= conv<ZZ_p>(w);
+  }
+
+  return EvaluationKey(r, level, *this);
 }
