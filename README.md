@@ -10,7 +10,7 @@ Specifically, the library implements ...
   * [Peikert-style](https://eprint.iacr.org/2014/070.pdf) key exchange & reconciliation*
   * The [Ring-TESLA](https://eprint.iacr.org/2016/030.pdf) digital signature algorithm*
   * The Knuth-Yao algorithm for fast discrete noise sampling over a Gaussian distribution*
-<br><br><sub><sup>* Implementation not finished yet</sup></sub>
+<br><sub><sup>* Implementation not finished yet</sup></sub>
 
 For anyone without significant background on RLWE, I would recommend checking out these links:
 * [Homomorphic Encryption from RLWE](https://cryptosith.org/michael/data/talks/2012-01-10-MSR-Cambridge.pdf) 
