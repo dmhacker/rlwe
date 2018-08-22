@@ -25,7 +25,7 @@ Plaintext KeyParameters::EncodeInteger(const ZZ & integer) const {
 }
 
 ZZ KeyParameters::DecodeInteger(const Plaintext & encoding) const {
-  ZZX message = encoding.GetM();
+  ZZX message = encoding.GetMessage();
   ZZ integer = ZZ::zero();
   long sign = 1;
 

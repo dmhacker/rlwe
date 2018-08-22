@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include "../src/rlwe.hpp"
+#include "../src/sampling.hpp"
 
 TEST_CASE("Encryption & decryption using small parameters") {
   // Set up parameters
@@ -10,7 +11,7 @@ TEST_CASE("Encryption & decryption using small parameters") {
   rlwe::PublicKey pub = params.GeneratePublicKey(priv);
 
   // Generate random plaintext
-  rlwe::Plaintext plaintext(rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
+  rlwe::Plaintext plaintext(rlwe::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
 
   // Convert to ciphertext and then back to plaintext
   rlwe::Ciphertext ciphertext = pub.Encrypt(plaintext);
@@ -29,7 +30,7 @@ TEST_CASE("Encryption & decryption using large parameters") {
   rlwe::PublicKey pub = params.GeneratePublicKey(priv);
 
   // Generate random plaintext
-  rlwe::Plaintext plaintext(rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
+  rlwe::Plaintext plaintext(rlwe::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
 
   // Convert to ciphertext and then back to plaintext
   rlwe::Ciphertext ciphertext = pub.Encrypt(plaintext);

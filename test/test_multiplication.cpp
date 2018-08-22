@@ -1,5 +1,6 @@
 #include "catch.hpp"
 #include "../src/rlwe.hpp"
+#include "../src/sampling.hpp"
 
 #include <NTL/ZZ_pX.h>
 
@@ -12,8 +13,8 @@ TEST_CASE("FV-style homomorphic multiplication") {
   rlwe::PublicKey pub = params.GeneratePublicKey(priv);
 
   // Generate two random plaintexts
-  rlwe::Plaintext pt1(rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
-  rlwe::Plaintext pt2(rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
+  rlwe::Plaintext pt1(rlwe::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
+  rlwe::Plaintext pt2(rlwe::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
 
   // Convert both to ciphertexts 
   rlwe::Ciphertext ct1 = pub.Encrypt(pt1);
@@ -29,10 +30,10 @@ TEST_CASE("FV-style homomorphic multiplication") {
   ZZ_pPush push;
   ZZ_p::init(params.GetPlainModulus());
   ZZ_pX m_p;
-  MulMod(m_p, conv<ZZ_pX>(pt1.GetM()), conv<ZZ_pX>(pt2.GetM()), params.GetPolyModulus());
+  MulMod(m_p, conv<ZZ_pX>(pt1.GetMessage()), conv<ZZ_pX>(pt2.GetMessage()), params.GetPolyModulus());
   ZZX m = conv<ZZX>(m_p);
 
-  REQUIRE(pt.GetM() == m);
+  REQUIRE(pt.GetMessage() == m);
 }
 
 TEST_CASE("FV-style relinearization") {
@@ -45,8 +46,8 @@ TEST_CASE("FV-style relinearization") {
   rlwe::EvaluationKey elk = params.GenerateEvaluationKey(priv, 2);
 
   // Generate two random plaintexts
-  rlwe::Plaintext pt1(rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
-  rlwe::Plaintext pt2(rlwe::random::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
+  rlwe::Plaintext pt1(rlwe::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
+  rlwe::Plaintext pt2(rlwe::UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
 
   // Convert both to ciphertexts 
   rlwe::Ciphertext ct1 = pub.Encrypt(pt1);
@@ -67,8 +68,8 @@ TEST_CASE("FV-style relinearization") {
   ZZ_pPush push;
   ZZ_p::init(params.GetPlainModulus());
   ZZ_pX m_p;
-  MulMod(m_p, conv<ZZ_pX>(pt1.GetM()), conv<ZZ_pX>(pt2.GetM()), params.GetPolyModulus());
+  MulMod(m_p, conv<ZZ_pX>(pt1.GetMessage()), conv<ZZ_pX>(pt2.GetMessage()), params.GetPolyModulus());
   ZZX m = conv<ZZX>(m_p);
 
-  REQUIRE(pt.GetM() == m);
+  REQUIRE(pt.GetMessage() == m);
 }

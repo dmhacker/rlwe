@@ -1,12 +1,10 @@
-#include "rlwe.hpp"
+#include "sampling.hpp"
 
 #include <random>
 #include <NTL/ZZ_pX.h>
 #include <NTL/GF2X.h>
 
-using namespace rlwe;
-
-ZZX random::UniformSample(long degree, ZZ maximum) {
+ZZX rlwe::UniformSample(long degree, ZZ maximum) {
   ZZX poly;
   if (maximum == 2) {
     // If the maximum is 2, we can use the GF2X class 
@@ -22,9 +20,9 @@ ZZX random::UniformSample(long degree, ZZ maximum) {
   return poly;
 }
 
-ZZX random::UniformSample(long degree, ZZ minimum, ZZ maximum) {
+ZZX rlwe::UniformSample(long degree, ZZ minimum, ZZ maximum) {
   ZZ range = maximum - minimum;
-  ZZX poly = random::UniformSample(degree, range);
+  ZZX poly = rlwe::UniformSample(degree, range);
 
   // Iterate through each coefficient and add the minimum 
   for (long i = 0; i < degree; i++) {
@@ -35,7 +33,7 @@ ZZX random::UniformSample(long degree, ZZ minimum, ZZ maximum) {
 }
 
 // TODO: Replace with a high-quality discrete number generator (e.g. rejection sampler, Knuth-Yao algorithm)
-ZZX random::GaussianSample(long degree, float standard_deviation) {
+ZZX rlwe::GaussianSample(long degree, float standard_deviation) {
   std::random_device device;
   std::mt19937 spigot(device());
   std::normal_distribution<float> distribution(0, standard_deviation);

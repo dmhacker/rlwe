@@ -1,4 +1,5 @@
 #include "rlwe.hpp"
+#include "util.hpp"
 
 #include <NTL/ZZ_pX.h>
 #include <cassert>
@@ -88,7 +89,7 @@ Ciphertext & Ciphertext::operator*= (const Ciphertext & ct) {
     }
 
     // Perform downscale to get rid of extra message scaling 
-    util::ScaleCoeffs(sum, params.GetCoeffToPlainScalar(), params.GetCoeffModulus());
+    ScaleCoeffs(sum, params.GetCoeffToPlainScalar(), params.GetCoeffModulus());
 
     // Add sum to ciphertext
     c_new[m] = sum;

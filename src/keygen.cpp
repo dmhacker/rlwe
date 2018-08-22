@@ -1,9 +1,14 @@
 #include "rlwe.hpp"
+#include "sampling.hpp"
+#include "defines.hpp"
 
 #include <cassert>
 #include <NTL/ZZ_pX.h>
 
 using namespace rlwe;
+
+KeyParameters::KeyParameters(long n, ZZ q, ZZ t) :
+  KeyParameters(n, q, t, DEFAULT_DECOMPOSITION_BIT_COUNT, DEFAULT_ERROR_STANDARD_DEVIATION) {}
 
 KeyParameters::KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma) : 
   n(n), q(q), t(t), log_w(log_w), sigma(sigma),
@@ -38,17 +43,17 @@ PrivateKey KeyParameters::GeneratePrivateKey() const {
   ZZ_p::init(q);
 
   // Create private key based off of small secret polynomial 
-  ZZ_pX secret = conv<ZZ_pX>(random::UniformSample(n, ZZ(-1), ZZ(2)));
+  ZZ_pX secret = conv<ZZ_pX>(UniformSample(n, ZZ(-1), ZZ(2)));
 
   return PrivateKey(conv<ZZX>(secret), *this);
 }
 
 PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv) const {
   // Compute a, where the coefficients are drawn uniformly from the integers mod q 
-  ZZX a = random::UniformSample(n, q);
+  ZZX a = UniformSample(n, q);
 
   // Draw error polynomial from discrete Gaussian distribution
-  ZZX e = random::GaussianSample(n, sigma);
+  ZZX e = GaussianSample(n, sigma);
 
   // Delegate to separate constructor now that a is known
   return KeyParameters::GeneratePublicKey(priv, a, e);
@@ -69,7 +74,7 @@ PublicKey KeyParameters::GeneratePublicKey(const PrivateKey & priv, const ZZX & 
   ZZ_pX e = conv<ZZ_pX>(e_random);
 
   // Copy private key parameters into polynomial over finite field
-  ZZ_pX s = conv<ZZ_pX>(priv.GetS());
+  ZZ_pX s = conv<ZZ_pX>(priv.GetSecret());
 
   // Compute b = -(a * s + e)
   ZZ_pX b;
@@ -90,7 +95,7 @@ EvaluationKey KeyParameters::GenerateEvaluationKey(const PrivateKey & priv, long
   ZZ_p::init(q);
 
   // Copy private key parameters into polynomial over finite field
-  ZZ_pX s = conv<ZZ_pX>(priv.GetS());
+  ZZ_pX s = conv<ZZ_pX>(priv.GetSecret());
 
   // Compute s^(level)
   ZZ_pX s_level;
@@ -105,10 +110,10 @@ EvaluationKey KeyParameters::GenerateEvaluationKey(const PrivateKey & priv, long
 
   for (long i = 0; i <= l; i++) {
     // Compute a, where the coefficients are drawn uniformly from the finite field (integers mod q) 
-    ZZ_pX a = conv<ZZ_pX>(random::UniformSample(n, q));
+    ZZ_pX a = conv<ZZ_pX>(UniformSample(n, q));
 
     // Draw error polynomial from discrete Gaussian distribution
-    ZZ_pX e = conv<ZZ_pX>(random::GaussianSample(n, sigma));
+    ZZ_pX e = conv<ZZ_pX>(GaussianSample(n, sigma));
 
     // Compute b = -(a * s + e)
     ZZ_pX b;

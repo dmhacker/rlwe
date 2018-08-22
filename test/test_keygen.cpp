@@ -17,10 +17,10 @@ TEST_CASE("Private key is small polynomial") {
   rlwe::KeyParameters params(16, 874, 7);  
   rlwe::PrivateKey priv = params.GeneratePrivateKey();
 
-  REQUIRE(NTL::deg(priv.GetS()) < params.GetPolyModulusDegree());
+  REQUIRE(NTL::deg(priv.GetSecret()) < params.GetPolyModulusDegree());
 
   for (long i = 0; i < params.GetPolyModulusDegree(); i++) {
-    NTL::ZZ coefficient = NTL::coeff(priv.GetS(), i);
+    NTL::ZZ coefficient = NTL::coeff(priv.GetSecret(), i);
     if (coefficient > params.GetCoeffModulus() / 2) { 
       REQUIRE(coefficient == params.GetCoeffModulus() - 1); 
     }
@@ -39,8 +39,9 @@ TEST_CASE("Public key is computed correctly") {
   NTL::ZZ_p::init(params.GetCoeffModulus());
 
   NTL::ZZ_pX buffer;
-  MulMod(buffer, conv<NTL::ZZ_pX>(pub.GetP1()), conv<NTL::ZZ_pX>(priv.GetS()), params.GetPolyModulus());
-  NTL::ZZ_pX error = -conv<NTL::ZZ_pX>(pub.GetP0()) - buffer;
+  Pair<NTL::ZZX, NTL::ZZX> pub_pair = pub.GetValues();
+  MulMod(buffer, conv<NTL::ZZ_pX>(pub_pair.b), conv<NTL::ZZ_pX>(priv.GetSecret()), params.GetPolyModulus());
+  NTL::ZZ_pX error = -conv<NTL::ZZ_pX>(pub_pair.a) - buffer;
 
   REQUIRE(NTL::deg(error) > 0);
 }

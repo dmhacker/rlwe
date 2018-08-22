@@ -3,23 +3,9 @@
 #include <NTL/RR.h>
 #include <NTL/pair.h>
 
-#define DEFAULT_ERROR_STANDARD_DEVIATION 3.192f
-#define DEFAULT_DECOMPOSITION_BIT_COUNT 32
-
 using namespace NTL;
 
 namespace rlwe {
-
-  namespace random {
-    ZZX UniformSample(long degree, ZZ minimum_inclusive, ZZ maximum_exclusive);
-    ZZX UniformSample(long degree, ZZ maximum_exclusive);
-    ZZX GaussianSample(long degree, float standard_deviation); 
-  }
-
-  namespace util {
-    void ScaleCoeffs(ZZX & poly, const RR scalar, const ZZ mod);
-    void CenterCoeffs(ZZX & poly, const ZZ mod);
-  }
 
   class Plaintext;
   class PublicKey;
@@ -43,10 +29,8 @@ namespace rlwe {
       long l;
     public:
       /* Constructors */
-      KeyParameters(long n, long q, long t) : 
-        KeyParameters(n, ZZ(q), ZZ(t)) {}
-      KeyParameters(long n, ZZ q, ZZ t) : 
-        KeyParameters(n, q, t, DEFAULT_DECOMPOSITION_BIT_COUNT, DEFAULT_ERROR_STANDARD_DEVIATION) {}
+      KeyParameters(long n, long q, long t) : KeyParameters(n, ZZ(q), ZZ(t)) {}
+      KeyParameters(long n, ZZ q, ZZ t);
       KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma);
 
       /* Getters */
@@ -93,7 +77,7 @@ namespace rlwe {
       Plaintext(ZZX m, const KeyParameters & params) : m(m), params(params) {}
 
       /* Getters */
-      const ZZX & GetM() const { 
+      const ZZX & GetMessage() const { 
         return m; 
       }
       const KeyParameters & GetParameters() const { 
@@ -182,20 +166,16 @@ namespace rlwe {
 
   class PublicKey {
     private:
-      ZZX p0;
-      ZZX p1;
+      Pair<ZZX, ZZX> p;
       const KeyParameters & params;
     public:
       /* Constructors */
-      PublicKey(ZZX p0, ZZX p1, const KeyParameters & params) : p0(p0), p1(p1), params(params) {}
+      PublicKey(ZZX p0, ZZX p1, const KeyParameters & params) : p(p0, p1), params(params) {}
 
       /* Getters */
-      const ZZX & GetP0() const { 
-        return p0; 
+      const Pair<ZZX, ZZX> & GetValues() const {
+        return p;
       }
-      const ZZX & GetP1() const { 
-        return p1; 
-      } 
       const KeyParameters & GetParameters() const { 
         return params; 
       }
@@ -205,7 +185,7 @@ namespace rlwe {
 
       /* Display to output stream */
       friend std::ostream& operator<< (std::ostream& stream, const PublicKey& pub) {
-        return stream << pub.p0 << ", " << pub.p1;
+        return stream << pub.p;
       }
   };
 
@@ -218,7 +198,7 @@ namespace rlwe {
       PrivateKey(ZZX s, const KeyParameters & params) : s(s), params(params) {}
 
       /* Getters */
-      ZZX GetS() const { 
+      ZZX GetSecret() const { 
         return s; 
       }
       const KeyParameters & GetParameters() const { 
