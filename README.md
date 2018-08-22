@@ -1,20 +1,20 @@
 # librlwe
 
-**librlwe** is a fast, lightweight, and easy-to-use library for doing ring-learning with errors (RLWE) cryptography.
+**librlwe** is a fast, lightweight, and easy-to-use library for doing cryptography involving the ring learning with errors (RLWE) problem.
 
-Specifically, librlwe implements the Fan-Vercauteren fully homomorphic cryptosystem, which is based off of the RLWE problem. 
-It contains support for RLWE-based encryption, decryption, key exchange, signing, and homomorphic addition & multiplication.
-Note that it does its best to stick to the cryptosystem outlined in the FV paper;
-however, relinearization is not immediately performed after every homomorphic multiplication and is instead
-separated into its own function. This means that the ciphertexts can grow in size without bound until the user decides
-that it is necessary to relinearize it.
+Note that the library makes no pretensions about being safe from side-channel attacks and should **not** be used in a production environment.
+Rather, it is intended to be used in an academic setting.
+
+Specifically, the library implements ...
+  * The [Fan-Vercauterean](https://eprint.iacr.org/2012/144.pdf) fully homomorphic cryptosystem
+  * [Peikert-style](https://eprint.iacr.org/2014/070.pdf) key exchange & reconciliation
+  * The [Ring-TESLA](https://eprint.iacr.org/2016/030.pdf) digital signature algorithm
+  * The Knuth-Yao algorithm for fast discrete noise sampling over a Gaussian distribution
 
 For anyone without significant background on RLWE, I would recommend checking out these links:
-* [Somewhat Practical Fully Homomorphic Encryption](https://eprint.iacr.org/2012/144.pdf) - Junfeng Fan and Frederik Vercauteren's original paper on FV-style FHE
-* [Homomorphic Encryption from RLWE](https://cryptosith.org/michael/data/talks/2012-01-10-MSR-Cambridge.pdf) - presentation given at MSR Cambridge
-* [Microsoft's SEAL Library Manual](https://www.microsoft.com/en-us/research/wp-content/uploads/2017/12/sealmanual.pdf) - of which this is based off of
+* [Homomorphic Encryption from RLWE](https://cryptosith.org/michael/data/talks/2012-01-10-MSR-Cambridge.pdf) 
+* [Microsoft's SEAL Library Manual](https://www.microsoft.com/en-us/research/wp-content/uploads/2017/12/sealmanual.pdf) 
 * [N1 Analytic's Blog on Homomorphic Encryption using RLWE](https://blog.n1analytics.com/homomorphic-encryption-illustrated-primer/)
-* [Parameters for RLWE Cryptography](http://www.ringlwe.info/parameters-for-rlwe.html)
 
 However, it is possible to still use this library without in-depth knowledge of how the RLWE cryptographic system works.
 This is because most of the algorithmic details have been abstracted away.
