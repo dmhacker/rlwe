@@ -1,6 +1,6 @@
-#include "rlwe.hpp"
+#include "fv.hpp"
 
-using namespace rlwe;
+using namespace rlwe::fv;
 
 Plaintext KeyParameters::EncodeInteger(long integer) const {
   // Convert long into a NTL:ZZ big integer and defer to other function

@@ -1,8 +1,10 @@
 #include "catch.hpp"
-#include "../src/rlwe.hpp"
+#include "../src/fv.hpp"
+
+using namespace rlwe::fv;
 
 TEST_CASE("Modulus is a cyclotomic polynomial") {
-  rlwe::KeyParameters params(16, 874, 7);  
+  KeyParameters params(16, 874, 7);  
 
   NTL::ZZ_pPush push;
   NTL::ZZ_p::init(ZZ(874));
@@ -14,8 +16,8 @@ TEST_CASE("Modulus is a cyclotomic polynomial") {
 }
 
 TEST_CASE("Private key is small polynomial") {
-  rlwe::KeyParameters params(16, 874, 7);  
-  rlwe::PrivateKey priv = params.GeneratePrivateKey();
+  KeyParameters params(16, 874, 7);  
+  PrivateKey priv = params.GeneratePrivateKey();
 
   REQUIRE(NTL::deg(priv.GetSecret()) < params.GetPolyModulusDegree());
 
@@ -31,9 +33,9 @@ TEST_CASE("Private key is small polynomial") {
 }
 
 TEST_CASE("Public key is computed correctly") {
-  rlwe::KeyParameters params(16, 874, 7);  
-  rlwe::PrivateKey priv = params.GeneratePrivateKey();
-  rlwe::PublicKey pub = params.GeneratePublicKey(priv);
+  KeyParameters params(16, 874, 7);  
+  PrivateKey priv = params.GeneratePrivateKey();
+  PublicKey pub = params.GeneratePublicKey(priv);
 
   NTL::ZZ_pPush push;
   NTL::ZZ_p::init(params.GetCoeffModulus());

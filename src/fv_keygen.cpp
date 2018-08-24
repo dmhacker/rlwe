@@ -1,11 +1,11 @@
-#include "rlwe.hpp"
+#include "fv.hpp"
 #include "sampling.hpp"
 #include "defines.hpp"
 
 #include <cassert>
 #include <NTL/ZZ_pX.h>
 
-using namespace rlwe;
+using namespace rlwe::fv;
 
 KeyParameters::KeyParameters(long n, ZZ q, ZZ t) :
   KeyParameters(n, q, t, DEFAULT_DECOMPOSITION_BIT_COUNT, DEFAULT_ERROR_STANDARD_DEVIATION) {}

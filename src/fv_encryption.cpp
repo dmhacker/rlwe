@@ -1,11 +1,11 @@
-#include "rlwe.hpp"
+#include "fv.hpp"
 #include "sampling.hpp"
 #include "util.hpp"
 
 #include <NTL/ZZ_pX.h>
 #include <NTL/RR.h>
 
-using namespace rlwe;
+using namespace rlwe::fv;
 
 Ciphertext PublicKey::Encrypt(const Plaintext & plaintext) const {
   // Set finite field modulus to be q

@@ -23,24 +23,26 @@ This is because most of the algorithmic details have been abstracted away.
 Here's an example of what you can do with librlwe:
 
 ```c++
+namespace fv = rlwe::fv;
+
 // Set up some parameters for the FV cryptosystem
-rlwe::fv::KeyParameters params(1024, 9214347247561474048, 290764801);
+fv::KeyParameters params(1024, 9214347247561474048, 290764801);
 
 // Generate a keypair
-rlwe::fv::PrivateKey priv = params.GeneratePrivateKey();
-rlwe::fv::PublicKey pub = params.GeneratePublicKey();
+fv::PrivateKey priv = params.GeneratePrivateKey();
+fv::PublicKey pub = params.GeneratePublicKey();
 
 // Encode some plaintext integer as a polynomial in the plaintext ring
 // The coefficients of the polynomial are equal to the binary representation of the integer
-rlwe::fv::Plaintext encoded_plaintext = params.EncodeInteger(1337);
+fv::Plaintext encoded_plaintext = params.EncodeInteger(1337);
 
 // Encrypt the plaintext using the public key 
-rlwe::fv::Ciphertext ciphertext = pub.Encrypt(encoded_plaintext);
+fv::Ciphertext ciphertext = pub.Encrypt(encoded_plaintext);
 
 [...]
 
 // Decrypt the plaintext using the private key
-rlwe::fv::Plaintext decrypted_plaintext = priv.Decrypt(ciphertext);
+fv::Plaintext decrypted_plaintext = priv.Decrypt(ciphertext);
 
 // Prints "1337"
 std::cout << params.DecodeInteger(decrypted_plaintext) << std::endl;

@@ -1,10 +1,10 @@
-#include "rlwe.hpp"
+#include "fv.hpp"
 #include "util.hpp"
 
 #include <NTL/ZZ_pX.h>
 #include <cassert>
 
-using namespace rlwe;
+using namespace rlwe::fv;
 
 Ciphertext & Ciphertext::Negate() {
   // Set finite field modulus to be q

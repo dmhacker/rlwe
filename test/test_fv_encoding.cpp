@@ -1,15 +1,17 @@
 #include "catch.hpp"
-#include "../src/rlwe.hpp"
+#include "../src/fv.hpp"
 
 #include <random>
 
+using namespace rlwe::fv;
+
 TEST_CASE("Encoding & decoding positive integer") {
   // Set up parameters
-  rlwe::KeyParameters params(16, 874, 7);  
+  KeyParameters params(16, 874, 7);  
 
   NTL:ZZ plaintext(1337);
 
-  rlwe::Plaintext encoded = params.EncodeInteger(plaintext);
+  Plaintext encoded = params.EncodeInteger(plaintext);
   NTL::ZZ decoded = params.DecodeInteger(encoded);
 
   // Make sure the decrypted plaintext equals the original 
@@ -18,11 +20,11 @@ TEST_CASE("Encoding & decoding positive integer") {
 
 TEST_CASE("Encoding & decoding negative integer") {
   // Set up parameters
-  rlwe::KeyParameters params(16, 874, 7);  
+  KeyParameters params(16, 874, 7);  
 
   NTL:ZZ plaintext(-1337);
 
-  rlwe::Plaintext encoded = params.EncodeInteger(plaintext);
+  Plaintext encoded = params.EncodeInteger(plaintext);
   NTL::ZZ decoded = params.DecodeInteger(encoded);
 
   // Make sure the decrypted plaintext equals the original 
@@ -31,11 +33,11 @@ TEST_CASE("Encoding & decoding negative integer") {
 
 TEST_CASE("Encryption & decryption with encoding") {
   // Set up parameters
-  rlwe::KeyParameters params(16, 874, 7);  
+  KeyParameters params(16, 874, 7);  
 
   // Compute keys
-  rlwe::PrivateKey priv = params.GeneratePrivateKey();
-  rlwe::PublicKey pub = params.GeneratePublicKey(priv);
+  PrivateKey priv = params.GeneratePrivateKey();
+  PublicKey pub = params.GeneratePublicKey(priv);
 
   // Generate random plaintext
   NTL::ZZ integer = NTL::RandomBits_ZZ(params.GetPolyModulusDegree());
@@ -44,9 +46,9 @@ TEST_CASE("Encryption & decryption with encoding") {
   }
 
   // Convert plaintext -> encoding -> ciphertext -> decrypted -> decoding 
-  rlwe::Plaintext encoded = params.EncodeInteger(integer);
-  rlwe::Ciphertext ciphertext = pub.Encrypt(encoded);
-  rlwe::Plaintext decrypted = priv.Decrypt(ciphertext);
+  Plaintext encoded = params.EncodeInteger(integer);
+  Ciphertext ciphertext = pub.Encrypt(encoded);
+  Plaintext decrypted = priv.Decrypt(ciphertext);
   NTL:ZZ decoded = params.DecodeInteger(decrypted);
 
   // Make sure the decrypted plaintext equals the original 
