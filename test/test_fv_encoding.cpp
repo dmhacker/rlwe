@@ -11,8 +11,8 @@ TEST_CASE("Encoding & decoding positive integer") {
 
   NTL:ZZ plaintext(1337);
 
-  Plaintext encoded(plaintext, params); 
-  NTL::ZZ decoded = encoded.ToInteger(); 
+  Plaintext encoded = EncodeInteger(plaintext, params); 
+  NTL::ZZ decoded = DecodeInteger(encoded, params);
 
   // Make sure the decrypted plaintext equals the original 
   REQUIRE(plaintext == decoded);
@@ -24,8 +24,8 @@ TEST_CASE("Encoding & decoding negative integer") {
 
   NTL:ZZ plaintext(-1337);
 
-  Plaintext encoded(plaintext, params); 
-  NTL::ZZ decoded = encoded.ToInteger(); 
+  Plaintext encoded = EncodeInteger(plaintext, params); 
+  NTL::ZZ decoded = DecodeInteger(encoded, params); 
 
   // Make sure the decrypted plaintext equals the original 
   REQUIRE(plaintext == decoded);
@@ -36,8 +36,8 @@ TEST_CASE("Encryption & decryption with encoding") {
   KeyParameters params(16, 874, 7);  
 
   // Compute keys
-  PrivateKey priv(params);
-  PublicKey pub(priv);
+  PrivateKey priv = GeneratePrivateKey(params);
+  PublicKey pub = GeneratePublicKey(priv);
 
   // Generate random plaintext
   NTL::ZZ integer = NTL::RandomBits_ZZ(params.GetPolyModulusDegree());
@@ -46,10 +46,10 @@ TEST_CASE("Encryption & decryption with encoding") {
   }
 
   // Convert plaintext -> encoding -> ciphertext -> decrypted -> decoding 
-  Plaintext encoded(integer, params); 
-  Ciphertext ciphertext = pub.Encrypt(encoded);
-  Plaintext decrypted = priv.Decrypt(ciphertext);
-  NTL:ZZ decoded = decrypted.ToInteger();
+  Plaintext encoded = EncodeInteger(integer, params); 
+  Ciphertext ciphertext = Encrypt(encoded, pub);
+  Plaintext decrypted = Decrypt(ciphertext, priv);
+  NTL:ZZ decoded = DecodeInteger(decrypted, params); 
 
   // Make sure the decrypted plaintext equals the original 
   REQUIRE(integer == decoded);

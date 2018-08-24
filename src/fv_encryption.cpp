@@ -4,10 +4,16 @@
 
 #include <NTL/ZZ_pX.h>
 #include <NTL/RR.h>
+#include <cassert>
 
+using namespace rlwe;
 using namespace rlwe::fv;
 
-Ciphertext PublicKey::Encrypt(const Plaintext & plaintext) const {
+Ciphertext fv::Encrypt(const Plaintext & plaintext, const PublicKey & pub) {
+  // Make sure plaintext parameters and public key parameters are equal, otherwise encryption fails
+  assert(plaintext.GetParameters() == pub.GetParameters());
+  const KeyParameters & params = pub.GetParameters();
+
   // Set finite field modulus to be q
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
@@ -25,6 +31,9 @@ Ciphertext PublicKey::Encrypt(const Plaintext & plaintext) const {
   // Set up a temporary buffer to hold the results of multiplications
   ZZ_pX buffer;
 
+  // Extract information from public key
+  const Pair<ZZX, ZZX> & p = pub.GetValues();
+
   // c1 = p0 * u + e1 + m
   MulMod(buffer, conv<ZZ_pX>(p.a), u, params.GetPolyModulus());
   ZZ_pX c1 = buffer + e1 + m;
@@ -36,12 +45,16 @@ Ciphertext PublicKey::Encrypt(const Plaintext & plaintext) const {
   return Ciphertext(conv<ZZX>(c1), conv<ZZX>(c2), params);
 }
 
-Plaintext PrivateKey::Decrypt(const Ciphertext & ciphertext) const {
+Plaintext fv::Decrypt(const Ciphertext & ciphertext, const PrivateKey & priv) {
+  // Make sure plaintext parameters and private key parameters are equal, otherwise decryption fails
+  assert(ciphertext.GetParameters() == priv.GetParameters());
+  const KeyParameters & params = priv.GetParameters();
+
   // Set finite field modulus to be q
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
 
-  ZZ_pX secret = conv<ZZ_pX>(s);
+  ZZ_pX secret = conv<ZZ_pX>(priv.GetSecret());
 
   // m = c0 + c1 * s + c2 * s^2 + ...
   ZZ_pX m;

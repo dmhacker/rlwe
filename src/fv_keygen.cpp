@@ -2,9 +2,10 @@
 #include "sampling.hpp"
 #include "defines.hpp"
 
-#include <cassert>
 #include <NTL/ZZ_pX.h>
+#include <cassert>
 
+using namespace rlwe;
 using namespace rlwe::fv;
 
 KeyParameters::KeyParameters(long n, ZZ q, ZZ t) :
@@ -37,12 +38,19 @@ KeyParameters::KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma) :
   l = floor(log(q) / log(w));
 }
 
-PublicKey::PublicKey(const PrivateKey & priv) : 
-  PublicKey(priv, 
-      UniformSample(priv.GetParameters().GetPolyModulusDegree(), priv.GetParameters().GetCoeffModulus()), 
-      GaussianSample(priv.GetParameters().GetPolyModulusDegree(), priv.GetParameters().GetErrorStandardDeviation())) {}
+PrivateKey fv::GeneratePrivateKey(const KeyParameters & params) {
+  return PrivateKey(UniformSample(params.GetPolyModulusDegree(), ZZ(-1), ZZ(2)), params);
+}
 
-PublicKey::PublicKey(const PrivateKey & priv, const ZZX & shared_a, const ZZX & shared_e) : params(priv.GetParameters()) {
+PublicKey fv::GeneratePublicKey(const PrivateKey & priv) {
+  return GeneratePublicKey(priv, 
+      UniformSample(priv.GetParameters().GetPolyModulusDegree(), priv.GetParameters().GetCoeffModulus()), 
+      GaussianSample(priv.GetParameters().GetPolyModulusDegree(), priv.GetParameters().GetErrorStandardDeviation()));
+}
+
+PublicKey fv::GeneratePublicKey(const PrivateKey & priv, const ZZX & shared_a, const ZZX & shared_e) { 
+  const KeyParameters & params = priv.GetParameters();
+
   // Set finite field modulus to be q
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
@@ -63,11 +71,12 @@ PublicKey::PublicKey(const PrivateKey & priv, const ZZX & shared_a, const ZZX & 
   b = -b;
 
   // Create public key based off of a & b polynomials
-  p.a = conv<ZZX>(b);
-  p.b = conv<ZZX>(a);
+  return PublicKey(Pair<ZZX, ZZX>(conv<ZZX>(b), conv<ZZX>(a)), params);
 }
 
-EvaluationKey::EvaluationKey(const PrivateKey & priv, long level) : level(level), params(priv.GetParameters()) {
+EvaluationKey fv::GenerateEvaluationKey(const PrivateKey & priv, long level) {
+  const KeyParameters & params = priv.GetParameters();
+
   // Set finite field modulus to be q 
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
@@ -80,6 +89,7 @@ EvaluationKey::EvaluationKey(const PrivateKey & priv, long level) : level(level)
   PowerMod(s_level, s, level, params.GetPolyModulus());
 
   // Set up vector of pairs of polynomials
+  Vec<Pair<ZZX, ZZX>> r;
   r.SetLength(params.GetDecompositionTermCount() + 1);
 
   // Create temporary base
@@ -104,4 +114,6 @@ EvaluationKey::EvaluationKey(const PrivateKey & priv, long level) : level(level)
     // Right shift by the word size (e.g. multiply by the base)
     tmp_w *= conv<ZZ_p>(params.GetDecompositionBase());
   }
+
+  return EvaluationKey(r, level, params);
 }

@@ -12,22 +12,22 @@ TEST_CASE("Homomorphic multiplication") {
   KeyParameters params(1024, 34359724033, 2);  
 
   // Compute keys
-  PrivateKey priv(params); 
-  PublicKey pub(priv);
+  PrivateKey priv = GeneratePrivateKey(params); 
+  PublicKey pub = GeneratePublicKey(priv);
 
   // Generate two random plaintexts
   Plaintext pt1(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
   Plaintext pt2(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
 
   // Convert both to ciphertexts 
-  Ciphertext ct1 = pub.Encrypt(pt1);
-  Ciphertext ct2 = pub.Encrypt(pt2);
+  Ciphertext ct1 = Encrypt(pt1, pub);
+  Ciphertext ct2 = Encrypt(pt2, pub);
 
   // Perform homomorphic multiplication 
   Ciphertext ct = ct1 * ct2;
 
   // Decrypt resultant ciphertext
-  Plaintext pt = priv.Decrypt(ct);
+  Plaintext pt = Decrypt(ct, priv);
 
   // Compute the multiplications in the plaintext ring 
   ZZ_pPush push;
@@ -44,17 +44,17 @@ TEST_CASE("Relinearization version 1") {
   KeyParameters params(2048, 1152921504606830600, 2);  
 
   // Compute keys
-  PrivateKey priv(params);
-  PublicKey pub(priv); 
-  EvaluationKey elk(priv, 2); 
+  PrivateKey priv = GeneratePrivateKey(params);
+  PublicKey pub = GeneratePublicKey(priv); 
+  EvaluationKey elk = GenerateEvaluationKey(priv, 2); 
 
   // Generate two random plaintexts
   Plaintext pt1(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
   Plaintext pt2(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
 
   // Convert both to ciphertexts 
-  Ciphertext ct1 = pub.Encrypt(pt1);
-  Ciphertext ct2 = pub.Encrypt(pt2);
+  Ciphertext ct1 = Encrypt(pt1, pub);
+  Ciphertext ct2 = Encrypt(pt2, pub);
 
   // Perform homomorphic multiplication 
   Ciphertext ct = ct1 * ct2;
@@ -65,7 +65,7 @@ TEST_CASE("Relinearization version 1") {
   REQUIRE(ct.GetLength() == 2);
 
   // Decrypt resultant ciphertext
-  Plaintext pt = priv.Decrypt(ct);
+  Plaintext pt = Decrypt(ct, priv);
 
   // Compute the multiplications in the plaintext ring 
   ZZ_pPush push;

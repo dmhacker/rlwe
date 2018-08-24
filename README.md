@@ -29,14 +29,14 @@ namespace fv = rlwe::fv;
 fv::KeyParameters params(1024, 9214347247561474048, 290764801);
 
 // Randomly generate the private key using the given parameters 
-fv::PrivateKey priv(params); 
+fv::PrivateKey priv = fv::GeneratePrivateKey(params);
 
 // Using the private key, generate a corresponding public key
-fv::PublicKey pub(priv); 
+fv::PublicKey pub = fv::GeneratePublicKey(priv);
 
 // Encode some plaintext integer as a polynomial in the plaintext ring
 // The coefficients of the polynomial are equal to the binary representation of the integer
-fv::Plaintext encoded_plaintext(1337); 
+fv::Plaintext encoded_plaintext = fv::EncodeInteger(1337, params); 
 
 // Encrypt the plaintext using the public key 
 fv::Ciphertext ciphertext = pub.Encrypt(encoded_plaintext);
@@ -47,7 +47,7 @@ fv::Ciphertext ciphertext = pub.Encrypt(encoded_plaintext);
 fv::Plaintext decrypted_plaintext = priv.Decrypt(ciphertext);
 
 // Prints "1337"
-std::cout << params.DecodeInteger(decrypted_plaintext) << std::endl;
+std::cout << fv::DecodeInteger(decrypted_plaintext, params) << std::endl;
 ```
 
 ## Installation

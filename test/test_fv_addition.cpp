@@ -12,22 +12,22 @@ TEST_CASE("Homomorphic addition") {
   KeyParameters params(1024, 12289, 2);  
 
   // Compute keys
-  PrivateKey priv(params);
-  PublicKey pub(priv);
+  PrivateKey priv = GeneratePrivateKey(params);
+  PublicKey pub = GeneratePublicKey(priv);
 
   // Generate two random plaintexts
   Plaintext pt1(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
   Plaintext pt2(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
 
   // Convert both to ciphertexts 
-  Ciphertext ct1 = pub.Encrypt(pt1);
-  Ciphertext ct2 = pub.Encrypt(pt2);
+  Ciphertext ct1 = Encrypt(pt1, pub);
+  Ciphertext ct2 = Encrypt(pt2, pub);
 
   // Perform homomorphic addition
   Ciphertext ct = ct1 + ct2;
 
   // Decrypt resultant ciphertext
-  Plaintext pt = priv.Decrypt(ct);
+  Plaintext pt = Decrypt(ct, priv);
 
   // Compute the additions in the plaintext ring 
   ZZ_pPush push;

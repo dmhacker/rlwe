@@ -8,8 +8,26 @@ using namespace NTL;
 
 namespace rlwe {
   namespace fv {
+    class KeyParameters;
+    class PrivateKey;
+    class PublicKey;
+    class EvaluationKey;
     class Plaintext;
     class Ciphertext;
+
+    /* Procedural key generation */
+    PrivateKey GeneratePrivateKey(const KeyParameters & params);
+    PublicKey GeneratePublicKey(const PrivateKey & priv);
+    PublicKey GeneratePublicKey(const PrivateKey & priv, const ZZX & shared_a, const ZZX & shared_e);
+    EvaluationKey GenerateEvaluationKey(const PrivateKey & priv, long level);
+
+    /* Procedural encoding/decoding */
+    Plaintext EncodeInteger(ZZ integer, const KeyParameters & params);
+    ZZ DecodeInteger(const Plaintext & plaintext, const KeyParameters & params);
+
+    /* Procedural encryption/decryption */
+    Ciphertext Encrypt(const Plaintext & plaintext, const PublicKey & pub);
+    Plaintext Decrypt(const Ciphertext & ciphertext, const PrivateKey & priv);
 
     class KeyParameters {
       private:
@@ -56,18 +74,13 @@ namespace rlwe {
         }
     };
 
-    
-
     class PrivateKey {
       private:
         ZZX s;
         const KeyParameters & params;
       public:
-        /* Raw constructor */
+        /* Constructors */
         PrivateKey(const ZZX & secret, const KeyParameters & params) : s(secret), params(params) {}
-
-        /* Main constructors */
-        PrivateKey(const KeyParameters & params) : s(UniformSample(params.GetPolyModulusDegree(), ZZ(-1), ZZ(2))), params(params) {}
 
         /* Getters */
         ZZX GetSecret() const { 
@@ -76,9 +89,6 @@ namespace rlwe {
         const KeyParameters & GetParameters() const { 
           return params; 
         }
-
-        /* Private key decryption */
-        Plaintext Decrypt(const Ciphertext & ciphertext) const;
 
         /* Display to output stream */
         friend std::ostream& operator<< (std::ostream& stream, const PrivateKey& priv) {
@@ -91,12 +101,8 @@ namespace rlwe {
         Pair<ZZX, ZZX> p;
         const KeyParameters & params;
       public:
-        /* Raw constructor */
+        /* Constructors */
         PublicKey(const Pair<ZZX, ZZX> & p, const KeyParameters & params) : p(p), params(params) {}
-
-        /* Main constructors */
-        PublicKey(const PrivateKey & priv);
-        PublicKey(const PrivateKey & priv, const ZZX & shared_a, const ZZX & shared_e);
 
         /* Getters */
         const Pair<ZZX, ZZX> & GetValues() const {
@@ -105,9 +111,6 @@ namespace rlwe {
         const KeyParameters & GetParameters() const { 
           return params; 
         }
-
-        /* Public key encryption */
-        Ciphertext Encrypt(const Plaintext & plaintext) const; 
 
         /* Display to output stream */
         friend std::ostream& operator<< (std::ostream& stream, const PublicKey& pub) {
@@ -121,11 +124,8 @@ namespace rlwe {
         long level;
         const KeyParameters & params;
       public:
-        /* Raw constructor */
+        /* Constructors */
         EvaluationKey(Vec<Pair<ZZX, ZZX>> r, long level, const KeyParameters & params) : r(r), level(level), params(params) {}
-
-        /* Main constructors */
-        EvaluationKey(const PrivateKey & priv, long level);
 
         /* Getters */
         const Pair<ZZX, ZZX> & operator[] (int index) const {
@@ -152,15 +152,8 @@ namespace rlwe {
         ZZX m;
         const KeyParameters & params;
       public:
-        /* Raw constructor */
+        /* Constructors */
         Plaintext(ZZX m, const KeyParameters & params) : m(m), params(params) {}
-
-        /* Encoding */
-        Plaintext(long integer, const KeyParameters & params) : Plaintext(ZZ(integer), params) {}
-        Plaintext(ZZ integer, const KeyParameters & params);
-
-        /* Decoding */
-        ZZ ToInteger() const;
 
         /* Getters */
         const ZZX & GetMessage() const { 
