@@ -26,7 +26,7 @@ Here's an example of what you can do with librlwe:
 namespace fv = rlwe::fv;
 
 // Set up some parameters for the FV cryptosystem
-fv::KeyParameters params(1024, 9214347247561474048, 290764801);
+fv::KeyParameters params(1024, 12289, 2);
 
 // Randomly generate the private key using the given parameters 
 fv::PrivateKey priv = fv::GeneratePrivateKey(params);
