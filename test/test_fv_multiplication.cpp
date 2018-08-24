@@ -12,8 +12,8 @@ TEST_CASE("Homomorphic multiplication") {
   KeyParameters params(1024, 34359724033, 2);  
 
   // Compute keys
-  PrivateKey priv = params.GeneratePrivateKey();
-  PublicKey pub = params.GeneratePublicKey(priv);
+  PrivateKey priv(params); 
+  PublicKey pub(priv);
 
   // Generate two random plaintexts
   Plaintext pt1(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
@@ -44,9 +44,9 @@ TEST_CASE("Relinearization version 1") {
   KeyParameters params(2048, 1152921504606830600, 2);  
 
   // Compute keys
-  PrivateKey priv = params.GeneratePrivateKey();
-  PublicKey pub = params.GeneratePublicKey(priv);
-  EvaluationKey elk = params.GenerateEvaluationKey(priv, 2);
+  PrivateKey priv(params);
+  PublicKey pub(priv); 
+  EvaluationKey elk(priv, 2); 
 
   // Generate two random plaintexts
   Plaintext pt1(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);

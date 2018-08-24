@@ -28,13 +28,15 @@ namespace fv = rlwe::fv;
 // Set up some parameters for the FV cryptosystem
 fv::KeyParameters params(1024, 9214347247561474048, 290764801);
 
-// Generate a keypair
-fv::PrivateKey priv = params.GeneratePrivateKey();
-fv::PublicKey pub = params.GeneratePublicKey();
+// Randomly generate the private key using the given parameters 
+fv::PrivateKey priv(params); 
+
+// Using the private key, generate a corresponding public key
+fv::PublicKey pub(priv); 
 
 // Encode some plaintext integer as a polynomial in the plaintext ring
 // The coefficients of the polynomial are equal to the binary representation of the integer
-fv::Plaintext encoded_plaintext = params.EncodeInteger(1337);
+fv::Plaintext encoded_plaintext(1337); 
 
 // Encrypt the plaintext using the public key 
 fv::Ciphertext ciphertext = pub.Encrypt(encoded_plaintext);

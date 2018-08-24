@@ -10,8 +10,8 @@ TEST_CASE("Encryption & decryption using small parameters") {
   KeyParameters params(16, 874, 7);  
 
   // Compute keys
-  PrivateKey priv = params.GeneratePrivateKey();
-  PublicKey pub = params.GeneratePublicKey(priv);
+  PrivateKey priv(params);
+  PublicKey pub(priv); 
 
   // Generate random plaintext
   Plaintext plaintext(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
@@ -29,8 +29,8 @@ TEST_CASE("Encryption & decryption using large parameters") {
   KeyParameters params(4096, 9214347247561474048, 290764801);  
 
   // Compute keys
-  PrivateKey priv = params.GeneratePrivateKey();
-  PublicKey pub = params.GeneratePublicKey(priv);
+  PrivateKey priv(params);
+  PublicKey pub(priv);
 
   // Generate random plaintext
   Plaintext plaintext(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);

@@ -2,15 +2,14 @@
 #include <NTL/ZZX.h>
 #include <NTL/RR.h>
 #include <NTL/pair.h>
+#include "sampling.hpp"
 
 using namespace NTL;
 
 namespace rlwe {
   namespace fv {
     class Plaintext;
-    class PublicKey;
-    class PrivateKey;
-    class EvaluationKey;
+    class Ciphertext;
 
     class KeyParameters {
       private:
@@ -46,17 +45,6 @@ namespace rlwe {
         long GetDecompositionBitCount() const { return log_w; }
         long GetDecompositionTermCount() const { return l; }
 
-        /* Key generation */
-        PrivateKey GeneratePrivateKey() const;
-        PublicKey GeneratePublicKey(const PrivateKey & priv) const;
-        PublicKey GeneratePublicKey(const PrivateKey & priv, const ZZX & a_random, const ZZX & e_random) const;
-        EvaluationKey GenerateEvaluationKey(const PrivateKey & priv, long level) const;
-
-        /* Encoding and decoding */
-        Plaintext EncodeInteger(const ZZ & integer) const;
-        Plaintext EncodeInteger(long integer) const;
-        ZZ DecodeInteger(const Plaintext & plaintext) const;
-
         /* Display to output stream */
         friend std::ostream& operator<< (std::ostream& stream, const KeyParameters& params) {
           return stream << "n = " << params.n << ", q = " << params.q << ", t = " << params.t;
@@ -68,13 +56,111 @@ namespace rlwe {
         }
     };
 
-    class Plaintext {
+    
+
+    class PrivateKey {
+      private:
+        ZZX s;
+        const KeyParameters & params;
+      public:
+        /* Raw constructor */
+        PrivateKey(const ZZX & secret, const KeyParameters & params) : s(secret), params(params) {}
+
+        /* Main constructors */
+        PrivateKey(const KeyParameters & params) : s(UniformSample(params.GetPolyModulusDegree(), ZZ(-1), ZZ(2))), params(params) {}
+
+        /* Getters */
+        ZZX GetSecret() const { 
+          return s; 
+        }
+        const KeyParameters & GetParameters() const { 
+          return params; 
+        }
+
+        /* Private key decryption */
+        Plaintext Decrypt(const Ciphertext & ciphertext) const;
+
+        /* Display to output stream */
+        friend std::ostream& operator<< (std::ostream& stream, const PrivateKey& priv) {
+          return stream << priv.s;
+        }
+    };
+
+    class PublicKey {
+      private:
+        Pair<ZZX, ZZX> p;
+        const KeyParameters & params;
+      public:
+        /* Raw constructor */
+        PublicKey(const Pair<ZZX, ZZX> & p, const KeyParameters & params) : p(p), params(params) {}
+
+        /* Main constructors */
+        PublicKey(const PrivateKey & priv);
+        PublicKey(const PrivateKey & priv, const ZZX & shared_a, const ZZX & shared_e);
+
+        /* Getters */
+        const Pair<ZZX, ZZX> & GetValues() const {
+          return p;
+        }
+        const KeyParameters & GetParameters() const { 
+          return params; 
+        }
+
+        /* Public key encryption */
+        Ciphertext Encrypt(const Plaintext & plaintext) const; 
+
+        /* Display to output stream */
+        friend std::ostream& operator<< (std::ostream& stream, const PublicKey& pub) {
+          return stream << pub.p;
+        }
+    };
+
+    class EvaluationKey {
+      private:
+        Vec<Pair<ZZX, ZZX>> r;
+        long level;
+        const KeyParameters & params;
+      public:
+        /* Raw constructor */
+        EvaluationKey(Vec<Pair<ZZX, ZZX>> r, long level, const KeyParameters & params) : r(r), level(level), params(params) {}
+
+        /* Main constructors */
+        EvaluationKey(const PrivateKey & priv, long level);
+
+        /* Getters */
+        const Pair<ZZX, ZZX> & operator[] (int index) const {
+          return r[index]; 
+        }
+        long GetLength() const { 
+          return r.length(); 
+        }
+        long GetLevel() const {
+          return level;
+        }
+        const KeyParameters & GetParameters() const { 
+          return params; 
+        }
+
+        /* Display to output stream */
+        friend std::ostream& operator<< (std::ostream& stream, const EvaluationKey & elk) {
+          return stream << elk.r; 
+        }  
+    };
+
+  class Plaintext {
       private:
         ZZX m;
         const KeyParameters & params;
       public:
-        /* Constructors */
+        /* Raw constructor */
         Plaintext(ZZX m, const KeyParameters & params) : m(m), params(params) {}
+
+        /* Encoding */
+        Plaintext(long integer, const KeyParameters & params) : Plaintext(ZZ(integer), params) {}
+        Plaintext(ZZ integer, const KeyParameters & params);
+
+        /* Decoding */
+        ZZ ToInteger() const;
 
         /* Getters */
         const ZZX & GetMessage() const { 
@@ -162,85 +248,6 @@ namespace rlwe {
         friend std::ostream& operator<< (std::ostream& stream, const Ciphertext& ct) {
           return stream << ct.c;
         }
-    };
-
-    class PublicKey {
-      private:
-        Pair<ZZX, ZZX> p;
-        const KeyParameters & params;
-      public:
-        /* Constructors */
-        PublicKey(ZZX p0, ZZX p1, const KeyParameters & params) : p(p0, p1), params(params) {}
-
-        /* Getters */
-        const Pair<ZZX, ZZX> & GetValues() const {
-          return p;
-        }
-        const KeyParameters & GetParameters() const { 
-          return params; 
-        }
-
-        /* Public key encryption */
-        Ciphertext Encrypt(const Plaintext & plaintext) const; 
-
-        /* Display to output stream */
-        friend std::ostream& operator<< (std::ostream& stream, const PublicKey& pub) {
-          return stream << pub.p;
-        }
-    };
-
-    class PrivateKey {
-      private:
-        ZZX s;
-        const KeyParameters & params;
-      public:
-        /* Constructors */
-        PrivateKey(ZZX s, const KeyParameters & params) : s(s), params(params) {}
-
-        /* Getters */
-        ZZX GetSecret() const { 
-          return s; 
-        }
-        const KeyParameters & GetParameters() const { 
-          return params; 
-        }
-
-        /* Private key decryption */
-        Plaintext Decrypt(const Ciphertext & ciphertext) const;
-
-        /* Display to output stream */
-        friend std::ostream& operator<< (std::ostream& stream, const PrivateKey& priv) {
-          return stream << priv.s;
-        }
-    };
-
-    class EvaluationKey {
-      private:
-        Vec<Pair<ZZX, ZZX>> r;
-        long level;
-        const KeyParameters & params;
-      public:
-        /* Constructors */
-        EvaluationKey(Vec<Pair<ZZX, ZZX>> r, long level, const KeyParameters & params) : r(r), level(level), params(params) {}
-
-        /* Getters */
-        const Pair<ZZX, ZZX> & operator[] (int index) const {
-          return r[index]; 
-        }
-        long GetLength() const { 
-          return r.length(); 
-        }
-        long GetLevel() const {
-          return level;
-        }
-        const KeyParameters & GetParameters() const { 
-          return params; 
-        }
-
-        /* Display to output stream */
-        friend std::ostream& operator<< (std::ostream& stream, const EvaluationKey & elk) {
-          return stream << elk.r; 
-        }  
     };
   }
 }

@@ -17,7 +17,7 @@ TEST_CASE("Modulus is a cyclotomic polynomial") {
 
 TEST_CASE("Private key is small polynomial") {
   KeyParameters params(16, 874, 7);  
-  PrivateKey priv = params.GeneratePrivateKey();
+  PrivateKey priv(params);
 
   REQUIRE(NTL::deg(priv.GetSecret()) < params.GetPolyModulusDegree());
 
@@ -34,8 +34,8 @@ TEST_CASE("Private key is small polynomial") {
 
 TEST_CASE("Public key is computed correctly") {
   KeyParameters params(16, 874, 7);  
-  PrivateKey priv = params.GeneratePrivateKey();
-  PublicKey pub = params.GeneratePublicKey(priv);
+  PrivateKey priv(params);
+  PublicKey pub(priv);
 
   NTL::ZZ_pPush push;
   NTL::ZZ_p::init(params.GetCoeffModulus());

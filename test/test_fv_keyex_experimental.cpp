@@ -15,22 +15,22 @@ TEST_CASE("Experimental homomorphic key exchange") {
 
   // Alice keeps these parameters private
   NTL::ZZX e_alice = GaussianSample(params.GetPolyModulusDegree(), params.GetErrorStandardDeviation());
-  PrivateKey s_alice = params.GeneratePrivateKey();
-  PrivateKey hs_alice = leveled_params.GeneratePrivateKey();
+  PrivateKey s_alice(params);
+  PrivateKey hs_alice(leveled_params);
 
   // Alice publishes these parameters
-  PublicKey p_alice = params.GeneratePublicKey(s_alice, a_shared, e_alice);
-  PublicKey hp_alice = leveled_params.GeneratePublicKey(hs_alice);
+  PublicKey p_alice(s_alice, a_shared, e_alice);
+  PublicKey hp_alice(hs_alice);
   Ciphertext s_alice_encrypted_alice = hp_alice.Encrypt(Plaintext(s_alice.GetSecret(), leveled_params));
 
   // Bob keeps these parameters private
   NTL::ZZX e_bob = GaussianSample(params.GetPolyModulusDegree(), params.GetErrorStandardDeviation());
-  PrivateKey s_bob = params.GeneratePrivateKey();
-  PrivateKey hs_bob = leveled_params.GeneratePrivateKey();
+  PrivateKey s_bob(params);
+  PrivateKey hs_bob(leveled_params);
 
   // Bob publishes these parameters
-  PublicKey p_bob = params.GeneratePublicKey(s_bob, a_shared, e_bob);
-  PublicKey hp_bob = leveled_params.GeneratePublicKey(hs_bob);
+  PublicKey p_bob(s_bob, a_shared, e_bob);
+  PublicKey hp_bob(hs_bob);
   Ciphertext s_bob_encrypted_bob = hp_bob.Encrypt(Plaintext(s_bob.GetSecret(), leveled_params));
 
   // Alice calculates this privately and then publishes the result

@@ -2,38 +2,28 @@
 
 using namespace rlwe::fv;
 
-Plaintext KeyParameters::EncodeInteger(long integer) const {
-  // Convert long into a NTL:ZZ big integer and defer to other function
-  return EncodeInteger(ZZ(integer));
-}
-
-Plaintext KeyParameters::EncodeInteger(const ZZ & integer) const {
-  ZZX encoding = ZZX::zero();
-
+Plaintext::Plaintext(ZZ integer, const KeyParameters & params) : params(params) {
   ZZ global_coeff(1);
   if (integer < 0) {
-    global_coeff = t - 1;
+    global_coeff = params.GetPlainModulus() - 1;
   }
 
   for (long i = 0; i < NumBits(integer); i++) {
     if (bit(integer, i)) {
-      SetCoeff(encoding, i, global_coeff); 
+      SetCoeff(m, i, global_coeff); 
     }
   }
-
-  return Plaintext(encoding, *this);
 }
 
-ZZ KeyParameters::DecodeInteger(const Plaintext & encoding) const {
-  ZZX message = encoding.GetMessage();
+ZZ Plaintext::ToInteger() const {
   ZZ integer = ZZ::zero();
   long sign = 1;
 
-  for (long i = deg(message); i >= 0; i--) {
+  for (long i = deg(m); i >= 0; i--) {
     integer <<= 1;
 
-    ZZ coefficient = coeff(message, i);
-    if (coefficient < 0 || coefficient > t / 2) {
+    ZZ coefficient = coeff(m, i);
+    if (coefficient < 0 || coefficient > params.GetPlainModulus() / 2) {
       sign = -1;
     }
     if (coefficient != 0) {

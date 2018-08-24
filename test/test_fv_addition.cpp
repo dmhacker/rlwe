@@ -12,8 +12,8 @@ TEST_CASE("Homomorphic addition") {
   KeyParameters params(1024, 12289, 2);  
 
   // Compute keys
-  PrivateKey priv = params.GeneratePrivateKey();
-  PublicKey pub = params.GeneratePublicKey(priv);
+  PrivateKey priv(params);
+  PublicKey pub(priv);
 
   // Generate two random plaintexts
   Plaintext pt1(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
