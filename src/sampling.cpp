@@ -33,6 +33,56 @@ ZZX rlwe::UniformSample(long len, ZZ minimum, ZZ maximum) {
   return poly;
 }
 
+Mat<GF2> rlwe::KnuthYaoGaussianMatrix(float standard_deviation) {
+  Mat<GF2> probability_matrix;
+
+  // Create probability matrix using sigma
+  long bound_upper = std::floor(standard_deviation * BOUNDS_SCALAR);
+  probability_matrix.SetDims(bound_upper, PROBABILITY_MATRIX_PRECISION); 
+
+  // Calculate some constants
+  float variance = standard_deviation * standard_deviation;
+  float pi2 = atan(1) * 8; 
+
+  // Calculate probabilities and the total they sum to
+  float total = 0;
+  float probabilities[bound_upper];
+  for (int i = 0; i < bound_upper; i++) {
+    // Calculate probability using a Gaussian PDF 
+    probabilities[i] = 1.0f / sqrt(pi2 * variance) * exp(-i * i / 2.0f / variance);
+
+    // Positive numbers have a 50% chance to be made negative in sampling 
+    // The probability of 0 must be lowered in order to compensate 
+    if (i == 0) {
+      probabilities[i] /= 2;
+    }
+
+    // Add it to the total
+    total += probabilities[i];
+  }
+
+  float scaling_factor = 1.0f / total;
+  for (int i = 0; i < bound_upper; i++) {
+    // Calculate scaled version of probability (so everything sums to 1)
+    float probability = probabilities[i] * scaling_factor; 
+
+    // Fill in the row of the matrix
+    float check_value = 0.5f;
+    for (int j = 0; j < PROBABILITY_MATRIX_PRECISION; j++) {
+      if (probability > check_value) {
+        probability_matrix[i][j] = 1;
+        probability -= check_value;
+      }
+      else {
+        probability_matrix[i][j] = 0;
+      }
+      check_value /= 2;
+    }
+  }
+
+  return probability_matrix;
+}
+
 ZZX rlwe::KnuthYaoSample(long len, const Mat<GF2> & probability_matrix) {
   ZZX poly;
 
