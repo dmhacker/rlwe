@@ -56,18 +56,18 @@ namespace rlwe {
         KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma);
 
         /* Getters */
-        ZZ GetCoeffModulus() const { return q; }
-        ZZ GetPlainModulus() const { return t; }
-        ZZ GetPlainToCoeffScalar() const { return delta; }
-        RR GetCoeffToPlainScalar() const { return downscale; }
+        const ZZ & GetCoeffModulus() const { return q; }
+        const ZZ & GetPlainModulus() const { return t; }
+        const ZZ & GetPlainToCoeffScalar() const { return delta; }
+        const RR & GetCoeffToPlainScalar() const { return downscale; }
         long GetPolyModulusDegree() const { return n; }
-        ZZ_pXModulus GetPolyModulus() const { return phi; }
+        const ZZ_pXModulus & GetPolyModulus() const { return phi; }
         float GetErrorStandardDeviation() const { return sigma; }
-        ZZ GetDecompositionBase() const { return w; }
-        ZZ GetDecompositionBitMask() const { return w_mask; }
+        const ZZ & GetDecompositionBase() const { return w; }
+        const ZZ & GetDecompositionBitMask() const { return w_mask; }
         long GetDecompositionBitCount() const { return log_w; }
         long GetDecompositionTermCount() const { return l; }
-        Mat<GF2> GetProbabilityMatrix() const { return probability_matrix; }
+        const Mat<GF2> & GetProbabilityMatrix() const { return probability_matrix; }
 
         /* Display to output stream */
         friend std::ostream& operator<< (std::ostream& stream, const KeyParameters& params) {

@@ -11,5 +11,5 @@ namespace rlwe {
   // Uniformly samples a polynomial of the given length, where the coefficients lie in [0, max)
   ZZX UniformSample(long len, ZZ maximum_exclusive);
   // Samples a polynomial of the given length, where each coefficient is taken from a binary probability matrix 
-  ZZX KnuthYaoSample(long len, Mat<GF2> probability_matrix); 
+  ZZX KnuthYaoSample(long len, const Mat<GF2> & probability_matrix); 
 }

@@ -33,7 +33,7 @@ ZZX rlwe::UniformSample(long len, ZZ minimum, ZZ maximum) {
   return poly;
 }
 
-ZZX rlwe::KnuthYaoSample(long len, Mat<GF2> probability_matrix) {
+ZZX rlwe::KnuthYaoSample(long len, const Mat<GF2> & probability_matrix) {
   ZZX poly;
 
   // Perform the Knuth-Yao sampling algorithm and navigate the DDG
