@@ -41,7 +41,7 @@ TEST_CASE("Homomorphic multiplication") {
 
 TEST_CASE("Relinearization version 1") {
   // Set up parameters
-  KeyParameters params(2048, 1152921504606830600, 2);  
+  KeyParameters params(2048, conv<ZZ>("1152921504606830600"), ZZ(2));  
 
   // Compute keys
   PrivateKey priv = GeneratePrivateKey(params);

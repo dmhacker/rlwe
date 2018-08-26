@@ -26,7 +26,7 @@ TEST_CASE("Encryption & decryption using small parameters") {
 
 TEST_CASE("Encryption & decryption using large parameters") {
   // Set up parameters
-  KeyParameters params(4096, 9214347247561474048, 290764801);  
+  KeyParameters params(4096, conv<ZZ>("9214347247561474048"), ZZ(290764801));
 
   // Compute keys
   PrivateKey priv = GeneratePrivateKey(params);
