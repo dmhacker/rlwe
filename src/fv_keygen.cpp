@@ -36,6 +36,49 @@ KeyParameters::KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma) :
   power2(w, log_w);
   w_mask = w - 1; 
   l = floor(log(q) / log(w));
+
+  // Create probability matrix using sigma
+  long bound_upper = std::floor(sigma * BOUNDS_SCALAR);
+  probability_matrix.SetDims(bound_upper, PROBABILITY_MATRIX_PRECISION); 
+
+  // Calculate some constants
+  float variance = sigma * sigma;
+  float pi2 = atan(1) * 8; 
+
+  // Calculate probabilities and the total they sum to
+  float total = 0;
+  float probabilities[bound_upper];
+  for (int i = 0; i < bound_upper; i++) {
+    // Calculate probability using a Gaussian PDF 
+    probabilities[i] = 1.0f / sqrt(pi2 * variance) * exp(-i * i / 2.0f / variance);
+
+    // Positive numbers have a 50% chance to be made negative in sampling 
+    // The probability of 0 must be lowered in order to compensate 
+    if (i == 0)
+      probabilities[i] /= 2;
+
+    // Add it to the total
+    total += probabilities[i];
+  }
+
+  float scaling_factor = 1.0f / total;
+  for (int i = 0; i < bound_upper; i++) {
+    // Calculate scaled version of probability (so everything sums to 1)
+    float probability = probabilities[i] * scaling_factor; 
+
+    // Fill in the row of the matrix
+    float check_value = 0.5f;
+    for (int j = 0; j < PROBABILITY_MATRIX_PRECISION; j++) {
+      if (probability > check_value) {
+        probability_matrix[i][j] = 1;
+        probability -= check_value;
+      }
+      else {
+        probability_matrix[i][j] = 0;
+      }
+      check_value /= 2;
+    }
+  }
 }
 
 PrivateKey fv::GeneratePrivateKey(const KeyParameters & params) {
@@ -45,7 +88,7 @@ PrivateKey fv::GeneratePrivateKey(const KeyParameters & params) {
 PublicKey fv::GeneratePublicKey(const PrivateKey & priv) {
   return GeneratePublicKey(priv, 
       UniformSample(priv.GetParameters().GetPolyModulusDegree(), priv.GetParameters().GetCoeffModulus()), 
-      GaussianSample(priv.GetParameters().GetPolyModulusDegree(), priv.GetParameters().GetErrorStandardDeviation()));
+      KnuthYaoSample(priv.GetParameters().GetPolyModulusDegree(), priv.GetParameters().GetProbabilityMatrix()));
 }
 
 PublicKey fv::GeneratePublicKey(const PrivateKey & priv, const ZZX & shared_a, const ZZX & shared_e) { 
@@ -100,7 +143,7 @@ EvaluationKey fv::GenerateEvaluationKey(const PrivateKey & priv, long level) {
     ZZ_pX a = conv<ZZ_pX>(UniformSample(params.GetPolyModulusDegree(), params.GetCoeffModulus()));
 
     // Draw error polynomial from discrete Gaussian distribution
-    ZZ_pX e = conv<ZZ_pX>(GaussianSample(params.GetPolyModulusDegree(), params.GetErrorStandardDeviation()));
+    ZZ_pX e = conv<ZZ_pX>(KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix()));
 
     // Compute b = -(a * s + e)
     ZZ_pX b;

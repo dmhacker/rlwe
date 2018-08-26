@@ -14,7 +14,7 @@ TEST_CASE("Experimental homomorphic key exchange") {
   NTL::ZZX a_shared = UniformSample(params.GetPolyModulusDegree(), ZZ(0), params.GetCoeffModulus()); 
 
   // Alice keeps these parameters private
-  NTL::ZZX e_alice = GaussianSample(params.GetPolyModulusDegree(), params.GetErrorStandardDeviation());
+  NTL::ZZX e_alice = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix());
   PrivateKey s_alice = GeneratePrivateKey(params);
   PrivateKey hs_alice = GeneratePrivateKey(leveled_params);
 
@@ -24,7 +24,7 @@ TEST_CASE("Experimental homomorphic key exchange") {
   Ciphertext s_alice_encrypted_alice = Encrypt(Plaintext(s_alice.GetSecret(), leveled_params), hp_alice);
 
   // Bob keeps these parameters private
-  NTL::ZZX e_bob = GaussianSample(params.GetPolyModulusDegree(), params.GetErrorStandardDeviation());
+  NTL::ZZX e_bob = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix());
   PrivateKey s_bob = GeneratePrivateKey(params);
   PrivateKey hs_bob = GeneratePrivateKey(leveled_params);
 

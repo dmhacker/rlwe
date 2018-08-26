@@ -9,7 +9,7 @@ Specifically, the library implements ...
   * The [Fan-Vercauterean](https://eprint.iacr.org/2012/144.pdf) fully homomorphic cryptosystem
   * [Peikert-style](https://eprint.iacr.org/2014/070.pdf) key exchange & reconciliation*
   * The [Ring-TESLA](https://eprint.iacr.org/2016/030.pdf) digital signature algorithm*
-  * The Knuth-Yao algorithm for fast discrete noise sampling over a Gaussian distribution*
+  * The [Knuth-Yao](https://eprint.iacr.org/2017/988.pdf) algorithm for fast discrete noise sampling over a Gaussian distribution
 <br><sub><sup>* Implementation not finished yet</sup></sub>
 
 For anyone without significant background on RLWE, I would recommend checking out these links:

@@ -1,8 +1,12 @@
+#include "sampling.hpp"
+
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>
 #include <NTL/RR.h>
+#include <NTL/GF2.h>
 #include <NTL/pair.h>
-#include "sampling.hpp"
+#include <NTL/matrix.h>
+#include <NTL/vec_vec_GF2.h>
 
 using namespace NTL;
 
@@ -44,6 +48,7 @@ namespace rlwe {
         ZZ w;
         ZZ w_mask;
         long l;
+        Mat<GF2> probability_matrix;
       public:
         /* Constructors */
         KeyParameters(long n, long q, long t) : KeyParameters(n, ZZ(q), ZZ(t)) {}
@@ -62,6 +67,7 @@ namespace rlwe {
         ZZ GetDecompositionBitMask() const { return w_mask; }
         long GetDecompositionBitCount() const { return log_w; }
         long GetDecompositionTermCount() const { return l; }
+        Mat<GF2> GetProbabilityMatrix() const { return probability_matrix; }
 
         /* Display to output stream */
         friend std::ostream& operator<< (std::ostream& stream, const KeyParameters& params) {
