@@ -1,5 +1,5 @@
 #include "catch.hpp"
-#include "../src/fv.hpp"
+#include "../src/fv.h"
 
 #include <random>
 

@@ -1,4 +1,4 @@
-#include "sampling.hpp"
+#include "sampling.h"
 
 #include <random>
 #include <NTL/ZZ_pX.h>

@@ -1,5 +1,3 @@
-#include "sampling.hpp"
-
 #include <NTL/ZZX.h>
 #include <NTL/ZZ.h>
 #include <NTL/pair.h>
@@ -14,10 +12,18 @@ namespace rlwe {
     class KeyParameters;
     class SigningKey;
     class VerificationKey;
+    class Signature;
 
     /* Procedural key generation */
     SigningKey GenerateSigningKey(const KeyParameters & params);
-    VerificationKey GenerateVerificationKey(const SigningKey & sign);
+    VerificationKey GenerateVerificationKey(const SigningKey & signer);
+
+    /* Procedural hashing & encoding */
+    std::string Hash(const ZZX & p1, const ZZX & p2, const std::string & message);
+    ZZX Encode(const std::string & hash_val); 
+
+    /* Procedural signing/verifying */
+    Signature Sign(const std::string & message, const SigningKey & signer);
 
     class KeyParameters {
       private:
@@ -87,8 +93,8 @@ namespace rlwe {
         }
 
         /* Display to output stream */
-        friend std::ostream& operator<< (std::ostream& stream, const SigningKey & sign) {
-          return stream << "[" << sign.s << ", " << sign.e << "]";
+        friend std::ostream& operator<< (std::ostream& stream, const SigningKey & signer) {
+          return stream << "[" << signer.s << ", " << signer.e << "]";
         }
     };
 
@@ -111,6 +117,32 @@ namespace rlwe {
         /* Display to output stream */
         friend std::ostream& operator<< (std::ostream& stream, const VerificationKey & verif) {
           return stream << verif.t;
+        }
+    };
+
+    class Signature {
+      private:
+        ZZX z;
+        std::string c_prime;
+        const KeyParameters & params;
+      public:
+        /* Constructors */
+        Signature(const ZZX & z, const std::string c_prime, const KeyParameters & params) : z(z), c_prime(c_prime), params(params) {}
+
+        /* Getters */
+        const ZZX & GetValue() const {
+          return z;
+        }
+        const std::string & GetHash() const {
+          return c_prime;
+        }
+        const KeyParameters & GetParameters() const {
+          return params;
+        }
+
+        /* Display to output stream */
+        friend std::ostream& operator<< (std::ostream& stream, const Signature & sig) {
+          return stream << "[" << sig.z << ", " << sig.c_prime << "]";
         }
     };
   }

@@ -69,3 +69,5 @@ Internally, librlwe uses [NTL](http://www.shoup.net/ntl/) for doing fast polynom
 All keys, plaintexts, and ciphertexts store their polynomials as `NTL:ZZX` objects.
 However, these polynomials are in the ring `Z_q/(f)` where `f` is a cyclotomic polynomial of the form `x^n + 1`.
 Whenever operations are performed on them, they are usually converted to `NTL::ZZ_pX` and a temporary modulus is pushed until the operation completes.
+
+The SHA-256 implementation used was obtained from [zedwood](http://www.zedwood.com/article/cpp-sha256-function).

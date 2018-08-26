@@ -1,4 +1,4 @@
-#include "util.hpp"
+#include "util.h"
 
 void rlwe::ScaleCoeffs(ZZX & poly, const RR scalar, const ZZ mod) {
   for (long i = 0; i <= deg(poly); i++) {

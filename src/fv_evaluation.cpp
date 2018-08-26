@@ -1,5 +1,5 @@
-#include "fv.hpp"
-#include "util.hpp"
+#include "fv.h"
+#include "util.h"
 
 #include <NTL/ZZ_pX.h>
 #include <cassert>

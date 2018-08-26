@@ -1,6 +1,6 @@
 #include "catch.hpp"
-#include "../src/fv.hpp"
-#include "../src/sampling.hpp"
+#include "../src/fv.h"
+#include "../src/sampling.h"
 
 #include <NTL/ZZ_pX.h>
 

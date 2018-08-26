@@ -1,4 +1,4 @@
-#include "fv.hpp"
+#include "fv.h"
 
 using namespace rlwe;
 using namespace rlwe::fv;

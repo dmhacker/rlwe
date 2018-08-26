@@ -1,5 +1,5 @@
-#include "fv.hpp"
-#include "sampling.hpp"
+#include "fv.h"
+#include "sampling.h"
 
 #include <NTL/ZZ_pX.h>
 #include <cassert>

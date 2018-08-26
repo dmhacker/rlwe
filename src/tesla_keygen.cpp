@@ -1,5 +1,5 @@
-#include "tesla.hpp"
-#include "sampling.hpp"
+#include "tesla.h"
+#include "sampling.h"
 
 #include <NTL/ZZ_pX.h>
 #include <cassert>
@@ -44,17 +44,17 @@ SigningKey tesla::GenerateSigningKey(const KeyParameters & params) {
   return SigningKey(s, e1, e2, params); 
 }
 
-VerificationKey tesla::GenerateVerificationKey(const SigningKey & sign) {
-  const KeyParameters & params = sign.GetParameters();
+VerificationKey tesla::GenerateVerificationKey(const SigningKey & signer) {
+  const KeyParameters & params = signer.GetParameters();
 
   // Setup global coefficient modulus 
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
 
   // Perform conversions to ZZ_p-reduced polynomials
-  ZZ_pX s =  conv<ZZ_pX>(sign.GetSecret());
-  ZZ_pX e1 = conv<ZZ_pX>(sign.GetErrorValues().a); 
-  ZZ_pX e2 = conv<ZZ_pX>(sign.GetErrorValues().b); 
+  ZZ_pX s =  conv<ZZ_pX>(signer.GetSecret());
+  ZZ_pX e1 = conv<ZZ_pX>(signer.GetErrorValues().a); 
+  ZZ_pX e2 = conv<ZZ_pX>(signer.GetErrorValues().b); 
   ZZ_pX a1 = conv<ZZ_pX>(params.GetPolyConstants().a);
   ZZ_pX a2 = conv<ZZ_pX>(params.GetPolyConstants().b);
 
