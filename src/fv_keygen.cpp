@@ -1,20 +1,18 @@
 #include "fv.hpp"
 #include "sampling.hpp"
-#include "defines.hpp"
 
 #include <NTL/ZZ_pX.h>
 #include <cassert>
 
+#define BOUNDS_SCALAR 6
+
 using namespace rlwe;
 using namespace rlwe::fv;
-
-KeyParameters::KeyParameters(long n, ZZ q, ZZ t) :
-  KeyParameters(n, q, t, DEFAULT_DECOMPOSITION_BIT_COUNT, DEFAULT_ERROR_STANDARD_DEVIATION) {}
 
 KeyParameters::KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma) : 
   n(n), q(q), t(t), log_w(log_w), sigma(sigma),
   delta(q / t), downscale(conv<RR>(t) / conv<RR>(q)),
-  probability_matrix(KnuthYaoGaussianMatrix(sigma))
+  probability_matrix(KnuthYaoGaussianMatrix(sigma, std::floor(BOUNDS_SCALAR * sigma)))
 {
   // Assert that n is even, assume that it is a power of 2
   assert(n % 2 == 0);
@@ -72,7 +70,7 @@ PublicKey fv::GeneratePublicKey(const PrivateKey & priv, const ZZX & shared_a, c
   b = -b;
 
   // Create public key based off of a & b polynomials
-  return PublicKey(Pair<ZZX, ZZX>(conv<ZZX>(b), conv<ZZX>(a)), params);
+  return PublicKey(conv<ZZX>(b), conv<ZZX>(a), params);
 }
 
 EvaluationKey fv::GenerateEvaluationKey(const PrivateKey & priv, long level) {

@@ -1,5 +1,3 @@
-#include "sampling.hpp"
-
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>
 #include <NTL/RR.h>
@@ -7,6 +5,9 @@
 #include <NTL/pair.h>
 #include <NTL/matrix.h>
 #include <NTL/vec_vec_GF2.h>
+
+#define DEFAULT_ERROR_STANDARD_DEVIATION 3.192f
+#define DEFAULT_DECOMPOSITION_BIT_COUNT 32
 
 using namespace NTL;
 
@@ -52,7 +53,7 @@ namespace rlwe {
       public:
         /* Constructors */
         KeyParameters(long n, long q, long t) : KeyParameters(n, ZZ(q), ZZ(t)) {}
-        KeyParameters(long n, ZZ q, ZZ t);
+        KeyParameters(long n, ZZ q, ZZ t) : KeyParameters(n, q, t, DEFAULT_DECOMPOSITION_BIT_COUNT, DEFAULT_ERROR_STANDARD_DEVIATION) {}
         KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma);
 
         /* Getters */
@@ -71,12 +72,12 @@ namespace rlwe {
 
         /* Display to output stream */
         friend std::ostream& operator<< (std::ostream& stream, const KeyParameters& params) {
-          return stream << "n = " << params.n << ", q = " << params.q << ", t = " << params.t;
+          return stream << "[n = " << params.n << ", q = " << params.q << ", t = " << params.t << "]";
         }
 
         /* Equality */
         bool operator== (const KeyParameters & kp) const {
-          return n == kp.n && q == kp.q && t == kp.t && log_w == kp.log_w && sigma == kp.sigma && phi.val() == kp.phi.val();
+          return n == kp.n && q == kp.q && t == kp.t && log_w == kp.log_w && sigma == kp.sigma;
         }
     };
 
@@ -89,7 +90,7 @@ namespace rlwe {
         PrivateKey(const ZZX & secret, const KeyParameters & params) : s(secret), params(params) {}
 
         /* Getters */
-        ZZX GetSecret() const { 
+        const ZZX & GetSecret() const { 
           return s; 
         }
         const KeyParameters & GetParameters() const { 
@@ -108,7 +109,7 @@ namespace rlwe {
         const KeyParameters & params;
       public:
         /* Constructors */
-        PublicKey(const Pair<ZZX, ZZX> & p, const KeyParameters & params) : p(p), params(params) {}
+        PublicKey(const ZZX & p0, const ZZX & p1, const KeyParameters & params) : p(p0, p1), params(params) {}
 
         /* Getters */
         const Pair<ZZX, ZZX> & GetValues() const {
@@ -153,7 +154,7 @@ namespace rlwe {
         }  
     };
 
-  class Plaintext {
+    class Plaintext {
       private:
         ZZX m;
         const KeyParameters & params;
