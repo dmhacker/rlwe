@@ -1,6 +1,6 @@
 # librlwe
 
-**librlwe** is a fast, lightweight, and easy-to-use library for doing cryptography involving the ring learning with errors (RLWE) problem.
+librlwe is a fast, lightweight, and easy-to-use library for doing cryptography involving the ring learning with errors (RLWE) problem.
 
 Note that the library makes no pretensions about being safe from side-channel attacks and should **not** be used in a production environment.
 Rather, it is intended to be used in an academic setting.
