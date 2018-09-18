@@ -1,6 +1,6 @@
-# librlwe
+# rlwe
 
-librlwe is a fast, lightweight, and easy-to-use library for doing cryptography involving the ring learning with errors (RLWE) problem.
+rlwe is a fast, lightweight, and easy-to-use library for doing cryptography involving the ring learning with errors (RLWE) problem.
 
 Note that the library makes no pretensions about being safe from side-channel attacks and should **not** be used in a production environment.
 Rather, it is intended to be used in an academic setting.
@@ -20,7 +20,7 @@ For anyone without significant background on RLWE, I would recommend checking ou
 However, it is possible to still use this library without in-depth knowledge of how the RLWE cryptographic system works.
 This is because most of the algorithmic details have been abstracted away.
 
-Here's an example of what you can do with librlwe:
+Here's an example of what you can do with this library:
 
 ```c++
 namespace fv = rlwe::fv;
@@ -65,7 +65,7 @@ make install
 
 ## Implementation Details
 
-Internally, librlwe uses [NTL](http://www.shoup.net/ntl/) for doing fast polynomial arithmetic. 
+Internally, rlwe uses [NTL](http://www.shoup.net/ntl/) for doing fast polynomial arithmetic. 
 All keys, plaintexts, and ciphertexts store their polynomials as `NTL:ZZX` objects.
 However, these polynomials are in the ring `Z_q/(f)` where `f` is a cyclotomic polynomial of the form `x^n + 1`.
 Whenever operations are performed on them, they are usually converted to `NTL::ZZ_pX` and a temporary modulus is pushed until the operation completes.
