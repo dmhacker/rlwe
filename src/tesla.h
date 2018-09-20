@@ -24,6 +24,7 @@ namespace rlwe {
 
     /* Procedural signing/verifying */
     Signature Sign(const std::string & message, const SigningKey & signer);
+    bool Verify(const std::string & message, const Signature & sig, const VerificationKey & verif);
 
     class KeyParameters {
       private:
@@ -34,30 +35,32 @@ namespace rlwe {
         ZZ w;
         ZZ B;
         ZZ U;
-        ZZ d;
+        long d;
         ZZ q;
         Pair<ZZX, ZZX> a;
         /* Calculated */
+        ZZ pow_2_d;
         ZZ_pXModulus phi;
         Mat<GF2> probability_matrix;
       public:
         /* Constructors */
         KeyParameters() : // 128-bit security, parameters recommended by the original paper
-          KeyParameters(512, 52.0f, 2766, ZZ(19), ZZ(4194303), ZZ(3173), ZZ(23), conv<ZZ>("39960577")) {}
-        KeyParameters(long n, float sigma, long L, ZZ w, ZZ B, ZZ U, ZZ d, ZZ q);
-        KeyParameters(long n, float sigma, long L, ZZ w, ZZ B, ZZ U, ZZ d, ZZ q, ZZX a1, ZZX a2);
+          KeyParameters(512, 52.0f, 2766, ZZ(19), ZZ(4194303), ZZ(3173), 23, conv<ZZ>("39960577")) {}
+        KeyParameters(long n, float sigma, long L, ZZ w, ZZ B, ZZ U, long d, ZZ q);
+        KeyParameters(long n, float sigma, long L, ZZ w, ZZ B, ZZ U, long d, ZZ q, ZZX a1, ZZX a2);
 
         /* Getters */
+        const Pair<ZZX, ZZX> & GetPolyConstants() const { return a; }
+        const ZZ_pXModulus & GetPolyModulus() const { return phi; }
         long GetPolyModulusDegree() const { return n; }
         float GetErrorStandardDeviation() const { return sigma; }
         long GetErrorBound() const { return L; }
-        const ZZ & GetCoeffModulus() const { return q; }
-        const ZZ & GetLSBCheckCount() const { return d; }
+        long GetLSBCount() const { return d; }
+        const ZZ & GetLSBValue() const { return pow_2_d; }
         const ZZ & GetEncodingWeight() const { return w; }
         const ZZ & GetB() const { return B; } /* TODO: Fix names for these two getters */
         const ZZ & GetU() const { return U; }
-        const Pair<ZZX, ZZX> & GetPolyConstants() const { return a; }
-        const ZZ_pXModulus & GetPolyModulus() const { return phi; }
+        const ZZ & GetCoeffModulus() const { return q; }
         const Mat<GF2> & GetProbabilityMatrix() const { return probability_matrix; }
 
         /* Display to output stream */

@@ -7,11 +7,11 @@
 using namespace rlwe;
 using namespace rlwe::tesla;
 
-KeyParameters::KeyParameters(long n, float sigma, long L, ZZ w, ZZ B, ZZ U, ZZ d, ZZ q) :
+KeyParameters::KeyParameters(long n, float sigma, long L, ZZ w, ZZ B, ZZ U, long d, ZZ q) :
   KeyParameters(n, sigma, L, w, B, U, d, q, UniformSample(n, q), UniformSample(n, q)) {}
 
-KeyParameters::KeyParameters(long n, float sigma, long L, ZZ w, ZZ B, ZZ U, ZZ d, ZZ q, ZZX a1, ZZX a2) :
-  n(n), sigma(sigma), L(L), w(w), B(B), U(U), d(d), q(q), a(a1, a2),
+KeyParameters::KeyParameters(long n, float sigma, long L, ZZ w, ZZ B, ZZ U, long d, ZZ q, ZZX a1, ZZX a2) :
+  n(n), sigma(sigma), L(L), w(w), B(B), U(U), d(d), q(q), a(a1, a2), pow_2_d(power_ZZ(2, d)),
   probability_matrix(KnuthYaoGaussianMatrix(sigma, L)) 
 {
   // Assert that n is even, assume that it is a power of 2
