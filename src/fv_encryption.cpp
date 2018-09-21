@@ -67,8 +67,8 @@ Plaintext fv::Decrypt(const Ciphertext & ciphertext, const PrivateKey & priv) {
 
   // Downscale m to be in plaintext ring
   ZZX plaintext = conv<ZZX>(m);
-  CenterCoeffs(plaintext, params.GetCoeffModulus());
-  RoundCoeffs(plaintext, params.GetCoeffToPlainScalar(), params.GetPlainModulus());  
+  CenterCoeffs(plaintext, plaintext, params.GetCoeffModulus());
+  RoundCoeffs(plaintext, plaintext, params.GetCoeffToPlainScalar(), params.GetPlainModulus());  
 
   return Plaintext(plaintext, params);
 }

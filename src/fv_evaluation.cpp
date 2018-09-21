@@ -89,7 +89,7 @@ Ciphertext & Ciphertext::operator*= (const Ciphertext & ct) {
     }
 
     // Perform downscale to get rid of extra message scaling 
-    RoundCoeffs(sum, params.GetCoeffToPlainScalar(), params.GetCoeffModulus());
+    RoundCoeffs(sum, sum, params.GetCoeffToPlainScalar(), params.GetCoeffModulus());
 
     // Add sum to ciphertext
     c_new[m] = sum;

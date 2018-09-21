@@ -36,8 +36,8 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   ZZX v2 = conv<ZZX>(v2_p);
 
   // Round v1, v2 by applying [...]_{d,q}
-  RoundCoeffsTESLA(v1, params.GetLSBValue()); 
-  RoundCoeffsTESLA(v2, params.GetLSBValue()); 
+  RoundCoeffsTESLA(v1, v1, params.GetLSBValue()); 
+  RoundCoeffsTESLA(v2, v2, params.GetLSBValue()); 
 
   // c' = Hash(v1, v2, u)
   std::string c_prime = Hash(v1, v2, message);
@@ -51,7 +51,7 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
 
   // Convert z back into raw polynomial data 
   ZZX z = conv<ZZX>(z_p);
-  CenterCoeffs(z, params.GetCoeffModulus());
+  CenterCoeffs(z, z, params.GetCoeffModulus());
 
   // Assert that z is in the ring R_{B - U}
   ZZ bound = params.GetB() - params.GetU();
@@ -70,7 +70,7 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   ZZX w1 = conv<ZZX>(w1_p);
 
   // d least significant bits in w1 are not small enough
-  CenterCoeffs(w1, params.GetLSBValue());
+  CenterCoeffs(w1, w1, params.GetLSBValue());
   if (!IsInRange(w1, -bound, bound)) {
     return Sign(message, signer);
   }
@@ -82,7 +82,7 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   ZZX w2 = conv<ZZX>(w2_p);
 
   // d least significant bits in w2 are not small enough
-  CenterCoeffs(w2, params.GetLSBValue());
+  CenterCoeffs(w2, w2, params.GetLSBValue());
   if (!IsInRange(w2, -bound, bound)) {
     return Sign(message, signer);
   }
@@ -128,8 +128,8 @@ bool tesla::Verify(const std::string & message, const Signature & sig, const Ver
   ZZX w2_prime = conv<ZZX>(w2_prime_p);
    
   // Round w1', w2' by applying [...]_{d,q}
-  RoundCoeffsTESLA(w1_prime, params.GetLSBValue());
-  RoundCoeffsTESLA(w2_prime, params.GetLSBValue());
+  RoundCoeffsTESLA(w1_prime, w1_prime, params.GetLSBValue());
+  RoundCoeffsTESLA(w2_prime, w2_prime, params.GetLSBValue());
 
   // c'' = Hash(w1', w2', message)
   std::string c_prime2 = Hash(w1_prime, w2_prime, message);

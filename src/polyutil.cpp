@@ -1,6 +1,6 @@
 #include "polyutil.h"
 
-void rlwe::RoundCoeffs(ZZX & poly, const RR scalar, const ZZ mod) {
+void rlwe::RoundCoeffs(ZZX & result, const ZZX & poly, const RR & scalar, const ZZ & mod) {
   for (long i = 0; i <= deg(poly); i++) {
     // Convert each coefficient into their floating point equivalent before rounding 
     RR r = conv<RR>(coeff(poly, i));
@@ -8,21 +8,20 @@ void rlwe::RoundCoeffs(ZZX & poly, const RR scalar, const ZZ mod) {
     round(r, r);
 
     // Convert coefficient back to integer equivalent and perform modulo operation
-    SetCoeff(poly, i, conv<ZZ>(r) % mod); 
+    SetCoeff(result, i, conv<ZZ>(r) % mod); 
   }
 }
 
-void rlwe::RoundCoeffsTESLA(ZZX & c, const ZZ mod_2d) {
+void rlwe::RoundCoeffsTESLA(ZZX & result, const ZZX & c, const ZZ & mod_2d) {
   // Perform [c]_{2^d}
-  ZZX c_2d(c); 
-  rlwe::CenterCoeffs(c_2d, mod_2d); 
+  ZZX c_2d;
+  rlwe::CenterCoeffs(c_2d, c, mod_2d); 
 
   // Compute result = (c - [c]_{2^d}) / 2^d
-  c -= c_2d;
-  c /= mod_2d;
+  result = (c - c_2d) / mod_2d;
 }
 
-void rlwe::CenterCoeffs(ZZX & poly, const ZZ mod) {
+void rlwe::CenterCoeffs(ZZX & result, const ZZX & poly, const ZZ & mod) {
   ZZ center_point = mod / 2;
   for (long i = 0; i <= deg(poly); i++) {
     // Apply modulus operation before centering
@@ -34,11 +33,11 @@ void rlwe::CenterCoeffs(ZZX & poly, const ZZ mod) {
     }
 
     // Update the coefficient in the polynomial
-    SetCoeff(poly, i, coefficient);
+    SetCoeff(result, i, coefficient);
   }
 }
 
-bool rlwe::IsInRange(const ZZX & poly, const ZZ lower, const ZZ upper) {
+bool rlwe::IsInRange(const ZZX & poly, const ZZ & lower, const ZZ & upper) {
   for (long i = 0; i <= deg(poly); i++) {
     // Assert that each coefficient is within [lower, upper]
     ZZ coefficient = coeff(poly, i);
