@@ -4,6 +4,7 @@
 #include <NTL/GF2.h>
 #include <NTL/matrix.h>
 #include <NTL/vec_vec_GF2.h>
+#include <sodium.h>
 
 using namespace NTL;
 
@@ -19,8 +20,8 @@ namespace rlwe {
     VerificationKey GenerateVerificationKey(const SigningKey & signer);
 
     /* Procedural hashing & encoding */
-    std::string Hash(const ZZX & p1, const ZZX & p2, const std::string & message);
-    ZZX Encode(const std::string & hash_val); 
+    void Hash(unsigned char * output, const ZZX & p1, const ZZX & p2, const std::string & message);
+    ZZX Encode(const unsigned char * hash_val); 
 
     /* Procedural signing/verifying */
     Signature Sign(const std::string & message, const SigningKey & signer);
@@ -126,17 +127,25 @@ namespace rlwe {
     class Signature {
       private:
         ZZX z;
-        std::string c_prime;
+        unsigned char * c_prime;
         const KeyParameters & params;
       public:
         /* Constructors */
-        Signature(const ZZX & z, const std::string c_prime, const KeyParameters & params) : z(z), c_prime(c_prime), params(params) {}
+        Signature(const ZZX & z, const unsigned char * c_prime_, const KeyParameters & params) : z(z), params(params) {
+          c_prime = (unsigned char *) malloc(crypto_hash_sha256_BYTES);
+          memcpy(c_prime, c_prime_, crypto_hash_sha256_BYTES);
+        }
+
+        /* Destructors */
+        ~Signature() {
+          delete c_prime;
+        }
 
         /* Getters */
         const ZZX & GetValue() const {
           return z;
         }
-        const std::string & GetHash() const {
+        const unsigned char * GetHash() const {
           return c_prime;
         }
         const KeyParameters & GetParameters() const {

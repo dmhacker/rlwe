@@ -40,7 +40,8 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   RoundCoeffsTESLA(v2, v2, params.GetLSBValue()); 
 
   // c' = Hash(v1, v2, u)
-  std::string c_prime = Hash(v1, v2, message);
+  unsigned char c_prime[crypto_hash_sha256_BYTES];
+  Hash(c_prime, v1, v2, message);
   ZZX c = Encode(c_prime);
   ZZ_pX c_p = conv<ZZ_pX>(c);
 
@@ -132,9 +133,17 @@ bool tesla::Verify(const std::string & message, const Signature & sig, const Ver
   RoundCoeffsTESLA(w2_prime, w2_prime, params.GetLSBValue());
 
   // c'' = Hash(w1', w2', message)
-  std::string c_prime2 = Hash(w1_prime, w2_prime, message);
+  unsigned char c_prime2[crypto_hash_sha256_BYTES];
+  Hash(c_prime2, w1_prime, w2_prime, message);
 
-  // Used for asserting that z is in the ring R_{B - U} 
+  // Assert that c == c''
+  for (int i = 0; i < crypto_hash_sha256_BYTES; i++) {
+    if (sig.GetHash()[i] != c_prime2[i]) {
+      return false;
+    }
+  }
+
+  // Assert that z is in the ring R_{B - U} 
   ZZ bound = params.GetB() - params.GetU();
-  return sig.GetHash() == c_prime2 && IsInRange(sig.GetValue(), -bound, bound);
+  return IsInRange(sig.GetValue(), -bound, bound);
 }
