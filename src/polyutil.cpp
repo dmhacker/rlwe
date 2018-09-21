@@ -1,4 +1,4 @@
-#include "util.h"
+#include "polyutil.h"
 
 void rlwe::RoundCoeffs(ZZX & poly, const RR scalar, const ZZ mod) {
   for (long i = 0; i <= deg(poly); i++) {
@@ -38,7 +38,7 @@ void rlwe::CenterCoeffs(ZZX & poly, const ZZ mod) {
   }
 }
 
-bool rlwe::IsInRange(ZZX & poly, const ZZ lower, const ZZ upper) {
+bool rlwe::IsInRange(const ZZX & poly, const ZZ lower, const ZZ upper) {
   for (long i = 0; i <= deg(poly); i++) {
     // Assert that each coefficient is within [lower, upper]
     ZZ coefficient = coeff(poly, i);

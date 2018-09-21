@@ -1,6 +1,6 @@
 #include "fv.h"
 #include "sampling.h"
-#include "util.h"
+#include "polyutil.h"
 
 #include <NTL/ZZ_pX.h>
 #include <cassert>

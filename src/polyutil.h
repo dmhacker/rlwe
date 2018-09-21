@@ -15,5 +15,5 @@ namespace rlwe {
   void CenterCoeffs(ZZX & poly, const ZZ mod);
 
   // Checks to see if all coefficients are in the range [lower, upper]
-  bool IsInRange(ZZX & poly, const ZZ lower, const ZZ upper);
+  bool IsInRange(const ZZX & poly, const ZZ lower, const ZZ upper);
 }

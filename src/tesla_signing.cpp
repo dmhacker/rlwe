@@ -1,31 +1,12 @@
 #include "tesla.h"
 #include "sampling.h"
-#include "sha256.h"
-#include "util.h"
+#include "polyutil.h"
 
-#include <sstream>
 #include <cassert>
 #include <NTL/ZZ_pX.h>
 
 using namespace rlwe;
 using namespace rlwe::tesla;
-
-std::string tesla::Hash(const ZZX & p1, const ZZX & p2, const std::string & message) {
-  // Concatenate everything into a single string
-  std::stringstream ss;
-  ss << p1 << p2 << message;
-
-  // Convert stream into actual string
-  std::string result;
-  ss >> result;
-
-  // Return SHA-256 of concatenated string
-  return sha256(result);
-}
-
-ZZX tesla::Encode(const std::string & hash_val) {
-  
-}
 
 Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   const KeyParameters & params = signer.GetParameters();
@@ -34,7 +15,7 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
 
-  // Convert given a1, a2, e1, e2, s polynomials into polynomials under the global modulus
+  // Convert given a1, a2, e1, e2, s into polynomials under the global modulus
   ZZ_pX a1 = conv<ZZ_pX>(params.GetPolyConstants().a);
   ZZ_pX a2 = conv<ZZ_pX>(params.GetPolyConstants().b);
   ZZ_pX e1 = conv<ZZ_pX>(signer.GetErrorValues().a);
@@ -47,14 +28,14 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   // v1 = a1 * y in R_q
   ZZ_pX v1_p;
   MulMod(v1_p, a1, y, params.GetPolyModulus());
+  ZZX v1 = conv<ZZX>(v1_p);  
 
   // v2 = a2 * y in R_q
   ZZ_pX v2_p;
   MulMod(v2_p, a2, y, params.GetPolyModulus());
-
-  // Round v1, v2 coefficients by applying [...]_{d,q}
-  ZZX v1 = conv<ZZX>(v1_p);  
   ZZX v2 = conv<ZZX>(v2_p);
+
+  // Round v1, v2 by applying [...]_{d,q}
   RoundCoeffsTESLA(v1, params.GetLSBValue()); 
   RoundCoeffsTESLA(v2, params.GetLSBValue()); 
 
@@ -113,5 +94,47 @@ bool tesla::Verify(const std::string & message, const Signature & sig, const Ver
   assert(sig.GetParameters() == verif.GetParameters());
   const KeyParameters & params = sig.GetParameters();
 
+  // Setup global coefficient modulus 
+  ZZ_pPush push;
+  ZZ_p::init(params.GetCoeffModulus());
 
+  // Extract polynomials serving as global constants
+  ZZ_pX a1 = conv<ZZ_pX>(params.GetPolyConstants().a);
+  ZZ_pX a2 = conv<ZZ_pX>(params.GetPolyConstants().b);
+
+  // Extract polynomials from verification key 
+  ZZ_pX t1 = conv<ZZ_pX>(verif.GetValues().a);
+  ZZ_pX t2 = conv<ZZ_pX>(verif.GetValues().b);
+
+  // Extract polynomials from the signing key
+  ZZ_pX z = conv<ZZ_pX>(sig.GetValue());
+  ZZ_pX c = conv<ZZ_pX>(Encode(sig.GetHash()));
+
+  // Setup temporary buffer
+  ZZ_pX buffer;
+
+  // w1' = a1 * z - t1 * c
+  ZZ_pX w1_prime_p;
+  MulMod(w1_prime_p, a1, z, params.GetPolyModulus());
+  MulMod(buffer, t1, c, params.GetPolyModulus());
+  w1_prime_p -= buffer;
+  ZZX w1_prime = conv<ZZX>(w1_prime_p);
+
+  // w2' = a2 * z - t2 * c
+  ZZ_pX w2_prime_p;
+  MulMod(w2_prime_p, a2, z, params.GetPolyModulus());
+  MulMod(buffer, t2, c, params.GetPolyModulus());
+  w2_prime_p -= buffer;
+  ZZX w2_prime = conv<ZZX>(w2_prime_p);
+   
+  // Round w1', w2' by applying [...]_{d,q}
+  RoundCoeffsTESLA(w1_prime, params.GetLSBValue());
+  RoundCoeffsTESLA(w2_prime, params.GetLSBValue());
+
+  // c'' = Hash(w1', w2', message)
+  std::string c_prime2 = Hash(w1_prime, w2_prime, message);
+
+  // Used for asserting that z is in the ring R_{B - U} 
+  ZZ bound = params.GetB() - params.GetU();
+  return sig.GetHash() == c_prime2 && IsInRange(sig.GetValue(), -bound, bound);
 }
