@@ -70,4 +70,6 @@ All keys, plaintexts, and ciphertexts store their polynomials as `NTL:ZZX` objec
 However, these polynomials are in the ring `Z_q/(f)` where `f` is a cyclotomic polynomial of the form `x^n + 1`.
 Whenever operations are performed on them, they are usually converted to `NTL::ZZ_pX` and a temporary modulus is pushed until the operation completes.
 
-The SHA-256 implementation used was obtained from [zedwood](http://www.zedwood.com/article/cpp-sha256-function).
+The ring-TESLA implementation requires both a hashing function and an encoding function. 
+The hashing function used is SHA-256, as specified in the paper, and the encoding function uses the ChaCha20 stream cipher, with the key being the function input.
+The [libsodium](https://download.libsodium.org/doc/) library was used to provide secure & fast implementations of these algorithms.
