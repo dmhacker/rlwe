@@ -21,7 +21,7 @@ namespace rlwe {
 
     /* Procedural hashing & encoding */
     void Hash(unsigned char * output, const ZZX & p1, const ZZX & p2, const std::string & message);
-    ZZX Encode(const unsigned char * hash_val); 
+    ZZX Encode(const unsigned char * hash_val, const KeyParameters & params); 
 
     /* Procedural signing/verifying */
     Signature Sign(const std::string & message, const SigningKey & signer);
@@ -33,7 +33,7 @@ namespace rlwe {
         long n;
         float sigma;
         long L;
-        ZZ w;
+        long w;
         ZZ B;
         ZZ U;
         long d;
@@ -46,9 +46,9 @@ namespace rlwe {
       public:
         /* Constructors */
         KeyParameters() : // 128-bit security, parameters recommended by the original paper
-          KeyParameters(512, 52.0f, 2766, ZZ(19), ZZ(4194303), ZZ(3173), 23, conv<ZZ>("39960577")) {}
-        KeyParameters(long n, float sigma, long L, ZZ w, ZZ B, ZZ U, long d, ZZ q);
-        KeyParameters(long n, float sigma, long L, ZZ w, ZZ B, ZZ U, long d, ZZ q, ZZX a1, ZZX a2);
+          KeyParameters(512, 52.0f, 2766, 19, ZZ(4194303), ZZ(3173), 23, conv<ZZ>("39960577")) {}
+        KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, long d, ZZ q);
+        KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, long d, ZZ q, ZZX a1, ZZX a2);
 
         /* Getters */
         const Pair<ZZX, ZZX> & GetPolyConstants() const { return a; }
@@ -56,9 +56,9 @@ namespace rlwe {
         long GetPolyModulusDegree() const { return n; }
         float GetErrorStandardDeviation() const { return sigma; }
         long GetErrorBound() const { return L; }
+        long GetEncodingWeight() const { return w; }
         long GetLSBCount() const { return d; }
         const ZZ & GetLSBValue() const { return pow_2d; }
-        const ZZ & GetEncodingWeight() const { return w; }
         const ZZ & GetB() const { return B; } /* TODO: Fix names for these two getters */
         const ZZ & GetU() const { return U; }
         const ZZ & GetCoeffModulus() const { return q; }

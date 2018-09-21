@@ -4,7 +4,7 @@ project(rlwe)
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/modules)
 
 find_package(NTL REQUIRED)
-find_package(Sodium REQUIRED)
+find_package(sodium REQUIRED)
 
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/lib)

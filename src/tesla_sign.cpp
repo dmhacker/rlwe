@@ -42,7 +42,7 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   // c' = Hash(v1, v2, u)
   unsigned char c_prime[crypto_hash_sha256_BYTES];
   Hash(c_prime, v1, v2, message);
-  ZZX c = Encode(c_prime);
+  ZZX c = Encode(c_prime, params);
   ZZ_pX c_p = conv<ZZ_pX>(c);
 
   // z = y + s * c
@@ -109,7 +109,7 @@ bool tesla::Verify(const std::string & message, const Signature & sig, const Ver
 
   // Extract polynomials from the signing key
   ZZ_pX z = conv<ZZ_pX>(sig.GetValue());
-  ZZ_pX c = conv<ZZ_pX>(Encode(sig.GetHash()));
+  ZZ_pX c = conv<ZZ_pX>(Encode(sig.GetHash(), params));
 
   // Setup temporary buffer
   ZZ_pX buffer;
