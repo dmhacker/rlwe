@@ -45,56 +45,66 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   ZZ_pX y = conv<ZZ_pX>(UniformSample(params.GetPolyModulusDegree(), -params.GetB(), params.GetB() + 1));
 
   // v1 = a1 * y in R_q
-  ZZ_pX v1_mod;
-  MulMod(v1_mod, a1, y, params.GetPolyModulus());
+  ZZ_pX v1_p;
+  MulMod(v1_p, a1, y, params.GetPolyModulus());
 
   // v2 = a2 * y in R_q
-  ZZ_pX v2_mod;
-  MulMod(v2_mod, a2, y, params.GetPolyModulus());
+  ZZ_pX v2_p;
+  MulMod(v2_p, a2, y, params.GetPolyModulus());
 
   // Round v1, v2 coefficients by applying [...]_{d,q}
-  ZZX v1 = conv<ZZX>(v1_mod);  
-  ZZX v2 = conv<ZZX>(v2_mod);
-  TeslaRoundCoeffs(v1, params.GetLSBValue()); 
-  TeslaRoundCoeffs(v2, params.GetLSBValue()); 
+  ZZX v1 = conv<ZZX>(v1_p);  
+  ZZX v2 = conv<ZZX>(v2_p);
+  RoundCoeffsTESLA(v1, params.GetLSBValue()); 
+  RoundCoeffsTESLA(v2, params.GetLSBValue()); 
 
   // c' = Hash(v1, v2, u)
   std::string c_prime = Hash(v1, v2, message);
   ZZX c = Encode(c_prime);
-  ZZ_pX c_mod = conv<ZZ_pX>(c);
+  ZZ_pX c_p = conv<ZZ_pX>(c);
 
   // z = y + s * c
-  ZZ_pX z_mod; 
-  MulMod(z_mod, s, c_mod, params.GetPolyModulus());
-  z_mod += y;
+  ZZ_pX z_p; 
+  MulMod(z_p, s, c_p, params.GetPolyModulus());
+  z_p += y;
 
   // Convert z back into raw polynomial data 
-  ZZX z = conv<ZZX>(z_mod);
+  ZZX z = conv<ZZX>(z_p);
   CenterCoeffs(z, params.GetCoeffModulus());
 
   // Assert that z is in the ring R_{B - U}
-  if (!IsInRange(z, params.GetB() - params.GetU())) {
+  ZZ bound = params.GetB() - params.GetU();
+  if (!IsInRange(z, -bound, bound)) {
     return Sign(message, signer); 
   }
 
-  // Set up some variables for computation
-  ZZ_pX w1_mod(v1_mod); 
-  ZZ_pX w2_mod(v2_mod);
-  ZZ_pX buffer;
+  // w1, w2 need to fall within bound 2^d - L
+  bound = params.GetLSBValue() - params.GetErrorBound();
 
   // w1 = v1 - e1 * c
-  MulMod(buffer, e1, c_mod, params.GetPolyModulus());
-  w1_mod -= buffer;
+  ZZ_pX w1_p(v1_p); 
+  ZZ_pX buffer;
+  MulMod(buffer, e1, c_p, params.GetPolyModulus());
+  w1_p -= buffer;
+  ZZX w1 = conv<ZZX>(w1_p);
+
+  // d least significant bits in w1 are not small enough
+  CenterCoeffs(w1, params.GetLSBValue());
+  if (!IsInRange(w1, -bound, bound)) {
+    return Sign(message, signer);
+  }
 
   // w2 = v2 - e2 * c
-  MulMod(buffer, e2, c_mod, params.GetPolyModulus());
-  w2_mod -= buffer;
+  ZZ_pX w2_p(v2_p);
+  MulMod(buffer, e2, c_p, params.GetPolyModulus());
+  w2_p -= buffer;
+  ZZX w2 = conv<ZZX>(w2_p);
 
-  // Convert w1, w2 back to raw polynomial forms
-  ZZX w1 = conv<ZZX>(w1_mod);
-  ZZX w2 = conv<ZZX>(w2_mod);
-
-  // TODO: Final check to make sure w1 and w2 are in R_{2^d - L}
+  // d least significant bits in w2 are not small enough
+  CenterCoeffs(w2, params.GetLSBValue());
+  if (!IsInRange(w2, -bound, bound)) {
+    return Sign(message, signer);
+  }
 
   return Signature(z, c_prime, params);
 }

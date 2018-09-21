@@ -39,7 +39,7 @@ namespace rlwe {
         ZZ q;
         Pair<ZZX, ZZX> a;
         /* Calculated */
-        ZZ pow_2_d;
+        ZZ pow_2d;
         ZZ_pXModulus phi;
         Mat<GF2> probability_matrix;
       public:
@@ -56,7 +56,7 @@ namespace rlwe {
         float GetErrorStandardDeviation() const { return sigma; }
         long GetErrorBound() const { return L; }
         long GetLSBCount() const { return d; }
-        const ZZ & GetLSBValue() const { return pow_2_d; }
+        const ZZ & GetLSBValue() const { return pow_2d; }
         const ZZ & GetEncodingWeight() const { return w; }
         const ZZ & GetB() const { return B; } /* TODO: Fix names for these two getters */
         const ZZ & GetU() const { return U; }
