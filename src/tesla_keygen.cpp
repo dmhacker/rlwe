@@ -1,5 +1,5 @@
 #include "tesla.h"
-#include "sampling.h"
+#include "sample.h"
 
 #include <NTL/ZZ_pX.h>
 #include <cassert>

@@ -1,5 +1,5 @@
 #include "tesla.h"
-#include "sampling.h"
+#include "sample.h"
 #include "polyutil.h"
 
 #include <cassert>
