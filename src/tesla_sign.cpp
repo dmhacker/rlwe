@@ -23,35 +23,31 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   ZZ_pX s = conv<ZZ_pX>(signer.GetSecret());
 
   // Sample y from R_{q,[B]}
-  ZZ_pX y = conv<ZZ_pX>(UniformSample(params.GetPolyModulusDegree(), -params.GetB(), params.GetB() + 1));
+  ZZX y = UniformSample(params.GetPolyModulusDegree(), -params.GetB(), params.GetB() + 1);
+  ZZ_pX y_p = conv<ZZ_pX>(y);
 
   // v1 = a1 * y in R_q
   ZZ_pX v1_p;
-  MulMod(v1_p, a1, y, params.GetPolyModulus());
+  MulMod(v1_p, a1, y_p, params.GetPolyModulus());
   ZZX v1 = conv<ZZX>(v1_p);  
 
   // v2 = a2 * y in R_q
   ZZ_pX v2_p;
-  MulMod(v2_p, a2, y, params.GetPolyModulus());
+  MulMod(v2_p, a2, y_p, params.GetPolyModulus());
   ZZX v2 = conv<ZZX>(v2_p);
-
-  // Round v1, v2 by applying [...]_{d,q}
-  RoundCoeffsTESLA(v1, v1, params.GetLSBValue()); 
-  RoundCoeffsTESLA(v2, v2, params.GetLSBValue()); 
 
   // c' = Hash(v1, v2, u)
   unsigned char c_prime[crypto_hash_sha256_BYTES];
-  Hash(c_prime, v1, v2, message);
+  Hash(c_prime, v1, v2, message, params);
   ZZX c = Encode(c_prime, params);
   ZZ_pX c_p = conv<ZZ_pX>(c);
 
-  // z = y + s * c
-  ZZ_pX z_p; 
-  MulMod(z_p, s, c_p, params.GetPolyModulus());
-  z_p += y;
+  // z = y + s * c in Z
+  ZZX z;
+  MulMod(z, signer.GetSecret(), c, conv<ZZX>(params.GetPolyModulus().val()));
+  z += y; 
 
   // Convert z back into raw polynomial data 
-  ZZX z = conv<ZZX>(z_p);
   CenterCoeffs(z, z, params.GetCoeffModulus());
 
   // Assert that z is in the ring R_{B - U}
@@ -63,7 +59,7 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   // w1, w2 need to fall within bound 2^d - L
   bound = params.GetLSBValue() - params.GetErrorBound();
 
-  // w1 = v1 - e1 * c
+  // w1 = v1 - e1 * c in R_q
   ZZ_pX w1_p(v1_p); 
   ZZ_pX buffer;
   MulMod(buffer, e1, c_p, params.GetPolyModulus());
@@ -71,18 +67,20 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   ZZX w1 = conv<ZZX>(w1_p);
 
   // d least significant bits in w1 are not small enough
+  AndCoeffs(w1, w1, params.GetLSBValue() - 1);
   CenterCoeffs(w1, w1, params.GetLSBValue());
   if (!IsInRange(w1, -bound, bound)) {
     return Sign(message, signer);
   }
 
-  // w2 = v2 - e2 * c
+  // w2 = v2 - e2 * c in R_q
   ZZ_pX w2_p(v2_p);
   MulMod(buffer, e2, c_p, params.GetPolyModulus());
   w2_p -= buffer;
   ZZX w2 = conv<ZZX>(w2_p);
 
   // d least significant bits in w2 are not small enough
+  AndCoeffs(w2, w2, params.GetLSBValue() - 1);
   CenterCoeffs(w2, w2, params.GetLSBValue());
   if (!IsInRange(w2, -bound, bound)) {
     return Sign(message, signer);
@@ -128,13 +126,9 @@ bool tesla::Verify(const std::string & message, const Signature & sig, const Ver
   w2_prime_p -= buffer;
   ZZX w2_prime = conv<ZZX>(w2_prime_p);
    
-  // Round w1', w2' by applying [...]_{d,q}
-  RoundCoeffsTESLA(w1_prime, w1_prime, params.GetLSBValue());
-  RoundCoeffsTESLA(w2_prime, w2_prime, params.GetLSBValue());
-
   // c'' = Hash(w1', w2', message)
   unsigned char c_prime2[crypto_hash_sha256_BYTES];
-  Hash(c_prime2, w1_prime, w2_prime, message);
+  Hash(c_prime2, w1_prime, w2_prime, message, params);
 
   // Assert that c == c''
   for (int i = 0; i < crypto_hash_sha256_BYTES; i++) {

@@ -1,4 +1,5 @@
 #include "tesla.h"
+#include "polyutil.h"
 
 #include <sstream>
 
@@ -8,10 +9,15 @@
 using namespace rlwe;
 using namespace rlwe::tesla;
 
-void tesla::Hash(unsigned char * output, const ZZX & p1, const ZZX & p2, const std::string & message) {
+void tesla::Hash(unsigned char * output, const ZZX & p1, const ZZX & p2, const std::string & message, const KeyParameters & params) {
+  // Round p1, p2 by applying [...]_{d,q}
+  ZZX q1, q2;
+  RightShiftCoeffs(q1, p1, params.GetLSBCount()); 
+  RightShiftCoeffs(q2, p2, params.GetLSBCount()); 
+
   // Concatenate everything into a single string
   std::stringstream ss;
-  ss << p1 << p2 << message;
+  ss << q1 << q2 << message;
 
   // Convert stream into actual string
   std::string cc;

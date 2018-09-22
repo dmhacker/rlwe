@@ -3,6 +3,7 @@ project(rlwe)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/modules)
 
+find_package(GMP REQUIRED)
 find_package(NTL REQUIRED)
 find_package(sodium REQUIRED)
 

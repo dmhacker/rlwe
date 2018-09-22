@@ -15,7 +15,7 @@ TEST_CASE("Encoding a hash value into a polynomial") {
   std::string message = "woweee!";
   
   // Produce a hash and initial encoding 
-  Hash(hsh, p1, p2, message);
+  Hash(hsh, p1, p2, message, params);
   ZZX output = Encode(hsh, params);
 
   // Count the number of non-zero coefficients

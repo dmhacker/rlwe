@@ -20,7 +20,7 @@ namespace rlwe {
     VerificationKey GenerateVerificationKey(const SigningKey & signer);
 
     /* Procedural hashing & encoding */
-    void Hash(unsigned char * output, const ZZX & p1, const ZZX & p2, const std::string & message);
+    void Hash(unsigned char * output, const ZZX & p1, const ZZX & p2, const std::string & message, const KeyParameters & params);
     ZZX Encode(const unsigned char * hash_val, const KeyParameters & params); 
 
     /* Procedural signing/verifying */

@@ -1,4 +1,5 @@
 #include "polyutil.h"
+#include <cassert>
 
 void rlwe::RoundCoeffs(ZZX & result, const ZZX & poly, const RR & scalar, const ZZ & mod) {
   for (long i = 0; i <= deg(poly); i++) {
@@ -10,15 +11,6 @@ void rlwe::RoundCoeffs(ZZX & result, const ZZX & poly, const RR & scalar, const 
     // Convert coefficient back to integer equivalent and perform modulo operation
     SetCoeff(result, i, conv<ZZ>(r) % mod); 
   }
-}
-
-void rlwe::RoundCoeffsTESLA(ZZX & result, const ZZX & c, const ZZ & mod_2d) {
-  // Perform [c]_{2^d}
-  ZZX c_2d;
-  rlwe::CenterCoeffs(c_2d, c, mod_2d); 
-
-  // Compute result = (c - [c]_{2^d}) / 2^d
-  result = (c - c_2d) / mod_2d;
 }
 
 void rlwe::CenterCoeffs(ZZX & result, const ZZX & poly, const ZZ & mod) {
@@ -34,6 +26,18 @@ void rlwe::CenterCoeffs(ZZX & result, const ZZX & poly, const ZZ & mod) {
 
     // Update the coefficient in the polynomial
     SetCoeff(result, i, coefficient);
+  }
+}
+
+void rlwe::RightShiftCoeffs(ZZX & result, const ZZX & poly, long bits) {
+  for (long i = 0; i <= deg(poly); i++) {
+    SetCoeff(result, i, coeff(poly, i) >> bits);    
+  }
+}
+
+void rlwe::AndCoeffs(ZZX & result, const ZZX & poly, const ZZ & mask) {
+  for (long i = 0; i <= deg(poly); i++) {
+    SetCoeff(result, i, coeff(poly, i) & mask);    
   }
 }
 

@@ -3,6 +3,8 @@
 
 #include <NTL/ZZ_pX.h>
 #include <cassert>
+#include <algorithm>    // std::sort
+#include <vector>       // std::vector
 
 using namespace rlwe;
 using namespace rlwe::tesla;
@@ -32,11 +34,41 @@ KeyParameters::KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, lo
   build(phi, cyclotomic);
 }
 
+bool CheckError(const ZZX & e, long w, long L) {
+  // Sort all of the coefficients in descending order
+  std::vector<ZZ> coeffs;
+  for (int i = 0; i <= deg(e); i++) {
+    coeffs.push_back(coeff(e, i));
+  }
+  std::sort(coeffs.begin(), coeffs.end());
+  std::reverse(coeffs.begin(), coeffs.end());
+
+  // Sum the top `w` coefficients 
+  ZZ sum(0);
+  for (int i = 0; i < w; i++) {
+    sum += coeffs[i];
+  }
+
+  // Make sure that the sum is less than the given error bound
+  return sum <= L;
+}
+
 SigningKey tesla::GenerateSigningKey(const KeyParameters & params) {
-  // Generate randomly sampled error polynomials
-  // Note that we don't have to reject any error samples because the Knuth-Yao sampling method restricts the bound already
-  ZZX e1 = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix());
-  ZZX e2 = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix());
+  // Generate error polynomial e1
+  ZZX e1;
+  bool check = false;
+  while (!check) {
+    e1 = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix());
+    check = CheckError(e1, params.GetEncodingWeight(), params.GetErrorBound());
+  }
+
+  // Generate error polynomial e2
+  ZZX e2;
+  check = false;
+  while (!check) {
+    e2 = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix());
+    check = CheckError(e2, params.GetEncodingWeight(), params.GetErrorBound());
+  }
 
   // Sample secret polynomial from same Gaussian distribution
   ZZX s = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix());
