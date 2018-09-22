@@ -47,11 +47,9 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   MulMod(z, signer.GetSecret(), c, conv<ZZX>(params.GetPolyModulus().val()));
   z += y; 
 
-  // Convert z back into raw polynomial data 
-  CenterCoeffs(z, z, params.GetCoeffModulus());
-
   // Assert that z is in the ring R_{B - U}
   ZZ bound = params.GetB() - params.GetU();
+  CenterCoeffs(z, z, params.GetCoeffModulus());
   if (!IsInRange(z, -bound, bound)) {
     return Sign(message, signer); 
   }
@@ -67,7 +65,6 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   ZZX w1 = conv<ZZX>(w1_p);
 
   // d least significant bits in w1 are not small enough
-  AndCoeffs(w1, w1, params.GetLSBValue() - 1);
   CenterCoeffs(w1, w1, params.GetLSBValue());
   if (!IsInRange(w1, -bound, bound)) {
     return Sign(message, signer);
@@ -80,7 +77,6 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   ZZX w2 = conv<ZZX>(w2_p);
 
   // d least significant bits in w2 are not small enough
-  AndCoeffs(w2, w2, params.GetLSBValue() - 1);
   CenterCoeffs(w2, w2, params.GetLSBValue());
   if (!IsInRange(w2, -bound, bound)) {
     return Sign(message, signer);

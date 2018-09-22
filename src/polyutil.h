@@ -14,9 +14,6 @@ namespace rlwe {
   // Applies a right shift to each coefficient by `bits` number of bits 
   void RightShiftCoeffs(ZZX & result, const ZZX & poly, long bits);
 
-  // Applies an AND mask to each coefficient
-  void AndCoeffs(ZZX & result, const ZZX & poly, const ZZ & mask);
-
   // Checks to see if all coefficients are in the range [lower, upper]
   bool IsInRange(const ZZX & poly, const ZZ & lower, const ZZ & upper);
 }

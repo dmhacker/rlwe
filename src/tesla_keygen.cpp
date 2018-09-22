@@ -3,8 +3,10 @@
 
 #include <NTL/ZZ_pX.h>
 #include <cassert>
-#include <algorithm>    // std::sort
-#include <vector>       // std::vector
+#include <algorithm>    
+#include <vector>      
+
+#define BOUNDS_SCALAR 6
 
 using namespace rlwe;
 using namespace rlwe::tesla;
@@ -14,7 +16,7 @@ KeyParameters::KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, lo
 
 KeyParameters::KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, long d, ZZ q, ZZX a1, ZZX a2) :
   n(n), sigma(sigma), L(L), w(w), B(B), U(U), d(d), q(q), a(a1, a2), pow_2d(power_ZZ(2, d)),
-  probability_matrix(KnuthYaoGaussianMatrix(sigma, L)) 
+  probability_matrix(KnuthYaoGaussianMatrix(sigma, sigma * BOUNDS_SCALAR)) 
 {
   // Assert that n is even, assume that it is a power of 2
   assert(n % 2 == 0);

@@ -1,5 +1,4 @@
 #include "polyutil.h"
-#include <cassert>
 
 void rlwe::RoundCoeffs(ZZX & result, const ZZX & poly, const RR & scalar, const ZZ & mod) {
   for (long i = 0; i <= deg(poly); i++) {
@@ -31,13 +30,8 @@ void rlwe::CenterCoeffs(ZZX & result, const ZZX & poly, const ZZ & mod) {
 
 void rlwe::RightShiftCoeffs(ZZX & result, const ZZX & poly, long bits) {
   for (long i = 0; i <= deg(poly); i++) {
+    // Apply a right shift to each coefficient
     SetCoeff(result, i, coeff(poly, i) >> bits);    
-  }
-}
-
-void rlwe::AndCoeffs(ZZX & result, const ZZX & poly, const ZZ & mask) {
-  for (long i = 0; i <= deg(poly); i++) {
-    SetCoeff(result, i, coeff(poly, i) & mask);    
   }
 }
 
