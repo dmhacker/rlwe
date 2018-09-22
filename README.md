@@ -5,11 +5,11 @@ rlwe is a fast, lightweight, and easy-to-use library for doing cryptography invo
 Note that the library makes no pretensions about being safe from side-channel attacks and should **not** be used in a production environment.
 Rather, it is intended to be used in an academic setting.
 
-Specifically, the library implements ...
-  * The [Fan-Vercauterean](https://eprint.iacr.org/2012/144.pdf) fully homomorphic cryptosystem
+Specifically, the library implements the ...
+  * [Fan-Vercauterean](https://eprint.iacr.org/2012/144.pdf) fully homomorphic cryptosystem
   * [NewHope-Simple](https://eprint.iacr.org/2015/1092.pdf) key exchange without reconciliation*
-  * The [Ring-TESLA](https://eprint.iacr.org/2016/030.pdf) digital signature algorithm
-  * The [Knuth-Yao](https://eprint.iacr.org/2017/988.pdf) algorithm for fast discrete noise sampling over a Gaussian distribution
+  * [Ring-TESLA](https://eprint.iacr.org/2016/030.pdf) digital signature algorithm
+  * [Knuth-Yao](https://eprint.iacr.org/2017/988.pdf) algorithm for fast discrete noise sampling over a Gaussian distribution
 <br><sub><sup>* Implementation not finished yet</sup></sub>
 
 For anyone without significant background on RLWE, I would recommend checking out these links:
