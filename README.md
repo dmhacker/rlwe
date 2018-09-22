@@ -36,18 +36,18 @@ fv::PublicKey pub = fv::GeneratePublicKey(priv);
 
 // Encode some plaintext integer as a polynomial in the plaintext ring
 // The coefficients of the polynomial are equal to the binary representation of the integer
-fv::Plaintext encoded_plaintext = fv::EncodeInteger(1337, params); 
+fv::Plaintext ptx = fv::EncodeInteger(1337, params); 
 
 // Encrypt the plaintext using the public key 
-fv::Ciphertext ciphertext = pub.Encrypt(encoded_plaintext);
+fv::Ciphertext ctx = fv::Encrypt(ptx, pub);
 
 [...]
 
 // Decrypt the plaintext using the private key
-fv::Plaintext decrypted_plaintext = priv.Decrypt(ciphertext);
+fv::Plaintext dptx = fv::Decrypt(ctx, priv);
 
 // Prints "1337"
-std::cout << fv::DecodeInteger(decrypted_plaintext, params) << std::endl;
+std::cout << fv::DecodeInteger(dptx, params) << std::endl;
 ```
 
 ## Installation
