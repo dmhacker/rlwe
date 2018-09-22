@@ -20,8 +20,7 @@ void tesla::Hash(unsigned char * output, const ZZX & p1, const ZZX & p2, const s
   ss << q1 << q2 << message;
 
   // Convert stream into actual string
-  std::string cc;
-  ss >> cc;
+  std::string cc = ss.str();
 
   // Convert input into its c_string equivalent
   const unsigned char * input = reinterpret_cast<const unsigned char *>(cc.c_str());
