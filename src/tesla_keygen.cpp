@@ -15,8 +15,7 @@ KeyParameters::KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, lo
   KeyParameters(n, sigma, L, w, B, U, d, q, UniformSample(n, q), UniformSample(n, q)) {}
 
 KeyParameters::KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, long d, ZZ q, ZZX a1, ZZX a2) :
-  n(n), sigma(sigma), L(L), w(w), B(B), U(U), d(d), q(q), a(a1, a2), pow_2d(power_ZZ(2, d)),
-  probability_matrix(KnuthYaoGaussianMatrix(sigma, sigma * BOUNDS_SCALAR)) 
+  n(n), sigma(sigma), L(L), w(w), B(B), U(U), d(d), q(q), a(a1, a2), pow_2d(power_ZZ(2, d))
 {
   // Assert that n is even, assume that it is a power of 2
   assert(n % 2 == 0);
@@ -34,6 +33,14 @@ KeyParameters::KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, lo
 
   // Build the modulus using the cyclotomic polynomial representation
   build(phi, cyclotomic);
+
+  // Generate probability matrix
+  probability_matrix_rows = sigma * BOUNDS_SCALAR;
+  probability_matrix = (char **) malloc(probability_matrix_rows * sizeof(char *));
+  for (size_t i = 0; i < probability_matrix_rows; i++) {
+    probability_matrix[i] = (char *) calloc(PROBABILITY_MATRIX_BYTE_PRECISION, sizeof(char));
+  }
+  KnuthYaoGaussianMatrix(probability_matrix, probability_matrix_rows, sigma); 
 }
 
 bool CheckError(const ZZX & e, long w, long L) {
@@ -60,7 +67,7 @@ SigningKey tesla::GenerateSigningKey(const KeyParameters & params) {
   ZZX e1;
   bool check = false;
   while (!check) {
-    e1 = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix());
+    e1 = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix(), params.GetProbabilityMatrixRows());
     check = CheckError(e1, params.GetEncodingWeight(), params.GetErrorBound());
   }
 
@@ -68,12 +75,12 @@ SigningKey tesla::GenerateSigningKey(const KeyParameters & params) {
   ZZX e2;
   check = false;
   while (!check) {
-    e2 = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix());
+    e2 = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix(), params.GetProbabilityMatrixRows());
     check = CheckError(e2, params.GetEncodingWeight(), params.GetErrorBound());
   }
 
   // Sample secret polynomial from same Gaussian distribution
-  ZZX s = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix());
+  ZZX s = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix(), params.GetProbabilityMatrixRows());
 
   return SigningKey(s, e1, e2, params); 
 }

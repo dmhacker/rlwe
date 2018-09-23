@@ -11,8 +11,7 @@ using namespace rlwe::fv;
 
 KeyParameters::KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma) : 
   n(n), q(q), t(t), log_w(log_w), sigma(sigma),
-  delta(q / t), downscale(conv<RR>(t) / conv<RR>(q)),
-  probability_matrix(KnuthYaoGaussianMatrix(sigma, std::floor(BOUNDS_SCALAR * sigma)))
+  delta(q / t), downscale(conv<RR>(t) / conv<RR>(q))
 {
   // Assert that n is even, assume that it is a power of 2
   assert(n % 2 == 0);
@@ -35,6 +34,14 @@ KeyParameters::KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma) :
   power2(w, log_w);
   w_mask = w - 1; 
   l = floor(log(q) / log(w));
+
+  // Generate probability matrix
+  probability_matrix_rows = sigma * BOUNDS_SCALAR;
+  probability_matrix = (char **) malloc(probability_matrix_rows * sizeof(char *));
+  for (size_t i = 0; i < probability_matrix_rows; i++) {
+    probability_matrix[i] = (char *) calloc(PROBABILITY_MATRIX_BYTE_PRECISION, sizeof(char));
+  }
+  KnuthYaoGaussianMatrix(probability_matrix, probability_matrix_rows, sigma); 
 }
 
 PrivateKey fv::GeneratePrivateKey(const KeyParameters & params) {
@@ -44,7 +51,7 @@ PrivateKey fv::GeneratePrivateKey(const KeyParameters & params) {
 PublicKey fv::GeneratePublicKey(const PrivateKey & priv) {
   return GeneratePublicKey(priv, 
       UniformSample(priv.GetParameters().GetPolyModulusDegree(), priv.GetParameters().GetCoeffModulus()), 
-      KnuthYaoSample(priv.GetParameters().GetPolyModulusDegree(), priv.GetParameters().GetProbabilityMatrix()));
+      KnuthYaoSample(priv.GetParameters().GetPolyModulusDegree(), priv.GetParameters().GetProbabilityMatrix(), priv.GetParameters().GetProbabilityMatrixRows()));
 }
 
 PublicKey fv::GeneratePublicKey(const PrivateKey & priv, const ZZX & shared_a, const ZZX & shared_e) { 
@@ -99,7 +106,7 @@ EvaluationKey fv::GenerateEvaluationKey(const PrivateKey & priv, long level) {
     ZZ_pX a = conv<ZZ_pX>(UniformSample(params.GetPolyModulusDegree(), params.GetCoeffModulus()));
 
     // Draw error polynomial from discrete Gaussian distribution
-    ZZ_pX e = conv<ZZ_pX>(KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix()));
+    ZZ_pX e = conv<ZZ_pX>(KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix(), params.GetProbabilityMatrixRows()));
 
     // Compute b = -(a * s + e)
     ZZ_pX b;

@@ -24,8 +24,8 @@ Ciphertext fv::Encrypt(const Plaintext & plaintext, const PublicKey & pub) {
   ZZ_pX u = conv<ZZ_pX>(UniformSample(params.GetPolyModulusDegree(), ZZ(-1), ZZ(2)));
 
   // Draw error polynomials from discrete Gaussian distribution
-  ZZ_pX e1 = conv<ZZ_pX>(KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix())); 
-  ZZ_pX e2 = conv<ZZ_pX>(KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix()));
+  ZZ_pX e1 = conv<ZZ_pX>(KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix(), params.GetProbabilityMatrixRows())); 
+  ZZ_pX e2 = conv<ZZ_pX>(KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix(), params.GetProbabilityMatrixRows()));
 
   // Set up a temporary buffer to hold the results of multiplications
   ZZ_pX buffer;

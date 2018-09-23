@@ -42,13 +42,22 @@ namespace rlwe {
         /* Calculated */
         ZZ pow_2d;
         ZZ_pXModulus phi;
-        Mat<GF2> probability_matrix;
+        char ** probability_matrix;
+        size_t probability_matrix_rows;
       public:
         /* Constructors */
         KeyParameters() : // 128-bit security, parameters recommended by the original paper
           KeyParameters(512, 52.0f, 2766, 19, ZZ(4194303), ZZ(3173), 23, conv<ZZ>("39960577")) {}
         KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, long d, ZZ q);
         KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, long d, ZZ q, ZZX a1, ZZX a2);
+
+        /* Destructors */
+        ~KeyParameters() {
+          for (size_t i = 0; i < probability_matrix_rows; i++) {
+            free(probability_matrix[i]);
+          }
+          free(probability_matrix);
+        }
 
         /* Getters */
         const Pair<ZZX, ZZX> & GetPolyConstants() const { return a; }
@@ -62,7 +71,9 @@ namespace rlwe {
         const ZZ & GetB() const { return B; } /* TODO: Fix names for these two getters */
         const ZZ & GetU() const { return U; }
         const ZZ & GetCoeffModulus() const { return q; }
-        const Mat<GF2> & GetProbabilityMatrix() const { return probability_matrix; }
+        char ** GetProbabilityMatrix() const { return probability_matrix; }
+        size_t GetProbabilityMatrixRows() const { return probability_matrix_rows; }
+
 
         /* Display to output stream */
         friend std::ostream& operator<< (std::ostream& stream, const KeyParameters & params) {

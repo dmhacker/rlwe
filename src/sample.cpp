@@ -4,8 +4,6 @@
 #include <NTL/ZZ_pX.h>
 #include <NTL/GF2X.h>
 
-#define PROBABILITY_MATRIX_PRECISION 64
-
 ZZX rlwe::UniformSample(long len, ZZ maximum) {
   ZZX poly;
   if (maximum == 2) {
@@ -34,12 +32,7 @@ ZZX rlwe::UniformSample(long len, ZZ minimum, ZZ maximum) {
   return poly;
 }
 
-Mat<GF2> rlwe::KnuthYaoGaussianMatrix(float standard_deviation, long bound) {
-  Mat<GF2> probability_matrix;
-
-  // Create probability matrix using sigma
-  probability_matrix.SetDims(bound, PROBABILITY_MATRIX_PRECISION); 
-
+void rlwe::KnuthYaoGaussianMatrix(char ** probability_matrix, size_t bound, float standard_deviation) {
   // Calculate some constants
   float variance = standard_deviation * standard_deviation;
   float pi2 = atan(1) * 8; 
@@ -68,26 +61,21 @@ Mat<GF2> rlwe::KnuthYaoGaussianMatrix(float standard_deviation, long bound) {
 
     // Fill in the row of the matrix
     float check_value = 0.5f;
-    for (int j = 0; j < PROBABILITY_MATRIX_PRECISION; j++) {
+    for (int j = 0; j < PROBABILITY_MATRIX_BIT_PRECISION; j++) {
       if (probability > check_value) {
-        probability_matrix[i][j] = 1;
+        probability_matrix[i][j / 8] |= (1 << (7 - j % 8));
         probability -= check_value;
-      }
-      else {
-        probability_matrix[i][j] = 0;
       }
       check_value /= 2;
     }
   }
-
-  return probability_matrix;
 }
 
-ZZX rlwe::KnuthYaoSample(long len, const Mat<GF2> & probability_matrix) {
+ZZX rlwe::KnuthYaoSample(long len, char ** probability_matrix, size_t num_rows) {
   ZZX poly;
 
   // Perform the Knuth-Yao sampling algorithm and navigate the DDG
-  int last_row = probability_matrix.NumRows() - 1;
+  int last_row = num_rows - 1; 
   for (long i = 0; i < len; i++) {
     // Setup: initialize random bit, counters, etc.
     GF2 r;
@@ -102,7 +90,7 @@ ZZX rlwe::KnuthYaoSample(long len, const Mat<GF2> & probability_matrix) {
 
       // Iterate through rows of probability matrix
       for (int row = last_row; row >= 0; row--) {
-        d -= IsOne(probability_matrix[row][col]);
+        d -= ((probability_matrix[row][col / 8] >> (7 - col % 8)) & 1); 
 
         // Reached terminal node in the DDG
         if (d == -1) {
