@@ -27,8 +27,13 @@ namespace rlwe {
     EvaluationKey GenerateEvaluationKey(const PrivateKey & priv, long level);
 
     /* Procedural encoding/decoding */
-    Plaintext EncodeInteger(ZZ integer, const KeyParameters & params);
-    ZZ DecodeInteger(const Plaintext & plaintext, const KeyParameters & params);
+    /* NOTE: Any time the base is not given, it is assumed to be 2 */
+    Plaintext EncodeInteger(long integer, const KeyParameters & params);
+    Plaintext EncodeInteger(long integer, unsigned long base, const KeyParameters & params);
+    Plaintext EncodeInteger(const ZZ & integer, const KeyParameters & params);
+    Plaintext EncodeInteger(const ZZ & integer, unsigned long base, const KeyParameters & params);
+    ZZ DecodeInteger(const Plaintext & plaintext);
+    ZZ DecodeInteger(const Plaintext & plaintext, unsigned long base);
 
     /* Procedural encryption/decryption */
     Ciphertext Encrypt(const Plaintext & plaintext, const PublicKey & pub);

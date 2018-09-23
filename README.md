@@ -47,7 +47,7 @@ fv::Ciphertext ctx = fv::Encrypt(ptx, pub);
 fv::Plaintext dptx = fv::Decrypt(ctx, priv);
 
 // Prints "1337"
-std::cout << fv::DecodeInteger(dptx, params) << std::endl;
+std::cout << fv::DecodeInteger(dptx) << std::endl;
 ```
 
 ## Installation
