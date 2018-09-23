@@ -4,8 +4,6 @@
 #include <NTL/ZZ_pX.h>
 #include <cassert>
 
-#define BOUNDS_SCALAR 6
-
 using namespace rlwe;
 using namespace rlwe::fv;
 
@@ -36,12 +34,8 @@ KeyParameters::KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma) :
   l = floor(log(q) / log(w));
 
   // Generate probability matrix
-  pmat_rows = sigma * BOUNDS_SCALAR;
-  pmat = (char **) malloc(pmat_rows * sizeof(char *));
-  for (size_t i = 0; i < pmat_rows; i++) {
-    pmat[i] = (char *) calloc(PROBABILITY_MATRIX_BYTE_PRECISION, sizeof(char));
-  }
-  KnuthYaoGaussianMatrix(pmat, pmat_rows, sigma); 
+  pmat_rows = sigma * PROBABILITY_MATRIX_BOUNDS_SCALAR;
+  pmat = KnuthYaoGaussianMatrix(pmat_rows, sigma); 
 }
 
 PrivateKey fv::GeneratePrivateKey(const KeyParameters & params) {

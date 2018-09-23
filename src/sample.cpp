@@ -32,7 +32,13 @@ ZZX rlwe::UniformSample(long len, ZZ minimum, ZZ maximum) {
   return poly;
 }
 
-void rlwe::KnuthYaoGaussianMatrix(char ** pmat, size_t pmat_rows, float sigma) {
+char ** rlwe::KnuthYaoGaussianMatrix(size_t pmat_rows, float sigma) {
+  // Allocate matrix on the heap
+  char ** pmat = (char **) malloc(pmat_rows * sizeof(char *));
+  for (size_t i = 0; i < pmat_rows; i++) {
+    pmat[i] = (char *) calloc(PROBABILITY_MATRIX_BYTE_PRECISION, sizeof(char));
+  }
+
   // Calculate some constants
   float variance = sigma * sigma;
   float pi2 = atan(1) * 8; 
@@ -69,6 +75,8 @@ void rlwe::KnuthYaoGaussianMatrix(char ** pmat, size_t pmat_rows, float sigma) {
       check_value /= 2;
     }
   }
+
+  return pmat;
 }
 
 ZZX rlwe::KnuthYaoSample(long len, char ** pmat, size_t pmat_rows) {

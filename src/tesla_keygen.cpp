@@ -6,8 +6,6 @@
 #include <algorithm>    
 #include <vector>      
 
-#define BOUNDS_SCALAR 6
-
 using namespace rlwe;
 using namespace rlwe::tesla;
 
@@ -35,12 +33,8 @@ KeyParameters::KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, lo
   build(phi, cyclotomic);
 
   // Generate probability matrix
-  pmat_rows = sigma * BOUNDS_SCALAR;
-  pmat = (char **) malloc(pmat_rows * sizeof(char *));
-  for (size_t i = 0; i < pmat_rows; i++) {
-    pmat[i] = (char *) calloc(PROBABILITY_MATRIX_BYTE_PRECISION, sizeof(char));
-  }
-  KnuthYaoGaussianMatrix(pmat, pmat_rows, sigma); 
+  pmat_rows = sigma * PROBABILITY_MATRIX_BOUNDS_SCALAR;
+  pmat = KnuthYaoGaussianMatrix(pmat_rows, sigma); 
 }
 
 bool CheckError(const ZZX & e, long w, long L) {
