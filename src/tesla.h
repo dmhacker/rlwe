@@ -42,8 +42,8 @@ namespace rlwe {
         /* Calculated */
         ZZ pow_2d;
         ZZ_pXModulus phi;
-        char ** probability_matrix;
-        size_t probability_matrix_rows;
+        char ** pmat;
+        size_t pmat_rows;
       public:
         /* Constructors */
         KeyParameters() : // 128-bit security, parameters recommended by the original paper
@@ -53,10 +53,10 @@ namespace rlwe {
 
         /* Destructors */
         ~KeyParameters() {
-          for (size_t i = 0; i < probability_matrix_rows; i++) {
-            free(probability_matrix[i]);
+          for (size_t i = 0; i < pmat_rows; i++) {
+            free(pmat[i]);
           }
-          free(probability_matrix);
+          free(pmat);
         }
 
         /* Getters */
@@ -71,8 +71,8 @@ namespace rlwe {
         const ZZ & GetB() const { return B; } /* TODO: Fix names for these two getters */
         const ZZ & GetU() const { return U; }
         const ZZ & GetCoeffModulus() const { return q; }
-        char ** GetProbabilityMatrix() const { return probability_matrix; }
-        size_t GetProbabilityMatrixRows() const { return probability_matrix_rows; }
+        char ** GetProbabilityMatrix() const { return pmat; }
+        size_t GetProbabilityMatrixRows() const { return pmat_rows; }
 
 
         /* Display to output stream */

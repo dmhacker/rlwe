@@ -32,15 +32,15 @@ ZZX rlwe::UniformSample(long len, ZZ minimum, ZZ maximum) {
   return poly;
 }
 
-void rlwe::KnuthYaoGaussianMatrix(char ** probability_matrix, size_t bound, float standard_deviation) {
+void rlwe::KnuthYaoGaussianMatrix(char ** pmat, size_t pmat_rows, float sigma) {
   // Calculate some constants
-  float variance = standard_deviation * standard_deviation;
+  float variance = sigma * sigma;
   float pi2 = atan(1) * 8; 
 
   // Calculate probabilities and the total they sum to
   float total = 0;
-  float probabilities[bound];
-  for (int i = 0; i < bound; i++) {
+  float probabilities[pmat_rows];
+  for (int i = 0; i < pmat_rows; i++) {
     // Calculate probability using a Gaussian PDF 
     probabilities[i] = 1.0f / sqrt(pi2 * variance) * exp(-i * i / 2.0f / variance);
 
@@ -55,7 +55,7 @@ void rlwe::KnuthYaoGaussianMatrix(char ** probability_matrix, size_t bound, floa
   }
 
   float scaling_factor = 1.0f / total;
-  for (int i = 0; i < bound; i++) {
+  for (int i = 0; i < pmat_rows; i++) {
     // Calculate scaled version of probability (so everything sums to 1)
     float probability = probabilities[i] * scaling_factor; 
 
@@ -63,7 +63,7 @@ void rlwe::KnuthYaoGaussianMatrix(char ** probability_matrix, size_t bound, floa
     float check_value = 0.5f;
     for (int j = 0; j < PROBABILITY_MATRIX_BIT_PRECISION; j++) {
       if (probability > check_value) {
-        probability_matrix[i][j / 8] |= (1 << (7 - j % 8));
+        pmat[i][j / 8] |= (1 << (7 - j % 8));
         probability -= check_value;
       }
       check_value /= 2;
@@ -71,11 +71,11 @@ void rlwe::KnuthYaoGaussianMatrix(char ** probability_matrix, size_t bound, floa
   }
 }
 
-ZZX rlwe::KnuthYaoSample(long len, char ** probability_matrix, size_t num_rows) {
+ZZX rlwe::KnuthYaoSample(long len, char ** pmat, size_t pmat_rows) {
   ZZX poly;
 
   // Perform the Knuth-Yao sampling algorithm and navigate the DDG
-  int last_row = num_rows - 1; 
+  int last_row = pmat_rows - 1; 
   for (long i = 0; i < len; i++) {
     // Setup: initialize random bit, counters, etc.
     GF2 r;
@@ -90,7 +90,7 @@ ZZX rlwe::KnuthYaoSample(long len, char ** probability_matrix, size_t num_rows) 
 
       // Iterate through rows of probability matrix
       for (int row = last_row; row >= 0; row--) {
-        d -= ((probability_matrix[row][col / 8] >> (7 - col % 8)) & 1); 
+        d -= ((pmat[row][col / 8] >> (7 - col % 8)) & 1); 
 
         // Reached terminal node in the DDG
         if (d == -1) {

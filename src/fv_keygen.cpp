@@ -36,12 +36,12 @@ KeyParameters::KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma) :
   l = floor(log(q) / log(w));
 
   // Generate probability matrix
-  probability_matrix_rows = sigma * BOUNDS_SCALAR;
-  probability_matrix = (char **) malloc(probability_matrix_rows * sizeof(char *));
-  for (size_t i = 0; i < probability_matrix_rows; i++) {
-    probability_matrix[i] = (char *) calloc(PROBABILITY_MATRIX_BYTE_PRECISION, sizeof(char));
+  pmat_rows = sigma * BOUNDS_SCALAR;
+  pmat = (char **) malloc(pmat_rows * sizeof(char *));
+  for (size_t i = 0; i < pmat_rows; i++) {
+    pmat[i] = (char *) calloc(PROBABILITY_MATRIX_BYTE_PRECISION, sizeof(char));
   }
-  KnuthYaoGaussianMatrix(probability_matrix, probability_matrix_rows, sigma); 
+  KnuthYaoGaussianMatrix(pmat, pmat_rows, sigma); 
 }
 
 PrivateKey fv::GeneratePrivateKey(const KeyParameters & params) {

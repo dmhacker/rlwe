@@ -49,8 +49,8 @@ namespace rlwe {
         ZZ w;
         ZZ w_mask;
         long l;
-        char ** probability_matrix;
-        size_t probability_matrix_rows; 
+        char ** pmat;
+        size_t pmat_rows; 
       public:
         /* Constructors */
         KeyParameters(long n, long q, long t) : KeyParameters(n, ZZ(q), ZZ(t)) {}
@@ -59,10 +59,10 @@ namespace rlwe {
         
         /* Destructors */
         ~KeyParameters() {
-          for (size_t i = 0; i < probability_matrix_rows; i++) {
-            free(probability_matrix[i]);
+          for (size_t i = 0; i < pmat_rows; i++) {
+            free(pmat[i]);
           }
-          free(probability_matrix);
+          free(pmat);
         }
 
         /* Getters */
@@ -77,8 +77,8 @@ namespace rlwe {
         const ZZ & GetDecompositionBitMask() const { return w_mask; }
         long GetDecompositionBitCount() const { return log_w; }
         long GetDecompositionTermCount() const { return l; }
-        char ** GetProbabilityMatrix() const { return probability_matrix; }
-        size_t GetProbabilityMatrixRows() const { return probability_matrix_rows; }
+        char ** GetProbabilityMatrix() const { return pmat; }
+        size_t GetProbabilityMatrixRows() const { return pmat_rows; }
 
         /* Display to output stream */
         friend std::ostream& operator<< (std::ostream& stream, const KeyParameters& params) {

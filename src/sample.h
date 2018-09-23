@@ -14,7 +14,7 @@ namespace rlwe {
   // Uniformly samples a polynomial of the given length, where the coefficients lie in [0, max)
   ZZX UniformSample(long len, ZZ maximum_exclusive);
   // Populates a compressed binary probability matrix for use in the Knuth-Yao sampling algorithm
-  void KnuthYaoGaussianMatrix(char ** probability_matrix, size_t bound, float standard_deviation);
+  void KnuthYaoGaussianMatrix(char ** pmat, size_t pmat_rows, float sigma);
   // Samples a polynomial of the given length, where each coefficient is taken from a binary probability matrix 
-  ZZX KnuthYaoSample(long len, char ** probability_matrix, size_t num_rows);
+  ZZX KnuthYaoSample(long len, char ** pmat, size_t pmat_rows);
 }
