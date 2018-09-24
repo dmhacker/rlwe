@@ -1,6 +1,6 @@
 #include "catch.hpp"
-#include "../src/tesla.h"
-#include "../src/sample.h"
+#include "tesla.h"
+#include "sample.h"
 
 using namespace rlwe;
 using namespace rlwe::tesla;

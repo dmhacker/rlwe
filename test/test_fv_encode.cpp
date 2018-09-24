@@ -1,8 +1,6 @@
 #include "catch.hpp"
-#include "../src/fv.h"
-#include "../src/polyutil.h"
-
-#include <random>
+#include "fv.h"
+#include "polyutil.h"
 
 using namespace rlwe::fv;
 

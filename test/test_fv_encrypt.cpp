@@ -1,6 +1,6 @@
 #include "catch.hpp"
-#include "../src/fv.h"
-#include "../src/sample.h"
+#include "fv.h"
+#include "sample.h"
 
 using namespace rlwe;
 using namespace rlwe::fv;
