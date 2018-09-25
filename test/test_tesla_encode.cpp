@@ -15,8 +15,9 @@ TEST_CASE("Encoding a hash value into a polynomial") {
   std::string message = "woweee!";
   
   // Produce a hash and initial encoding 
+  ZZX output;
   Hash(hsh, p1, p2, message, params);
-  ZZX output = Encode(hsh, params);
+  Encode(output, hsh, params);
 
   // Count the number of non-zero coefficients
   int w = 0;
@@ -34,6 +35,7 @@ TEST_CASE("Encoding a hash value into a polynomial") {
   REQUIRE(NTL::deg(output) < params.GetPolyModulusDegree());
 
   // Assert that the output is deterministic and can be replicated
-  ZZX replicated = Encode(hsh, params);
+  ZZX replicated;
+  Encode(replicated, hsh, params);
   REQUIRE(output == replicated);
 }

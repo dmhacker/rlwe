@@ -8,18 +8,6 @@
 using namespace rlwe;
 using namespace rlwe::fv;
 
-Ciphertext fv::Encrypt(const Plaintext & ptx, const PublicKey & pub) {
-  Ciphertext ctx(pub.GetParameters());
-  Encrypt(ctx, ptx, pub);
-  return ctx;
-}
-
-Plaintext fv::Decrypt(const Ciphertext & ctx, const PrivateKey & priv) {
-  Plaintext ptx(priv.GetParameters());
-  Decrypt(ptx, ctx, priv);
-  return ptx;
-}
-
 void fv::Encrypt(Ciphertext & ctx, const Plaintext & ptx, const PublicKey & pub) {
   const KeyParameters & params = pub.GetParameters();
   assert(params == ctx.GetParameters());
@@ -85,4 +73,16 @@ void fv::Decrypt(Plaintext & ptx, const Ciphertext & ctx, const PrivateKey & pri
   RoundCoeffs(message, message, params.GetCoeffToPlainScalar(), params.GetPlainModulus());  
 
   ptx.SetMessage(message);
+}
+
+Ciphertext fv::Encrypt(const Plaintext & ptx, const PublicKey & pub) {
+  Ciphertext ctx(pub.GetParameters());
+  Encrypt(ctx, ptx, pub);
+  return ctx;
+}
+
+Plaintext fv::Decrypt(const Ciphertext & ctx, const PrivateKey & priv) {
+  Plaintext ptx(priv.GetParameters());
+  Decrypt(ptx, ctx, priv);
+  return ptx;
 }

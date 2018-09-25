@@ -38,33 +38,6 @@ KeyParameters::KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma) :
   pmat = KnuthYaoGaussianMatrix(pmat_rows, sigma); 
 }
 
-PrivateKey fv::GeneratePrivateKey(const KeyParameters & params) {
-  PrivateKey priv(params);
-  GeneratePrivateKey(priv);
-  return priv;
-}
-
-PublicKey fv::GeneratePublicKey(const PrivateKey & priv) {
-  const KeyParameters & params = priv.GetParameters();
-  PublicKey pub(params);
-  GeneratePublicKey(pub, priv);
-  return pub;
-}
-
-PublicKey fv::GeneratePublicKey(const PrivateKey & priv, const ZZX & a, const ZZX & e) {
-  const KeyParameters & params = priv.GetParameters();
-  PublicKey pub(params);
-  GeneratePublicKey(pub, priv, a, e);
-  return pub;
-}
-
-EvaluationKey fv::GenerateEvaluationKey(const PrivateKey & priv, long level) {
-  const KeyParameters & params = priv.GetParameters();
-  EvaluationKey elk(params);
-  GenerateEvaluationKey(elk, priv, level);
-  return elk;
-}
-
 void fv::GeneratePrivateKey(PrivateKey & priv) {
   const KeyParameters & params = priv.GetParameters();
   priv.SetSecret(UniformSample(params.GetPolyModulusDegree(), ZZ(-1), ZZ(2)));
@@ -173,4 +146,31 @@ void fv::GenerateEvaluationKey(EvaluationKey & elk, const PrivateKey & priv, lon
     // Right shift by the word size (e.g. multiply by the base)
     tmp_w *= conv<ZZ_p>(params.GetDecompositionBase());
   }
+}
+
+PrivateKey fv::GeneratePrivateKey(const KeyParameters & params) {
+  PrivateKey priv(params);
+  GeneratePrivateKey(priv);
+  return priv;
+}
+
+PublicKey fv::GeneratePublicKey(const PrivateKey & priv) {
+  const KeyParameters & params = priv.GetParameters();
+  PublicKey pub(params);
+  GeneratePublicKey(pub, priv);
+  return pub;
+}
+
+PublicKey fv::GeneratePublicKey(const PrivateKey & priv, const ZZX & a, const ZZX & e) {
+  const KeyParameters & params = priv.GetParameters();
+  PublicKey pub(params);
+  GeneratePublicKey(pub, priv, a, e);
+  return pub;
+}
+
+EvaluationKey fv::GenerateEvaluationKey(const PrivateKey & priv, long level) {
+  const KeyParameters & params = priv.GetParameters();
+  EvaluationKey elk(params);
+  GenerateEvaluationKey(elk, priv, level);
+  return elk;
 }

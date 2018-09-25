@@ -15,17 +15,17 @@ namespace rlwe {
     class VerificationKey;
     class Signature;
 
-    /* Procedural key generation */
+    /* Key generation */
     SigningKey GenerateSigningKey(const KeyParameters & params);
     VerificationKey GenerateVerificationKey(const SigningKey & signer);
 
-    /* Procedural hashing & encoding */
-    void Hash(unsigned char * output, const ZZX & p1, const ZZX & p2, const std::string & message, const KeyParameters & params);
-    ZZX Encode(const unsigned char * hash_val, const KeyParameters & params); 
-
-    /* Procedural signing/verifying */
+    /* Signing & verifying */
     Signature Sign(const std::string & message, const SigningKey & signer);
     bool Verify(const std::string & message, const Signature & sig, const VerificationKey & verif);
+
+    /* Util functions */
+    void Hash(unsigned char * output, const ZZX & p1, const ZZX & p2, const std::string & message, const KeyParameters & params);
+    void Encode(ZZX & dest, const unsigned char * hash_val, const KeyParameters & params); 
 
     class KeyParameters {
       private:

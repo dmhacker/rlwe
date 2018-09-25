@@ -21,26 +21,18 @@ namespace rlwe {
     class Ciphertext;
 
     /* Key generation */
-    PrivateKey GeneratePrivateKey(const KeyParameters & params);
-    PublicKey GeneratePublicKey(const PrivateKey & priv);
-    PublicKey GeneratePublicKey(const PrivateKey & priv, const ZZX & a, const ZZX & e);
-    EvaluationKey GenerateEvaluationKey(const PrivateKey & priv, long level);
-
-    /* Procedural variants */
     void GeneratePrivateKey(PrivateKey & priv);
     void GeneratePublicKey(PublicKey & pub, const PrivateKey & priv);
     void GeneratePublicKey(PublicKey & pub, const PrivateKey & priv, const ZZX & a, const ZZX & e);
     void GenerateEvaluationKey(EvaluationKey & elk, const PrivateKey & priv, long level);
 
-    /* Encoding & decoding (if the base is not given, it is assumed to be 2) */
-    Plaintext EncodeInteger(long integer, const KeyParameters & params);
-    Plaintext EncodeInteger(long integer, unsigned long base, const KeyParameters & params);
-    Plaintext EncodeInteger(const ZZ & integer, const KeyParameters & params);
-    Plaintext EncodeInteger(const ZZ & integer, unsigned long base, const KeyParameters & params);
-    ZZ DecodeInteger(const Plaintext & ptx);
-    ZZ DecodeInteger(const Plaintext & ptx, unsigned long base);
+    /* Object-oriented variants */
+    PrivateKey GeneratePrivateKey(const KeyParameters & params);
+    PublicKey GeneratePublicKey(const PrivateKey & priv);
+    PublicKey GeneratePublicKey(const PrivateKey & priv, const ZZX & a, const ZZX & e);
+    EvaluationKey GenerateEvaluationKey(const PrivateKey & priv, long level);
 
-    /* Procedural variants */
+    /* Encoding & decoding (if the base is not given, it is assumed to be 2) */
     void EncodeInteger(Plaintext & ptx, long integer);
     void EncodeInteger(Plaintext & ptx, long integer, unsigned long base);
     void EncodeInteger(Plaintext & ptx, const ZZ & integer);
@@ -48,13 +40,21 @@ namespace rlwe {
     void DecodeInteger(ZZ & integer, const Plaintext & ptx);
     void DecodeInteger(ZZ & integer, const Plaintext & ptx, unsigned long base);
 
-    /* Encryption & decryption */
-    Ciphertext Encrypt(const Plaintext & ptx, const PublicKey & pub);
-    Plaintext Decrypt(const Ciphertext & ctx, const PrivateKey & priv);
+    /* Object-oriented variants */
+    Plaintext EncodeInteger(long integer, const KeyParameters & params);
+    Plaintext EncodeInteger(long integer, unsigned long base, const KeyParameters & params);
+    Plaintext EncodeInteger(const ZZ & integer, const KeyParameters & params);
+    Plaintext EncodeInteger(const ZZ & integer, unsigned long base, const KeyParameters & params);
+    ZZ DecodeInteger(const Plaintext & ptx);
+    ZZ DecodeInteger(const Plaintext & ptx, unsigned long base);
 
-    /* Procedural variants */
+    /* Encryption & decryption */
     void Encrypt(Ciphertext & ctx, const Plaintext & ptx, const PublicKey & pub);
     void Decrypt(Plaintext & ptx, const Ciphertext & ctx, const PrivateKey & priv);
+
+    /* Object-oriented variants */
+    Ciphertext Encrypt(const Plaintext & ptx, const PublicKey & pub);
+    Plaintext Decrypt(const Ciphertext & ctx, const PrivateKey & priv);
 
     class KeyParameters {
       private:

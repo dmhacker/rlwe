@@ -5,42 +5,6 @@
 using namespace rlwe;
 using namespace rlwe::fv;
 
-Plaintext fv::EncodeInteger(long integer, const KeyParameters & params) {
-  Plaintext ptx(params);
-  EncodeInteger(ptx, ZZ(integer));
-  return ptx;
-}
-
-Plaintext fv::EncodeInteger(long integer, unsigned long base, const KeyParameters & params) {
-  Plaintext ptx(params);
-  EncodeInteger(ptx, ZZ(integer), base);
-  return ptx;
-}
-
-Plaintext fv::EncodeInteger(const ZZ & integer, const KeyParameters & params) {
-  Plaintext ptx(params);
-  EncodeInteger(ptx, integer); 
-  return ptx;
-}
-
-Plaintext fv::EncodeInteger(const ZZ & integer, unsigned long base, const KeyParameters & params) {
-  Plaintext ptx(params);
-  EncodeInteger(ptx, integer, base); 
-  return ptx;
-}
-
-ZZ fv::DecodeInteger(const Plaintext & ptx) {
-  ZZ integer;
-  DecodeInteger(integer, ptx);
-  return integer;
-}
-
-ZZ fv::DecodeInteger(const Plaintext & ptx, unsigned long base) {
-  ZZ integer;
-  DecodeInteger(integer, ptx, base);
-  return integer;
-}
-
 void fv::EncodeInteger(Plaintext & ptx, long integer) {
   EncodeInteger(ptx, ZZ(integer));  
 }
@@ -132,4 +96,40 @@ void fv::DecodeInteger(ZZ & integer, const Plaintext & plaintext, unsigned long 
     // x increases by a factor of the given base 
     x *= base;
   }
+}
+
+Plaintext fv::EncodeInteger(long integer, const KeyParameters & params) {
+  Plaintext ptx(params);
+  EncodeInteger(ptx, ZZ(integer));
+  return ptx;
+}
+
+Plaintext fv::EncodeInteger(long integer, unsigned long base, const KeyParameters & params) {
+  Plaintext ptx(params);
+  EncodeInteger(ptx, ZZ(integer), base);
+  return ptx;
+}
+
+Plaintext fv::EncodeInteger(const ZZ & integer, const KeyParameters & params) {
+  Plaintext ptx(params);
+  EncodeInteger(ptx, integer); 
+  return ptx;
+}
+
+Plaintext fv::EncodeInteger(const ZZ & integer, unsigned long base, const KeyParameters & params) {
+  Plaintext ptx(params);
+  EncodeInteger(ptx, integer, base); 
+  return ptx;
+}
+
+ZZ fv::DecodeInteger(const Plaintext & ptx) {
+  ZZ integer;
+  DecodeInteger(integer, ptx);
+  return integer;
+}
+
+ZZ fv::DecodeInteger(const Plaintext & ptx, unsigned long base) {
+  ZZ integer;
+  DecodeInteger(integer, ptx, base);
+  return integer;
 }
