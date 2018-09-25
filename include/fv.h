@@ -20,24 +20,41 @@ namespace rlwe {
     class Plaintext;
     class Ciphertext;
 
-    /* Procedural key generation */
+    /* Key generation */
     PrivateKey GeneratePrivateKey(const KeyParameters & params);
     PublicKey GeneratePublicKey(const PrivateKey & priv);
-    PublicKey GeneratePublicKey(const PrivateKey & priv, const ZZX & shared_a, const ZZX & shared_e);
+    PublicKey GeneratePublicKey(const PrivateKey & priv, const ZZX & a, const ZZX & e);
     EvaluationKey GenerateEvaluationKey(const PrivateKey & priv, long level);
 
-    /* Procedural encoding/decoding */
-    /* NOTE: Any time the base is not given, it is assumed to be 2 */
+    /* Procedural variants */
+    void GeneratePrivateKey(PrivateKey & priv);
+    void GeneratePublicKey(PublicKey & pub, const PrivateKey & priv);
+    void GeneratePublicKey(PublicKey & pub, const PrivateKey & priv, const ZZX & a, const ZZX & e);
+    void GenerateEvaluationKey(EvaluationKey & elk, const PrivateKey & priv, long level);
+
+    /* Encoding & decoding (if the base is not given, it is assumed to be 2) */
     Plaintext EncodeInteger(long integer, const KeyParameters & params);
     Plaintext EncodeInteger(long integer, unsigned long base, const KeyParameters & params);
     Plaintext EncodeInteger(const ZZ & integer, const KeyParameters & params);
     Plaintext EncodeInteger(const ZZ & integer, unsigned long base, const KeyParameters & params);
-    ZZ DecodeInteger(const Plaintext & plaintext);
-    ZZ DecodeInteger(const Plaintext & plaintext, unsigned long base);
+    ZZ DecodeInteger(const Plaintext & ptx);
+    ZZ DecodeInteger(const Plaintext & ptx, unsigned long base);
 
-    /* Procedural encryption/decryption */
-    Ciphertext Encrypt(const Plaintext & plaintext, const PublicKey & pub);
-    Plaintext Decrypt(const Ciphertext & ciphertext, const PrivateKey & priv);
+    /* Procedural variants */
+    void EncodeInteger(Plaintext & ptx, long integer);
+    void EncodeInteger(Plaintext & ptx, long integer, unsigned long base);
+    void EncodeInteger(Plaintext & ptx, const ZZ & integer);
+    void EncodeInteger(Plaintext & ptx, const ZZ & integer, unsigned long base);
+    void DecodeInteger(ZZ & integer, const Plaintext & ptx);
+    void DecodeInteger(ZZ & integer, const Plaintext & ptx, unsigned long base);
+
+    /* Encryption & decryption */
+    Ciphertext Encrypt(const Plaintext & ptx, const PublicKey & pub);
+    Plaintext Decrypt(const Ciphertext & ctx, const PrivateKey & priv);
+
+    /* Procedural variants */
+    void Encrypt(Ciphertext & ctx, const Plaintext & ptx, const PublicKey & pub);
+    void Decrypt(Plaintext & ptx, const Ciphertext & ctx, const PrivateKey & priv);
 
     class KeyParameters {
       private:
@@ -102,7 +119,7 @@ namespace rlwe {
         const KeyParameters & params;
       public:
         /* Constructors */
-        PrivateKey(const ZZX & secret, const KeyParameters & params) : s(secret), params(params) {}
+        PrivateKey(const KeyParameters & params) : params(params) {}
 
         /* Getters */
         const ZZX & GetSecret() const { 
@@ -110,6 +127,11 @@ namespace rlwe {
         }
         const KeyParameters & GetParameters() const { 
           return params; 
+        }
+
+        /* Setters */
+        void SetSecret(const ZZX & secret) {
+          this->s = secret;
         }
 
         /* Display to output stream */
@@ -124,7 +146,7 @@ namespace rlwe {
         const KeyParameters & params;
       public:
         /* Constructors */
-        PublicKey(const ZZX & p0, const ZZX & p1, const KeyParameters & params) : p(p0, p1), params(params) {}
+        PublicKey(const KeyParameters & params) : params(params) {}
 
         /* Getters */
         const Pair<ZZX, ZZX> & GetValues() const {
@@ -132,6 +154,12 @@ namespace rlwe {
         }
         const KeyParameters & GetParameters() const { 
           return params; 
+        }
+
+        /* Setters */
+        void SetValues(const ZZX & p0, const ZZX & p1) {
+          this->p.a = p0;
+          this->p.b = p1;
         }
 
         /* Display to output stream */
@@ -147,7 +175,7 @@ namespace rlwe {
         const KeyParameters & params;
       public:
         /* Constructors */
-        EvaluationKey(Vec<Pair<ZZX, ZZX>> r, long level, const KeyParameters & params) : r(r), level(level), params(params) {}
+        EvaluationKey(const KeyParameters & params) : params(params) {}
 
         /* Getters */
         const Pair<ZZX, ZZX> & operator[] (int index) const {
@@ -163,6 +191,18 @@ namespace rlwe {
           return params; 
         }
 
+        /* Setters */
+        Pair<ZZX, ZZX> & operator[] (int index) {
+          return r[index]; 
+        }
+        void SetLevel(long level) {
+          this->level = level;
+        }
+        void SetLength(long len) {
+          this->r.SetLength(len);
+        }
+
+
         /* Display to output stream */
         friend std::ostream& operator<< (std::ostream& stream, const EvaluationKey & elk) {
           return stream << elk.r; 
@@ -175,7 +215,7 @@ namespace rlwe {
         const KeyParameters & params;
       public:
         /* Constructors */
-        Plaintext(ZZX m, const KeyParameters & params) : m(m), params(params) {}
+        Plaintext(const KeyParameters & params) : params(params) {}
 
         /* Getters */
         const ZZX & GetMessage() const { 
@@ -183,6 +223,11 @@ namespace rlwe {
         }
         const KeyParameters & GetParameters() const { 
           return params; 
+        }
+
+        /* Setters */
+        void SetMessage(const ZZX & message) {
+          this->m = message;
         }
 
         /* Equality */
@@ -202,12 +247,7 @@ namespace rlwe {
         const KeyParameters & params;
       public:
         /* Constructors */
-        Ciphertext(ZZX c0, ZZX c1, const KeyParameters & params) : params(params) {
-          c.SetLength(2);
-          c[0] = c0;
-          c[1] = c1;
-        }
-        Ciphertext(Vec<ZZX> c, const KeyParameters & params) : c(c), params(params) {}
+        Ciphertext(const KeyParameters & params) : params(params) {}
         Ciphertext(const Ciphertext & ct) : c(ct.c), params(ct.params) {}
 
         /* Getters */
@@ -219,6 +259,14 @@ namespace rlwe {
         }
         const KeyParameters & GetParameters() const { 
           return params; 
+        }
+
+        /* Setters */
+        ZZX & operator[] (int index) {
+          return c[index];
+        }
+        void SetLength(long len) {
+          this->c.SetLength(len);
         }
 
         /* Somewhat homomorphic encryption */

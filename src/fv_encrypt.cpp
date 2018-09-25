@@ -8,17 +8,29 @@
 using namespace rlwe;
 using namespace rlwe::fv;
 
-Ciphertext fv::Encrypt(const Plaintext & plaintext, const PublicKey & pub) {
-  // Make sure plaintext parameters and public key parameters are equal, otherwise encryption fails
-  assert(plaintext.GetParameters() == pub.GetParameters());
+Ciphertext fv::Encrypt(const Plaintext & ptx, const PublicKey & pub) {
+  Ciphertext ctx(pub.GetParameters());
+  Encrypt(ctx, ptx, pub);
+  return ctx;
+}
+
+Plaintext fv::Decrypt(const Ciphertext & ctx, const PrivateKey & priv) {
+  Plaintext ptx(priv.GetParameters());
+  Decrypt(ptx, ctx, priv);
+  return ptx;
+}
+
+void fv::Encrypt(Ciphertext & ctx, const Plaintext & ptx, const PublicKey & pub) {
   const KeyParameters & params = pub.GetParameters();
+  assert(params == ctx.GetParameters());
+  assert(params == ptx.GetParameters());
 
   // Set finite field modulus to be q
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
 
   // Upscale plaintext to be in ciphertext ring
-  ZZ_pX m = conv<ZZ_pX>(plaintext.GetMessage()) * conv<ZZ_p>(params.GetPlainToCoeffScalar());
+  ZZ_pX m = conv<ZZ_pX>(ptx.GetMessage()) * conv<ZZ_p>(params.GetPlainToCoeffScalar());
 
   // Draw u from uniform distribution over {-1, 0, 1}
   ZZ_pX u = conv<ZZ_pX>(UniformSample(params.GetPolyModulusDegree(), ZZ(-1), ZZ(2)));
@@ -41,13 +53,15 @@ Ciphertext fv::Encrypt(const Plaintext & plaintext, const PublicKey & pub) {
   MulMod(buffer, conv<ZZ_pX>(p.b), u, params.GetPolyModulus());
   ZZ_pX c2 = buffer + e2;
 
-  return Ciphertext(conv<ZZX>(c1), conv<ZZX>(c2), params);
+  ctx.SetLength(2);
+  ctx[0] = conv<ZZX>(c1);
+  ctx[1] = conv<ZZX>(c2);
 }
 
-Plaintext fv::Decrypt(const Ciphertext & ciphertext, const PrivateKey & priv) {
-  // Make sure plaintext parameters and private key parameters are equal, otherwise decryption fails
-  assert(ciphertext.GetParameters() == priv.GetParameters());
+void fv::Decrypt(Plaintext & ptx, const Ciphertext & ctx, const PrivateKey & priv) {
   const KeyParameters & params = priv.GetParameters();
+  assert(params == ptx.GetParameters());
+  assert(params == ctx.GetParameters());
 
   // Set finite field modulus to be q
   ZZ_pPush push;
@@ -59,16 +73,16 @@ Plaintext fv::Decrypt(const Ciphertext & ciphertext, const PrivateKey & priv) {
   ZZ_pX m;
   ZZ_pX buffer0;
   ZZ_pX buffer1;
-  for (long i = 0; i < ciphertext.GetLength(); i++) {
+  for (long i = 0; i < ctx.GetLength(); i++) {
     PowerMod(buffer0, secret, i, params.GetPolyModulus());
-    MulMod(buffer1, conv<ZZ_pX>(ciphertext[i]), buffer0, params.GetPolyModulus());
+    MulMod(buffer1, conv<ZZ_pX>(ctx[i]), buffer0, params.GetPolyModulus());
     m += buffer1;
   }
 
   // Downscale m to be in plaintext ring
-  ZZX plaintext = conv<ZZX>(m);
-  CenterCoeffs(plaintext, plaintext, params.GetCoeffModulus());
-  RoundCoeffs(plaintext, plaintext, params.GetCoeffToPlainScalar(), params.GetPlainModulus());  
+  ZZX message = conv<ZZX>(m);
+  CenterCoeffs(message, message, params.GetCoeffModulus());
+  RoundCoeffs(message, message, params.GetCoeffToPlainScalar(), params.GetPlainModulus());  
 
-  return Plaintext(plaintext, params);
+  ptx.SetMessage(message);
 }

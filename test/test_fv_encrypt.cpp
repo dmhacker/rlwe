@@ -7,21 +7,22 @@ using namespace rlwe::fv;
 
 TEST_CASE("Encryption & decryption using small parameters") {
   // Set up parameters
-  KeyParameters params(16, 874, 7);  
+  KeyParameters params(16, 1337, 7);  
 
   // Compute keys
   PrivateKey priv = GeneratePrivateKey(params);
   PublicKey pub = GeneratePublicKey(priv);
 
   // Generate random plaintext
-  Plaintext plaintext(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
+  Plaintext ptx(params);
+  ptx.SetMessage(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()));
 
   // Convert to ciphertext and then back to plaintext
-  Ciphertext ciphertext = Encrypt(plaintext, pub);
-  Plaintext decrypted = Decrypt(ciphertext, priv);
+  Ciphertext ctx = Encrypt(ptx, pub);
+  Plaintext dptx = Decrypt(ctx, priv);
 
   // Make sure the decrypted plaintext equals the original 
-  REQUIRE(plaintext == decrypted);
+  REQUIRE(ptx == dptx);
 }
 
 TEST_CASE("Encryption & decryption using large parameters") {
@@ -33,12 +34,13 @@ TEST_CASE("Encryption & decryption using large parameters") {
   PublicKey pub = GeneratePublicKey(priv);
 
   // Generate random plaintext
-  Plaintext plaintext(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
+  Plaintext ptx(params);
+  ptx.SetMessage(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()));
 
   // Convert to ciphertext and then back to plaintext
-  Ciphertext ciphertext = Encrypt(plaintext, pub);
-  Plaintext decrypted = Decrypt(ciphertext, priv);
+  Ciphertext ctx = Encrypt(ptx, pub);
+  Plaintext dptx = Decrypt(ctx, priv);
 
   // Make sure the decrypted plaintext equals the original 
-  REQUIRE(plaintext == decrypted);
+  REQUIRE(ptx == dptx);
 }

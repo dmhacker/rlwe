@@ -6,14 +6,52 @@ using namespace rlwe;
 using namespace rlwe::fv;
 
 Plaintext fv::EncodeInteger(long integer, const KeyParameters & params) {
-  return EncodeInteger(ZZ(integer), params);  
+  Plaintext ptx(params);
+  EncodeInteger(ptx, ZZ(integer));
+  return ptx;
 }
 
 Plaintext fv::EncodeInteger(long integer, unsigned long base, const KeyParameters & params) {
-  return EncodeInteger(ZZ(integer), base, params);  
+  Plaintext ptx(params);
+  EncodeInteger(ptx, ZZ(integer), base);
+  return ptx;
 }
 
 Plaintext fv::EncodeInteger(const ZZ & integer, const KeyParameters & params) {
+  Plaintext ptx(params);
+  EncodeInteger(ptx, integer); 
+  return ptx;
+}
+
+Plaintext fv::EncodeInteger(const ZZ & integer, unsigned long base, const KeyParameters & params) {
+  Plaintext ptx(params);
+  EncodeInteger(ptx, integer, base); 
+  return ptx;
+}
+
+ZZ fv::DecodeInteger(const Plaintext & ptx) {
+  ZZ integer;
+  DecodeInteger(integer, ptx);
+  return integer;
+}
+
+ZZ fv::DecodeInteger(const Plaintext & ptx, unsigned long base) {
+  ZZ integer;
+  DecodeInteger(integer, ptx, base);
+  return integer;
+}
+
+void fv::EncodeInteger(Plaintext & ptx, long integer) {
+  EncodeInteger(ptx, ZZ(integer));  
+}
+
+void fv::EncodeInteger(Plaintext & ptx, long integer, unsigned long base) {
+  EncodeInteger(ptx, ZZ(integer), base);  
+}
+
+void fv::EncodeInteger(Plaintext & ptx, const ZZ & integer) {
+  const KeyParameters & params = ptx.GetParameters(); 
+
   // Setup variables
   ZZX message;
 
@@ -29,15 +67,17 @@ Plaintext fv::EncodeInteger(const ZZ & integer, const KeyParameters & params) {
     message *= params.GetPlainModulus() - 1;
   }
 
-  return Plaintext(message, params);
+  ptx.SetMessage(message);
 }
 
-Plaintext fv::EncodeInteger(const ZZ & integer, unsigned long base, const KeyParameters & params) {
+void fv::EncodeInteger(Plaintext & ptx, const ZZ & integer, unsigned long base) {
   assert(base > 1);
+  const KeyParameters & params = ptx.GetParameters(); 
 
   // Use binary encoding algorithm if base is 2
   if (base == 2) {
-    return EncodeInteger(integer, params);
+    EncodeInteger(ptx, integer);
+    return;
   }
 
   // Setup variables 
@@ -61,19 +101,19 @@ Plaintext fv::EncodeInteger(const ZZ & integer, unsigned long base, const KeyPar
     }
   }
 
-  return Plaintext(message, params);
+  ptx.SetMessage(message);
 }
 
-ZZ fv::DecodeInteger(const Plaintext & plaintext) { 
-  return DecodeInteger(plaintext, (unsigned long) 2);
+void fv::DecodeInteger(ZZ & integer, const Plaintext & plaintext) { 
+  DecodeInteger(integer, plaintext, (unsigned long) 2);
 }
 
-ZZ fv::DecodeInteger(const Plaintext & plaintext, unsigned long base) { 
+void fv::DecodeInteger(ZZ & integer, const Plaintext & plaintext, unsigned long base) { 
   assert(base > 1);
 
   // Sum starts out at zero, x variable starts out at 1
-  ZZ sum = ZZ::zero();
-  ZZ x = sum + 1; 
+  clear(integer);
+  ZZ x = integer + 1; 
 
   // Any coefficients greater than the center are flipped
   const ZZ & t = plaintext.GetParameters().GetPlainModulus();
@@ -87,11 +127,9 @@ ZZ fv::DecodeInteger(const Plaintext & plaintext, unsigned long base) {
     }
 
     // Add a scaled version of x to the sum
-    sum += scalar * x;
+    integer += scalar * x;
 
     // x increases by a factor of the given base 
     x *= base;
   }
-
-  return sum;
 }

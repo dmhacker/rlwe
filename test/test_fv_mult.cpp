@@ -16,27 +16,29 @@ TEST_CASE("Homomorphic multiplication") {
   PublicKey pub = GeneratePublicKey(priv);
 
   // Generate two random plaintexts
-  Plaintext pt1(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
-  Plaintext pt2(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
+  Plaintext ptx1(params);
+  ptx1.SetMessage(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()));
+  Plaintext ptx2(params);
+  ptx2.SetMessage(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()));
 
   // Convert both to ciphertexts 
-  Ciphertext ct1 = Encrypt(pt1, pub);
-  Ciphertext ct2 = Encrypt(pt2, pub);
+  Ciphertext ctx1 = Encrypt(ptx1, pub);
+  Ciphertext ctx2 = Encrypt(ptx2, pub);
 
   // Perform homomorphic multiplication 
-  Ciphertext ct = ct1 * ct2;
+  Ciphertext ctx = ctx1 * ctx2;
 
   // Decrypt resultant ciphertext
-  Plaintext pt = Decrypt(ct, priv);
+  Plaintext ptx = Decrypt(ctx, priv);
 
   // Compute the multiplications in the plaintext ring 
   ZZ_pPush push;
   ZZ_p::init(params.GetPlainModulus());
   ZZ_pX m_p;
-  MulMod(m_p, conv<ZZ_pX>(pt1.GetMessage()), conv<ZZ_pX>(pt2.GetMessage()), params.GetPolyModulus());
+  MulMod(m_p, conv<ZZ_pX>(ptx1.GetMessage()), conv<ZZ_pX>(ptx2.GetMessage()), params.GetPolyModulus());
   ZZX m = conv<ZZX>(m_p);
 
-  REQUIRE(pt.GetMessage() == m);
+  REQUIRE(ptx.GetMessage() == m);
 }
 
 TEST_CASE("Relinearization version 1") {
@@ -49,30 +51,32 @@ TEST_CASE("Relinearization version 1") {
   EvaluationKey elk = GenerateEvaluationKey(priv, 2); 
 
   // Generate two random plaintexts
-  Plaintext pt1(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
-  Plaintext pt2(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
+  Plaintext ptx1(params);
+  ptx1.SetMessage(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()));
+  Plaintext ptx2(params);
+  ptx2.SetMessage(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()));
 
   // Convert both to ciphertexts 
-  Ciphertext ct1 = Encrypt(pt1, pub);
-  Ciphertext ct2 = Encrypt(pt2, pub);
+  Ciphertext ctx1 = Encrypt(ptx1, pub);
+  Ciphertext ctx2 = Encrypt(ptx2, pub);
 
   // Perform homomorphic multiplication 
-  Ciphertext ct = ct1 * ct2;
-  REQUIRE(ct.GetLength() == 3);
+  Ciphertext ctx = ctx1 * ctx2;
+  REQUIRE(ctx.GetLength() == 3);
 
   // Relinearize resultant ciphertext
-  ct.Relinearize(elk);
-  REQUIRE(ct.GetLength() == 2);
+  ctx.Relinearize(elk);
+  REQUIRE(ctx.GetLength() == 2);
 
   // Decrypt resultant ciphertext
-  Plaintext pt = Decrypt(ct, priv);
+  Plaintext ptx = Decrypt(ctx, priv);
 
   // Compute the multiplications in the plaintext ring 
   ZZ_pPush push;
   ZZ_p::init(params.GetPlainModulus());
   ZZ_pX m_p;
-  MulMod(m_p, conv<ZZ_pX>(pt1.GetMessage()), conv<ZZ_pX>(pt2.GetMessage()), params.GetPolyModulus());
+  MulMod(m_p, conv<ZZ_pX>(ptx1.GetMessage()), conv<ZZ_pX>(ptx2.GetMessage()), params.GetPolyModulus());
   ZZX m = conv<ZZX>(m_p);
 
-  REQUIRE(pt.GetMessage() == m);
+  REQUIRE(ptx.GetMessage() == m);
 }

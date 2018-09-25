@@ -16,25 +16,27 @@ TEST_CASE("Homomorphic addition") {
   PublicKey pub = GeneratePublicKey(priv);
 
   // Generate two random plaintexts
-  Plaintext pt1(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
-  Plaintext pt2(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()), params);
+  Plaintext ptx1(params);
+  ptx1.SetMessage(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()));
+  Plaintext ptx2(params);
+  ptx2.SetMessage(UniformSample(params.GetPolyModulusDegree(), params.GetPlainModulus()));
 
   // Convert both to ciphertexts 
-  Ciphertext ct1 = Encrypt(pt1, pub);
-  Ciphertext ct2 = Encrypt(pt2, pub);
+  Ciphertext ctx1 = Encrypt(ptx1, pub);
+  Ciphertext ctx2 = Encrypt(ptx2, pub);
 
   // Perform homomorphic addition
-  Ciphertext ct = ct1 + ct2;
+  Ciphertext ctx = ctx1 + ctx2;
 
   // Decrypt resultant ciphertext
-  Plaintext pt = Decrypt(ct, priv);
+  Plaintext ptx = Decrypt(ctx, priv);
 
   // Compute the additions in the plaintext ring 
   ZZ_pPush push;
   ZZ_p::init(params.GetPlainModulus());
-  ZZ_pX m_p = conv<ZZ_pX>(pt1.GetMessage()) + conv<ZZ_pX>(pt2.GetMessage());
+  ZZ_pX m_p = conv<ZZ_pX>(ptx1.GetMessage()) + conv<ZZ_pX>(ptx2.GetMessage());
   ZZX m = conv<ZZX>(m_p);
 
-  REQUIRE(pt.GetMessage() == m);
+  REQUIRE(ptx.GetMessage() == m);
 }
 
