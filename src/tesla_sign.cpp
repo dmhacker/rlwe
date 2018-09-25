@@ -8,8 +8,9 @@
 using namespace rlwe;
 using namespace rlwe::tesla;
 
-Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
+void tesla::Sign(Signature & sig, const std::string & message, const SigningKey & signer) {
   const KeyParameters & params = signer.GetParameters();
+  assert(params == sig.GetParameters());
 
   // Setup global coefficient modulus 
   ZZ_pPush push;
@@ -18,8 +19,8 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   // Convert given a1, a2, e1, e2, s into polynomials under the global modulus
   ZZ_pX a1 = conv<ZZ_pX>(params.GetPolyConstants().a);
   ZZ_pX a2 = conv<ZZ_pX>(params.GetPolyConstants().b);
-  ZZ_pX e1 = conv<ZZ_pX>(signer.GetErrorValues().a);
-  ZZ_pX e2 = conv<ZZ_pX>(signer.GetErrorValues().b);
+  ZZ_pX e1 = conv<ZZ_pX>(signer.GetErrors().a);
+  ZZ_pX e2 = conv<ZZ_pX>(signer.GetErrors().b);
   ZZ_pX s = conv<ZZ_pX>(signer.GetSecret());
 
   // Sample y from R_{q,[B]}
@@ -52,7 +53,8 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   ZZ bound = params.GetB() - params.GetU();
   CenterCoeffs(z, z, params.GetCoeffModulus());
   if (!IsInRange(z, -bound, bound)) {
-    return Sign(message, signer); 
+    Sign(sig, message, signer); 
+    return;
   }
 
   // w1, w2 need to fall within bound 2^d - L
@@ -68,7 +70,8 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   // d least significant bits in w1 are not small enough
   CenterCoeffs(w1, w1, params.GetLSBValue());
   if (!IsInRange(w1, -bound, bound)) {
-    return Sign(message, signer);
+    Sign(sig, message, signer);
+    return;
   }
 
   // w2 = v2 - e2 * c in R_q
@@ -80,10 +83,12 @@ Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
   // d least significant bits in w2 are not small enough
   CenterCoeffs(w2, w2, params.GetLSBValue());
   if (!IsInRange(w2, -bound, bound)) {
-    return Sign(message, signer);
+    Sign(sig, message, signer);
+    return;
   }
 
-  return Signature(z, c_prime, params);
+  sig.SetValue(z);
+  sig.SetHash(c_prime);
 }
 
 bool tesla::Verify(const std::string & message, const Signature & sig, const VerificationKey & verif) {
@@ -139,4 +144,10 @@ bool tesla::Verify(const std::string & message, const Signature & sig, const Ver
   // Assert that z is in the ring R_{B - U} 
   ZZ bound = params.GetB() - params.GetU();
   return IsInRange(sig.GetValue(), -bound, bound);
+}
+
+Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
+  Signature sig(signer.GetParameters());
+  Sign(sig, message, signer);
+  return sig;
 }

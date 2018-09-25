@@ -56,7 +56,9 @@ bool CheckError(const ZZX & e, long w, long L) {
   return sum <= L;
 }
 
-SigningKey tesla::GenerateSigningKey(const KeyParameters & params) {
+void tesla::GenerateSigningKey(SigningKey & signer) {
+  const KeyParameters & params = signer.GetParameters();
+
   // Generate error polynomial e1
   ZZX e1;
   bool check = false;
@@ -73,14 +75,19 @@ SigningKey tesla::GenerateSigningKey(const KeyParameters & params) {
     check = CheckError(e2, params.GetEncodingWeight(), params.GetErrorBound());
   }
 
-  // Sample secret polynomial from same Gaussian distribution
-  ZZX s = KnuthYaoSample(params.GetPolyModulusDegree(), params.GetProbabilityMatrix(), params.GetProbabilityMatrixRows());
+  // Set error values if they have passed all checks
+  signer.SetErrors(e1, e2);
 
-  return SigningKey(s, e1, e2, params); 
+  // Sample secret polynomial from same Gaussian distribution
+  signer.SetSecret(KnuthYaoSample(
+        params.GetPolyModulusDegree(), 
+        params.GetProbabilityMatrix(), 
+        params.GetProbabilityMatrixRows()));
 }
 
-VerificationKey tesla::GenerateVerificationKey(const SigningKey & signer) {
+void tesla::GenerateVerificationKey(VerificationKey & verif, const SigningKey & signer) {
   const KeyParameters & params = signer.GetParameters();
+  assert(params == verif.GetParameters()); 
 
   // Setup global coefficient modulus 
   ZZ_pPush push;
@@ -88,8 +95,8 @@ VerificationKey tesla::GenerateVerificationKey(const SigningKey & signer) {
 
   // Perform conversions to ZZ_p-reduced polynomials
   ZZ_pX s =  conv<ZZ_pX>(signer.GetSecret());
-  ZZ_pX e1 = conv<ZZ_pX>(signer.GetErrorValues().a); 
-  ZZ_pX e2 = conv<ZZ_pX>(signer.GetErrorValues().b); 
+  ZZ_pX e1 = conv<ZZ_pX>(signer.GetErrors().a); 
+  ZZ_pX e2 = conv<ZZ_pX>(signer.GetErrors().b); 
   ZZ_pX a1 = conv<ZZ_pX>(params.GetPolyConstants().a);
   ZZ_pX a2 = conv<ZZ_pX>(params.GetPolyConstants().b);
 
@@ -103,5 +110,17 @@ VerificationKey tesla::GenerateVerificationKey(const SigningKey & signer) {
   MulMod(t2, a2, s, params.GetPolyModulus());
   t2 += e2;
 
-  return VerificationKey(conv<ZZX>(t1), conv<ZZX>(t2), params);
+  verif.SetValues(conv<ZZX>(t1), conv<ZZX>(t2));
+}
+
+SigningKey tesla::GenerateSigningKey(const KeyParameters & params) {
+  SigningKey signer(params);
+  GenerateSigningKey(signer);
+  return signer;
+}
+
+VerificationKey tesla::GenerateVerificationKey(const SigningKey & signer) {
+  VerificationKey verif(signer.GetParameters());
+  GenerateVerificationKey(verif, signer);
+  return verif;
 }

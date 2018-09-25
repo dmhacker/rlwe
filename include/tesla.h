@@ -16,12 +16,19 @@ namespace rlwe {
     class Signature;
 
     /* Key generation */
+    void GenerateSigningKey(SigningKey & signer);
+    void GenerateVerificationKey(VerificationKey & verif, const SigningKey & signer);
+
+    /* Object-oriented variants */
     SigningKey GenerateSigningKey(const KeyParameters & params);
     VerificationKey GenerateVerificationKey(const SigningKey & signer);
 
     /* Signing & verifying */
-    Signature Sign(const std::string & message, const SigningKey & signer);
+    void Sign(Signature & sig, const std::string & message, const SigningKey & signer); 
     bool Verify(const std::string & message, const Signature & sig, const VerificationKey & verif);
+
+    /* Object-oriented variants */
+    Signature Sign(const std::string & message, const SigningKey & signer);
 
     /* Util functions */
     void Hash(unsigned char * output, const ZZX & p1, const ZZX & p2, const std::string & message, const KeyParameters & params);
@@ -94,17 +101,26 @@ namespace rlwe {
         const KeyParameters & params;
       public:
         /* Constructors */
-        SigningKey(const ZZX & secret, const ZZX & e1, const ZZX & e2, const KeyParameters & params) : s(secret), e(e1, e2), params(params) {}
+        SigningKey(const KeyParameters & params) : params(params) {}
 
         /* Getters */
         const ZZX & GetSecret() const {
           return s;
         }
-        const Pair<ZZX, ZZX> GetErrorValues() const {
+        const Pair<ZZX, ZZX> GetErrors() const {
           return e;
         }
         const KeyParameters & GetParameters() const {
           return params;
+        }
+
+        /* Setters */
+        void SetSecret(const ZZX & secret) {
+          this->s = secret;
+        }
+        void SetErrors(const ZZX & e1, const ZZX & e2) {
+          this->e.a = e1;
+          this->e.b = e2;
         }
 
         /* Display to output stream */
@@ -119,7 +135,7 @@ namespace rlwe {
         const KeyParameters & params;
       public:
         /* Constructors */
-        VerificationKey(const ZZX & t0, const ZZX & t1, const KeyParameters & params) : t(t0, t1), params(params) {}
+        VerificationKey(const KeyParameters & params) : params(params) {}
 
         /* Getters */
         const Pair<ZZX, ZZX> & GetValues() const {
@@ -127,6 +143,12 @@ namespace rlwe {
         }
         const KeyParameters & GetParameters() const {
           return params;
+        }
+
+        /* Setters */
+        void SetValues(const ZZX & t1, const ZZX & t2) {
+          this->t.a = t1;
+          this->t.b = t2;
         }
 
         /* Display to output stream */
@@ -142,9 +164,8 @@ namespace rlwe {
         const KeyParameters & params;
       public:
         /* Constructors */
-        Signature(const ZZX & z, const unsigned char * c_prime_, const KeyParameters & params) : z(z), params(params) {
+        Signature(const KeyParameters & params) : params(params) {
           c_prime = (unsigned char *) malloc(crypto_hash_sha256_BYTES);
-          memcpy(c_prime, c_prime_, crypto_hash_sha256_BYTES);
         }
 
         /* Destructors */
@@ -161,6 +182,14 @@ namespace rlwe {
         }
         const KeyParameters & GetParameters() const {
           return params;
+        }
+
+        /* Setters */
+        void SetValue(const ZZX & value) {
+          this->z = value;
+        }
+        void SetHash(const unsigned char * c_prime) {
+          memcpy(this->c_prime, c_prime, crypto_hash_sha256_BYTES);
         }
 
         /* Display to output stream */

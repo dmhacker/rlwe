@@ -44,8 +44,8 @@ void fv::GeneratePrivateKey(PrivateKey & priv) {
 }
 
 void fv::GeneratePublicKey(PublicKey & pub, const PrivateKey & priv) {
-  assert(pub.GetParameters() == priv.GetParameters());
   const KeyParameters & params = priv.GetParameters();
+  assert(params == pub.GetParameters());
   
   // Set finite field modulus to be q
   ZZ_pPush push;
@@ -75,8 +75,8 @@ void fv::GeneratePublicKey(PublicKey & pub, const PrivateKey & priv) {
 }
 
 void fv::GeneratePublicKey(PublicKey & pub, const PrivateKey & priv, const ZZX & a, const ZZX & e) { 
-  assert(pub.GetParameters() == priv.GetParameters());
   const KeyParameters & params = priv.GetParameters();
+  assert(params == pub.GetParameters());
 
   // Set finite field modulus to be q
   ZZ_pPush push;
@@ -102,8 +102,8 @@ void fv::GeneratePublicKey(PublicKey & pub, const PrivateKey & priv, const ZZX &
 }
 
 void fv::GenerateEvaluationKey(EvaluationKey & elk, const PrivateKey & priv, long level) {
-  assert(elk.GetParameters() == priv.GetParameters());
   const KeyParameters & params = priv.GetParameters();
+  assert(params == elk.GetParameters()); 
 
   // Set finite field modulus to be q 
   ZZ_pPush push;
