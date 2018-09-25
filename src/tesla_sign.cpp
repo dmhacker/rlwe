@@ -100,6 +100,12 @@ bool tesla::Verify(const std::string & message, const Signature & sig, const Ver
   assert(sig.GetParameters() == verif.GetParameters());
   const KeyParameters & params = sig.GetParameters();
 
+  // Assert that z is in the ring R_{B - U} 
+  ZZ bound = params.GetSignatureBound() - params.GetSignatureBoundAdjustment();
+  if (!IsInRange(sig.GetValue(), -bound, bound)) {
+    return false;
+  }
+
   // Setup global coefficient modulus 
   ZZ_pPush push;
   ZZ_p::init(params.GetCoeffModulus());
@@ -146,9 +152,7 @@ bool tesla::Verify(const std::string & message, const Signature & sig, const Ver
     }
   }
 
-  // Assert that z is in the ring R_{B - U} 
-  ZZ bound = params.GetSignatureBound() - params.GetSignatureBoundAdjustment();
-  return IsInRange(sig.GetValue(), -bound, bound);
+  return true;
 }
 
 Signature tesla::Sign(const std::string & message, const SigningKey & signer) {
