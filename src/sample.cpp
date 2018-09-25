@@ -2,41 +2,34 @@
 
 #include <NTL/GF2X.h>
 
-ZZX rlwe::UniformSample(long len, ZZ maximum) {
-  ZZX poly;
+void rlwe::UniformSample(ZZX & poly, size_t len, const ZZ & maximum) {
   if (maximum == 2) {
     // If the maximum is 2, we can use the GF2X class 
-    poly = conv<ZZX>(random_GF2X(len));
+    GF2X tmp;
+    random(tmp, len);
+    conv(poly, tmp);
   }
   else {
     // Otherwise, we set a temporary modulus and use the ZZ_pX class
     ZZ_pPush push;
     ZZ_p::init(maximum);
-    poly = conv<ZZX>(random_ZZ_pX(len));
+    ZZ_pX tmp;
+    random(tmp, len);
+    conv(poly, tmp);
   }
-
-  return poly;
 }
 
-ZZX rlwe::UniformSample(long len, ZZ minimum, ZZ maximum) {
+void rlwe::UniformSample(ZZX & poly, size_t len, const ZZ & minimum, const ZZ & maximum) {
   ZZ range = maximum - minimum;
-  ZZX poly = rlwe::UniformSample(len, range);
+  UniformSample(poly, len, range);
 
   // Iterate through each coefficient and add the minimum 
   for (long i = 0; i < len; i++) {
     SetCoeff(poly, i, minimum + coeff(poly, i));
   }
-
-  return poly;
 }
 
-char ** rlwe::KnuthYaoGaussianMatrix(size_t pmat_rows, float sigma) {
-  // Allocate matrix on the heap
-  char ** pmat = (char **) malloc(pmat_rows * sizeof(char *));
-  for (size_t i = 0; i < pmat_rows; i++) {
-    pmat[i] = (char *) calloc(PROBABILITY_MATRIX_BYTE_PRECISION, sizeof(char));
-  }
-
+void rlwe::KnuthYaoGaussianMatrix(char ** pmat, size_t pmat_rows, float sigma) {
   // Calculate some constants
   float variance = sigma * sigma;
   float pi2 = atan(1) * 8; 
@@ -73,13 +66,9 @@ char ** rlwe::KnuthYaoGaussianMatrix(size_t pmat_rows, float sigma) {
       check_value /= 2;
     }
   }
-
-  return pmat;
 }
 
-ZZX rlwe::KnuthYaoSample(long len, char ** pmat, size_t pmat_rows) {
-  ZZX poly;
-
+void rlwe::KnuthYaoSample(ZZX & poly, size_t len, char ** pmat, size_t pmat_rows) {
   // Perform the Knuth-Yao sampling algorithm and navigate the DDG
   int last_row = pmat_rows - 1; 
   for (long i = 0; i < len; i++) {
@@ -112,6 +101,31 @@ ZZX rlwe::KnuthYaoSample(long len, char ** pmat, size_t pmat_rows) {
       col++;
     }
   }
+}
 
+ZZX rlwe::UniformSample(size_t len, const ZZ & maximum) {
+  ZZX poly;
+  UniformSample(poly, len, maximum);
+  return poly;
+}
+
+ZZX rlwe::UniformSample(size_t len, const ZZ & minimum, const ZZ & maximum) {
+  ZZX poly;
+  UniformSample(poly, len, minimum, maximum);
+  return poly;
+}
+
+char ** rlwe::KnuthYaoGaussianMatrix(size_t pmat_rows, float sigma) {
+  char ** pmat = (char **) malloc(pmat_rows * sizeof(char *));
+  for (size_t i = 0; i < pmat_rows; i++) {
+    pmat[i] = (char *) calloc(PROBABILITY_MATRIX_BYTE_PRECISION, sizeof(char));
+  }
+  KnuthYaoGaussianMatrix(pmat, pmat_rows, sigma);
+  return pmat;
+}
+
+ZZX rlwe::KnuthYaoSample(size_t len, char ** pmat, size_t pmat_rows) {
+  ZZX poly;
+  KnuthYaoSample(poly, len, pmat, pmat_rows);
   return poly;
 }

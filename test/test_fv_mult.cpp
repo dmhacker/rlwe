@@ -9,7 +9,7 @@ using namespace rlwe::fv;
 
 TEST_CASE("Homomorphic multiplication") {
   // Set up parameters
-  KeyParameters params(1024, conv<ZZ>("34359724033"), ZZ(2));  
+  KeyParameters params(1024, conv<ZZ>("1152921504606830600"), ZZ(2));  
 
   // Compute keys
   PrivateKey priv = GeneratePrivateKey(params); 

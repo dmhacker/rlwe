@@ -168,7 +168,7 @@ namespace rlwe {
     class EvaluationKey {
       private:
         Vec<Pair<ZZX, ZZX>> r;
-        long level;
+        unsigned long level;
         const KeyParameters & params;
       public:
         /* Constructors */
@@ -178,10 +178,10 @@ namespace rlwe {
         const Pair<ZZX, ZZX> & operator[] (int index) const {
           return r[index]; 
         }
-        long GetLength() const { 
+        size_t GetLength() const { 
           return r.length(); 
         }
-        long GetLevel() const {
+        unsigned long GetLevel() const {
           return level;
         }
         const KeyParameters & GetParameters() const { 
@@ -192,10 +192,10 @@ namespace rlwe {
         Pair<ZZX, ZZX> & operator[] (int index) {
           return r[index]; 
         }
-        void SetLevel(long level) {
+        void SetLevel(unsigned long level) {
           this->level = level;
         }
-        void SetLength(long len) {
+        void SetLength(size_t len) {
           this->r.SetLength(len);
         }
 
@@ -251,7 +251,7 @@ namespace rlwe {
         const ZZX & operator[] (int index) const {
           return c[index]; 
         }
-        long GetLength() const { 
+        size_t GetLength() const { 
           return c.length(); 
         }
         const KeyParameters & GetParameters() const { 
@@ -262,7 +262,7 @@ namespace rlwe {
         ZZX & operator[] (int index) {
           return c[index];
         }
-        void SetLength(long len) {
+        void SetLength(size_t len) {
           this->c.SetLength(len);
         }
 

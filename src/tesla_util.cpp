@@ -12,8 +12,8 @@ using namespace rlwe::tesla;
 void tesla::Hash(unsigned char * output, const ZZX & p1, const ZZX & p2, const std::string & message, const KeyParameters & params) {
   // Round p1, p2 by applying [...]_{d,q}
   ZZX q1, q2;
-  RightShiftCoeffs(q1, p1, params.GetLSBCount()); 
-  RightShiftCoeffs(q2, p2, params.GetLSBCount()); 
+  RightShiftPoly(q1, p1, params.GetLSBCount()); 
+  RightShiftPoly(q2, p2, params.GetLSBCount()); 
 
   // Concatenate everything into a single string
   std::stringstream ss;

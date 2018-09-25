@@ -1,6 +1,6 @@
 #include "polyutil.h"
 
-void rlwe::RoundCoeffs(ZZX & result, const ZZX & poly, const RR & scalar, const ZZ & mod) {
+void rlwe::RoundPoly(ZZX & result, const ZZX & poly, const RR & scalar, const ZZ & mod) {
   for (long i = 0; i <= deg(poly); i++) {
     // Convert each coefficient into their floating point equivalent before rounding 
     RR r = conv<RR>(coeff(poly, i));
@@ -12,7 +12,7 @@ void rlwe::RoundCoeffs(ZZX & result, const ZZX & poly, const RR & scalar, const 
   }
 }
 
-void rlwe::CenterCoeffs(ZZX & result, const ZZX & poly, const ZZ & mod) {
+void rlwe::CenterPoly(ZZX & result, const ZZX & poly, const ZZ & mod) {
   ZZ center_point = mod / 2;
   for (long i = 0; i <= deg(poly); i++) {
     // Apply modulus operation before centering
@@ -28,10 +28,17 @@ void rlwe::CenterCoeffs(ZZX & result, const ZZX & poly, const ZZ & mod) {
   }
 }
 
-void rlwe::RightShiftCoeffs(ZZX & result, const ZZX & poly, long bits) {
+void rlwe::RightShiftPoly(ZZX & result, const ZZX & poly, unsigned long bits) {
   for (long i = 0; i <= deg(poly); i++) {
     // Apply a right shift to each coefficient
     SetCoeff(result, i, coeff(poly, i) >> bits);    
+  }
+}
+
+void rlwe::AndPoly(ZZX & result, const ZZX & poly, const ZZ & bitmask) {
+  for (long i = 0; i <= deg(poly); i++) {
+    // Apply the AND bitmask to each coefficient
+    SetCoeff(result, i, coeff(poly, i) & bitmask);    
   }
 }
 
