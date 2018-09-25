@@ -28,7 +28,8 @@ namespace rlwe {
     Signature Sign(const std::string & message, const SigningKey & signer);
 
     /* Util functions */
-    void Hash(unsigned char * output, const ZZX & p1, const ZZX & p2, const std::string & message, const KeyParameters & params);
+    void Hash(unsigned char * output, const ZZX & p1, const ZZX & p2, 
+        const std::string & message, const KeyParameters & params);
     void Encode(ZZX & dest, const unsigned char * hash_val, const KeyParameters & params); 
 
     class KeyParameters {
@@ -78,16 +79,15 @@ namespace rlwe {
         char ** GetProbabilityMatrix() const { return pmat; }
         size_t GetProbabilityMatrixRows() const { return pmat_rows; }
 
-
-        /* Display to output stream */
-        friend std::ostream& operator<< (std::ostream& stream, const KeyParameters & params) {
-          return stream << "n = " << params.n << ", sigma = " << params.sigma << ", q = " << params.q;
-        }
-
         /* Equality */
         bool operator== (const KeyParameters & kp) const {
           return n == kp.n && sigma == kp.sigma && L == kp.L && w == kp.w && 
             B == kp.B && U == kp.U && d == kp.d && q == kp.q;
+        }
+
+        /* Display to output stream */
+        friend std::ostream& operator<< (std::ostream& stream, const KeyParameters & params) {
+          return stream << "{n = " << params.n << ", sigma = " << params.sigma << ", q = " << params.q << "}";
         }
     };
 
@@ -121,8 +121,8 @@ namespace rlwe {
         }
 
         /* Display to output stream */
-        friend std::ostream& operator<< (std::ostream& stream, const SigningKey & signer) {
-          return stream << "[" << signer.s << ", " << signer.e << "]";
+        friend std::ostream & operator<< (std::ostream & stream, const SigningKey & signer) {
+          return stream << "{s = " << signer.s << ", e = " << signer.e << "}";
         }
     };
 
@@ -149,7 +149,7 @@ namespace rlwe {
         }
 
         /* Display to output stream */
-        friend std::ostream& operator<< (std::ostream& stream, const VerificationKey & verif) {
+        friend std::ostream & operator<< (std::ostream & stream, const VerificationKey & verif) {
           return stream << verif.t;
         }
     };
@@ -190,8 +190,8 @@ namespace rlwe {
         }
 
         /* Display to output stream */
-        friend std::ostream& operator<< (std::ostream& stream, const Signature & sig) {
-          return stream << "[" << sig.z << ", " << sig.c_prime << "]";
+        friend std::ostream & operator<< (std::ostream & stream, const Signature & sig) {
+          return stream << "{z = " << sig.z << ", c' = " << sig.c_prime << "}";
         }
     };
   }
