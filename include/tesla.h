@@ -75,8 +75,8 @@ namespace rlwe {
         long GetEncodingWeight() const { return w; }
         long GetLSBCount() const { return d; }
         const ZZ & GetLSBValue() const { return pow_2d; }
-        const ZZ & GetB() const { return B; } /* TODO: Fix names for these two getters */
-        const ZZ & GetU() const { return U; }
+        const ZZ & GetSignatureBound() const { return B; } 
+        const ZZ & GetSignatureBoundAdjustment() const { return U; }
         const ZZ & GetCoeffModulus() const { return q; }
         char ** GetProbabilityMatrix() const { return pmat; }
         size_t GetProbabilityMatrixRows() const { return pmat_rows; }

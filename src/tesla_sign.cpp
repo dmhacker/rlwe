@@ -23,68 +23,74 @@ void tesla::Sign(Signature & sig, const std::string & message, const SigningKey 
   ZZ_pX e2 = conv<ZZ_pX>(signer.GetErrors().b);
   ZZ_pX s = conv<ZZ_pX>(signer.GetSecret());
 
-  // Sample y from R_{q,[B]}
-  ZZX y = UniformSample(params.GetPolyModulusDegree(), -params.GetB(), params.GetB() + 1);
-  ZZ_pX y_p = conv<ZZ_pX>(y);
-
-  // v1 = a1 * y in R_q
-  ZZ_pX v1_p;
-  MulMod(v1_p, a1, y_p, params.GetPolyModulus());
-  ZZX v1 = conv<ZZX>(v1_p);  
-
-  // v2 = a2 * y in R_q
-  ZZ_pX v2_p;
-  MulMod(v2_p, a2, y_p, params.GetPolyModulus());
-  ZZX v2 = conv<ZZX>(v2_p);
-
-  // c' = Hash(v1, v2, u)
-  unsigned char c_prime[crypto_hash_sha256_BYTES];
-  Hash(c_prime, v1, v2, message, params);
-  ZZX c;
-  Encode(c, c_prime, params);
-  ZZ_pX c_p = conv<ZZ_pX>(c);
-
-  // z = y + s * c in Z
+  // Declare signature variables 
   ZZX z;
-  MulMod(z, signer.GetSecret(), c, conv<ZZX>(params.GetPolyModulus().val()));
-  z += y; 
+  unsigned char c_prime[crypto_hash_sha256_BYTES];
+    
+  // Declare temporary variables
+  ZZ bound;
+  ZZX y, v1, v2, c, w1, w2;
+  ZZ_pX y_p, v1_p, v2_p, c_p, w1_p, w2_p, buffer;
 
-  // Assert that z is in the ring R_{B - U}
-  ZZ bound = params.GetB() - params.GetU();
-  CenterCoeffs(z, z, params.GetCoeffModulus());
-  if (!IsInRange(z, -bound, bound)) {
-    Sign(sig, message, signer); 
-    return;
-  }
+  while (1) {
+    // Sample y from R_{q,[B]}
+    y = UniformSample(params.GetPolyModulusDegree(), -params.GetSignatureBound(), params.GetSignatureBound() + 1);
+    conv(y_p, y);
 
-  // w1, w2 need to fall within bound 2^d - L
-  bound = params.GetLSBValue() - params.GetErrorBound();
+    // v1 = a1 * y in R_q
+    MulMod(v1_p, a1, y_p, params.GetPolyModulus());
+    conv(v1, v1_p);  
 
-  // w1 = v1 - e1 * c in R_q
-  ZZ_pX w1_p(v1_p); 
-  ZZ_pX buffer;
-  MulMod(buffer, e1, c_p, params.GetPolyModulus());
-  w1_p -= buffer;
-  ZZX w1 = conv<ZZX>(w1_p);
+    // v2 = a2 * y in R_q
+    MulMod(v2_p, a2, y_p, params.GetPolyModulus());
+    conv(v2, v2_p);
 
-  // d least significant bits in w1 are not small enough
-  CenterCoeffs(w1, w1, params.GetLSBValue());
-  if (!IsInRange(w1, -bound, bound)) {
-    Sign(sig, message, signer);
-    return;
-  }
+    // c' = Hash(v1, v2, u)
+    Hash(c_prime, v1, v2, message, params);
+    Encode(c, c_prime, params);
+    conv(c_p, c);
 
-  // w2 = v2 - e2 * c in R_q
-  ZZ_pX w2_p(v2_p);
-  MulMod(buffer, e2, c_p, params.GetPolyModulus());
-  w2_p -= buffer;
-  ZZX w2 = conv<ZZX>(w2_p);
+    // z = y + s * c in Z
+    MulMod(z, signer.GetSecret(), c, conv<ZZX>(params.GetPolyModulus().val()));
+    z += y; 
 
-  // d least significant bits in w2 are not small enough
-  CenterCoeffs(w2, w2, params.GetLSBValue());
-  if (!IsInRange(w2, -bound, bound)) {
-    Sign(sig, message, signer);
-    return;
+    // Assert that z is in the ring R_{B - U}
+    bound = params.GetSignatureBound() - params.GetSignatureBoundAdjustment();
+    CenterCoeffs(z, z, params.GetCoeffModulus());
+    if (!IsInRange(z, -bound, bound)) {
+      Sign(sig, message, signer); 
+      continue;
+    }
+
+    // w1, w2 need to fall within bound 2^d - L
+    bound = params.GetLSBValue() - params.GetErrorBound();
+
+    // w1 = v1 - e1 * c in R_q
+    w1_p = v1_p; 
+    MulMod(buffer, e1, c_p, params.GetPolyModulus());
+    w1_p -= buffer;
+    conv(w1, w1_p);
+
+    // d least significant bits in w1 are not small enough
+    CenterCoeffs(w1, w1, params.GetLSBValue());
+    if (!IsInRange(w1, -bound, bound)) {
+      Sign(sig, message, signer);
+      continue;
+    }
+
+    // w2 = v2 - e2 * c in R_q
+    w2_p = v2_p;
+    MulMod(buffer, e2, c_p, params.GetPolyModulus());
+    w2_p -= buffer;
+    conv(w2, w2_p);
+
+    // d least significant bits in w2 are not small enough
+    CenterCoeffs(w2, w2, params.GetLSBValue());
+    if (!IsInRange(w2, -bound, bound)) {
+      continue;
+    }
+
+    break;
   }
 
   sig.SetValue(z);
@@ -142,7 +148,7 @@ bool tesla::Verify(const std::string & message, const Signature & sig, const Ver
   }
 
   // Assert that z is in the ring R_{B - U} 
-  ZZ bound = params.GetB() - params.GetU();
+  ZZ bound = params.GetSignatureBound() - params.GetSignatureBoundAdjustment();
   return IsInRange(sig.GetValue(), -bound, bound);
 }
 
