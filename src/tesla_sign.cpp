@@ -3,7 +3,6 @@
 #include "polyutil.h"
 
 #include <cassert>
-#include <NTL/ZZ_pX.h>
 
 using namespace rlwe;
 using namespace rlwe::tesla;

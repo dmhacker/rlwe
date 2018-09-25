@@ -1,7 +1,6 @@
 #include "fv.h"
 #include "polyutil.h"
 
-#include <NTL/ZZ_pX.h>
 #include <cassert>
 
 using namespace rlwe::fv;

@@ -1,7 +1,5 @@
 #include "sample.h"
 
-#include <random>
-#include <NTL/ZZ_pX.h>
 #include <NTL/GF2X.h>
 
 ZZX rlwe::UniformSample(long len, ZZ maximum) {

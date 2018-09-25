@@ -1,7 +1,5 @@
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>
-#include <NTL/matrix.h>
-#include <NTL/GF2.h>
 
 using namespace NTL;
 

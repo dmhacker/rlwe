@@ -1,9 +1,6 @@
 #include <NTL/ZZX.h>
 #include <NTL/ZZ.h>
 #include <NTL/pair.h>
-#include <NTL/GF2.h>
-#include <NTL/matrix.h>
-#include <NTL/vec_vec_GF2.h>
 #include <sodium.h>
 
 using namespace NTL;

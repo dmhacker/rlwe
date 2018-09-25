@@ -1,10 +1,7 @@
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>
 #include <NTL/RR.h>
-#include <NTL/GF2.h>
 #include <NTL/pair.h>
-#include <NTL/matrix.h>
-#include <NTL/vec_vec_GF2.h>
 
 #define DEFAULT_ERROR_STANDARD_DEVIATION 3.192f
 #define DEFAULT_DECOMPOSITION_BIT_COUNT 32
