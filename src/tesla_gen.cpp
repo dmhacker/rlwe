@@ -8,7 +8,7 @@
 using namespace rlwe;
 using namespace rlwe::tesla;
 
-bool CheckError(const ZZX & e, long w, long L) {
+bool CheckError(const ZZX & e, uint32_t w, const ZZ & L) {
   // Sort all of the coefficients in descending order
   std::vector<ZZ> coeffs;
   for (int i = 0; i <= deg(e); i++) {

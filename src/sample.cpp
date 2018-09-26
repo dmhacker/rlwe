@@ -29,7 +29,7 @@ void rlwe::UniformSample(ZZX & poly, size_t len, const ZZ & minimum, const ZZ & 
   }
 }
 
-void rlwe::KnuthYaoGaussianMatrix(char ** pmat, size_t pmat_rows, float sigma) {
+void rlwe::KnuthYaoGaussianMatrix(uint8_t ** pmat, size_t pmat_rows, float sigma) {
   // Calculate some constants
   float variance = sigma * sigma;
   float pi2 = atan(1) * 8; 
@@ -68,7 +68,7 @@ void rlwe::KnuthYaoGaussianMatrix(char ** pmat, size_t pmat_rows, float sigma) {
   }
 }
 
-void rlwe::KnuthYaoSample(ZZX & poly, size_t len, char ** pmat, size_t pmat_rows) {
+void rlwe::KnuthYaoSample(ZZX & poly, size_t len, uint8_t ** pmat, size_t pmat_rows) {
   // Perform the Knuth-Yao sampling algorithm and navigate the DDG
   int last_row = pmat_rows - 1; 
   for (long i = 0; i < len; i++) {
@@ -115,16 +115,16 @@ ZZX rlwe::UniformSample(size_t len, const ZZ & minimum, const ZZ & maximum) {
   return poly;
 }
 
-char ** rlwe::KnuthYaoGaussianMatrix(size_t pmat_rows, float sigma) {
-  char ** pmat = (char **) malloc(pmat_rows * sizeof(char *));
+uint8_t ** rlwe::KnuthYaoGaussianMatrix(size_t pmat_rows, float sigma) {
+  uint8_t ** pmat = (uint8_t **) malloc(pmat_rows * sizeof(uint8_t *));
   for (size_t i = 0; i < pmat_rows; i++) {
-    pmat[i] = (char *) calloc(PROBABILITY_MATRIX_BYTE_PRECISION, sizeof(char));
+    pmat[i] = (uint8_t *) calloc(PROBABILITY_MATRIX_BYTE_PRECISION, sizeof(uint8_t));
   }
   KnuthYaoGaussianMatrix(pmat, pmat_rows, sigma);
   return pmat;
 }
 
-ZZX rlwe::KnuthYaoSample(size_t len, char ** pmat, size_t pmat_rows) {
+ZZX rlwe::KnuthYaoSample(size_t len, uint8_t ** pmat, size_t pmat_rows) {
   ZZX poly;
   KnuthYaoSample(poly, len, pmat, pmat_rows);
   return poly;

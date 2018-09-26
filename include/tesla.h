@@ -3,6 +3,15 @@
 #include <NTL/pair.h>
 #include <sodium.h>
 
+#define DEFAULT_POLY_MODULUS_DEGREE 512
+#define DEFAULT_ERROR_STANDARD_DEVIATION 52.0f 
+#define DEFAULT_ERROR_BOUND 2766
+#define DEFAULT_ENCODING_WEIGHT 19
+#define DEFAULT_SIGNATURE_BOUND 4194303
+#define DEFAULT_SIGNATURE_BOUND_ADJUSTMENT 3173
+#define DEFAULT_LEAST_SIGNIFICANT_BITS 23
+#define DEFAULT_COEFF_MODULUS 39960577LL
+
 using namespace NTL;
 
 namespace rlwe {
@@ -35,26 +44,27 @@ namespace rlwe {
     class KeyParameters {
       private:
         /* Given parameters */ 
-        long n;
+        uint32_t n;
         float sigma;
-        long L;
-        long w;
+        ZZ L;
+        uint32_t w;
         ZZ B;
         ZZ U;
-        long d;
+        uint32_t d;
         ZZ q;
         Pair<ZZX, ZZX> a;
         /* Calculated */
         ZZ pow_2d;
         ZZ_pXModulus phi;
-        char ** pmat;
+        uint8_t ** pmat;
         size_t pmat_rows;
       public:
         /* Constructors */
-        KeyParameters() : // 128-bit security, parameters recommended by the original paper
-          KeyParameters(512, 52.0f, 2766, 19, ZZ(4194303), ZZ(3173), 23, conv<ZZ>("39960577")) {}
-        KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, long d, ZZ q);
-        KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, long d, ZZ q, ZZX a1, ZZX a2);
+        KeyParameters(); 
+        KeyParameters(const ZZX & a1, const ZZX & a2);
+        KeyParameters(const ZZX & a1, const ZZX & a2, 
+            uint32_t n, float sigma, const ZZ & L, uint32_t w, 
+            const ZZ & B, const ZZ & U, uint32_t d, const ZZ & q); 
 
         /* Destructors */
         ~KeyParameters() {
@@ -67,27 +77,32 @@ namespace rlwe {
         /* Getters */
         const Pair<ZZX, ZZX> & GetPolyConstants() const { return a; }
         const ZZ_pXModulus & GetPolyModulus() const { return phi; }
-        long GetPolyModulusDegree() const { return n; }
+        uint32_t GetPolyModulusDegree() const { return n; }
         float GetErrorStandardDeviation() const { return sigma; }
-        long GetErrorBound() const { return L; }
-        long GetEncodingWeight() const { return w; }
-        long GetLSBCount() const { return d; }
-        const ZZ & GetLSBValue() const { return pow_2d; }
+        const ZZ & GetErrorBound() const { return L; }
+        uint32_t GetEncodingWeight() const { return w; }
         const ZZ & GetSignatureBound() const { return B; } 
         const ZZ & GetSignatureBoundAdjustment() const { return U; }
+        uint32_t GetLSBCount() const { return d; }
+        const ZZ & GetLSBValue() const { return pow_2d; }
         const ZZ & GetCoeffModulus() const { return q; }
-        char ** GetProbabilityMatrix() const { return pmat; }
+        uint8_t ** GetProbabilityMatrix() const { return pmat; }
         size_t GetProbabilityMatrixRows() const { return pmat_rows; }
 
         /* Equality */
         bool operator== (const KeyParameters & kp) const {
           return n == kp.n && sigma == kp.sigma && L == kp.L && w == kp.w && 
-            B == kp.B && U == kp.U && d == kp.d && q == kp.q;
+            B == kp.B && U == kp.U && d == kp.d && q == kp.q && a == kp.a;
         }
 
         /* Display to output stream */
-        friend std::ostream& operator<< (std::ostream& stream, const KeyParameters & params) {
-          return stream << "{n = " << params.n << ", sigma = " << params.sigma << ", q = " << params.q << "}";
+        friend std::ostream & operator<< (std::ostream & stream, const KeyParameters & params) {
+          return stream << 
+            "{n = " << params.n << 
+            ", sigma = " << params.sigma << 
+            ", q = " << params.q << 
+            ", a = " << params.a <<
+            "}";
         }
     };
 

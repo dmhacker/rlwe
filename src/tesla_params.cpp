@@ -5,11 +5,24 @@
 
 using namespace rlwe::tesla;
 
-KeyParameters::KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, long d, ZZ q) :
-  KeyParameters(n, sigma, L, w, B, U, d, q, UniformSample(n, q), UniformSample(n, q)) {}
+// Mainly used for testing; not recommended for actual usage 
+KeyParameters::KeyParameters() : 
+  KeyParameters(
+      UniformSample(DEFAULT_POLY_MODULUS_DEGREE, ZZ(DEFAULT_COEFF_MODULUS)), 
+      UniformSample(DEFAULT_POLY_MODULUS_DEGREE, ZZ(DEFAULT_COEFF_MODULUS))) {}
 
-KeyParameters::KeyParameters(long n, float sigma, long L, long w, ZZ B, ZZ U, long d, ZZ q, ZZX a1, ZZX a2) :
-  n(n), sigma(sigma), L(L), w(w), B(B), U(U), d(d), q(q), a(a1, a2), pow_2d(power_ZZ(2, d))
+// 128-bit security, parameters recommended by the original paper
+KeyParameters::KeyParameters(const ZZX & a1, const ZZX & a2) : 
+  KeyParameters(a1, a2, 
+      DEFAULT_POLY_MODULUS_DEGREE, DEFAULT_ERROR_STANDARD_DEVIATION, 
+      ZZ(DEFAULT_ERROR_BOUND), DEFAULT_ENCODING_WEIGHT, 
+      ZZ(DEFAULT_SIGNATURE_BOUND), ZZ(DEFAULT_SIGNATURE_BOUND_ADJUSTMENT), 
+      DEFAULT_LEAST_SIGNIFICANT_BITS, ZZ(DEFAULT_COEFF_MODULUS)) {}
+
+KeyParameters::KeyParameters(const ZZX & a1, const ZZX & a2, 
+    uint32_t n, float sigma, const ZZ & L, uint32_t w, 
+    const ZZ & B, const ZZ & U, uint32_t d, const ZZ & q) :
+  a(a1, a2), n(n), sigma(sigma), L(L), w(w), B(B), U(U), d(d), q(q), pow_2d(power_ZZ(2, d))
 {
   // Assert that n is even, assume that it is a power of 2
   assert(n % 2 == 0);

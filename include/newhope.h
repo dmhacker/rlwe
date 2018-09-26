@@ -1,8 +1,12 @@
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>
 
-#define ERROR_STANDARD_DEVIATION 2.828f
+#define DEFAULT_POLY_MODULUS_DEGREE 1024
+#define DEFAULT_COEFF_MODULUS 12289
+#define DEFAULT_ERROR_STANDARD_DEVIATION 2.828f
+
 #define SEED_BYTE_LENGTH 32
+#define SHARED_KEY_BYTE_LENGTH 32
 
 using namespace NTL;
 
@@ -11,39 +15,32 @@ namespace rlwe {
     class KeyParameters;
     class Server;
     class Client;
-    class ClientboundPacket;
-    class ServerboundPacket;
 
     /* Initialization procedures */
     void Initialize(Server & server);
-    void Initialize(Server & server, const uint8_t seed[SEED_BYTE_LENGTH]);
     void Initialize(Client & client); 
 
-    /* Packet computation */
-    void ReceivePacket(Client & client, const ClientboundPacket & packet);
-    void ReceivePacket(Server & server, const ServerboundPacket & packet);
-
-    /* Packet compression (NHSCompress, NHSDecompress are built into the functions) */ 
-    void EncodeA(uint8_t * ma, const ClientboundPacket & packet);
-    void DecodeA(ClientboundPacket & packet, const uint8_t * ma);
-    void EncodeB(uint8_t * mb, const ServerboundPacket & packet);
-    void DecodeB(ServerboundPacket & packet, const uint8_t * mb);
+    /* Packet receiving/processing */
+    void ReadPacket(Client & client, const uint8_t * packet);
+    void ReadPacket(Server & server, const uint8_t * packet);
+    void WritePacket(uint8_t * packet, Server & server);
+    void WritePacket(uint8_t * packet, Client & client);
 
     class KeyParameters {
       private:
         /* Given parameters */ 
-        long n;
+        uint32_t n;
         ZZ q;
         float sigma;
         /* Calculated */
         ZZ_pXModulus phi;
-        char ** pmat;
+        uint8_t ** pmat;
         size_t pmat_rows; 
       public:
         /* Constructors */
-        KeyParameters(long n, long q) : KeyParameters(n, ZZ(q)) {}
-        KeyParameters(long n, ZZ q) : KeyParameters(n, q, ERROR_STANDARD_DEVIATION) {}
-        KeyParameters(long n, ZZ q, float sigma);
+        KeyParameters();
+        KeyParameters(uint32_t n, const ZZ & q); 
+        KeyParameters(uint32_t n, const ZZ & q, float sigma);
         
         /* Destructors */
         ~KeyParameters() {
@@ -58,7 +55,7 @@ namespace rlwe {
         long GetPolyModulusDegree() const { return n; }
         const ZZ_pXModulus & GetPolyModulus() const { return phi; }
         float GetErrorStandardDeviation() const { return sigma; }
-        char ** GetProbabilityMatrix() const { return pmat; }
+        uint8_t ** GetProbabilityMatrix() const { return pmat; }
         size_t GetProbabilityMatrixRows() const { return pmat_rows; }
 
         /* Display to output stream */
@@ -72,87 +69,101 @@ namespace rlwe {
         }
     };
 
-    class ClientboundPacket {
+    class Server {
       private:
+        ZZX s;
         ZZX b;
         uint8_t seed[SEED_BYTE_LENGTH];
+        uint8_t shared[SHARED_KEY_BYTE_LENGTH];
         const KeyParameters & params;
       public:
-        /* Constructors */
-        ClientboundPacket(const KeyParameters & params) : params(params) {}
-
         /* Getters */
+        const ZZX & GetSecretKey() const {
+          return s;
+        }
         const ZZX & GetPublicKey() const {
           return b;
         }
         const uint8_t * GetSeed() const {
           return seed;
         }
+        const uint8_t * GetSharedKey() const {
+          return shared;
+        }
         const KeyParameters & GetParameters() const { 
           return params; 
         }
 
         /* Setters */
+        void SetSecretKey(const ZZX & s) {
+          this->s = s;
+        }
         void SetPublicKey(const ZZX & b) {
           this->b = b;
         }
         void SetSeed(const uint8_t seed[SEED_BYTE_LENGTH]) {
           memcpy(this->seed, seed, SEED_BYTE_LENGTH);
         }
-
-        /* Equality */
-        bool operator== (const ClientboundPacket & packet) const {
-          for (size_t i = 0; i < SEED_BYTE_LENGTH; i++) {
-            if (seed[i] != packet.seed[i]) {
-              return false;
-            }
-          }
-
-          return b == packet.b && params == packet.params;
+        void SetSharedKey(const uint8_t shared[SHARED_KEY_BYTE_LENGTH]) {
+          memcpy(this->shared, shared, SHARED_KEY_BYTE_LENGTH);
         }
 
         /* Display to output stream */
-        friend std::ostream & operator<< (std::ostream & stream, const ClientboundPacket & packet) {
-          return stream << "[seed = " << packet.seed << ", b = " << packet.b << "]";
+        friend std::ostream & operator<< (std::ostream & stream, const Server & server) {
+          return stream << 
+            "{s = " << server.s << 
+            ", b = " << server.b << 
+            ", seed = " << server.seed << 
+            "}";
         }
     };
 
-    class ServerboundPacket {
+    class Client {
       private:
+        ZZX s;
         ZZX u;
         ZZX c;
+        uint8_t shared[SHARED_KEY_BYTE_LENGTH];
         const KeyParameters & params;
       public:
-        /* Constructors */
-        ServerboundPacket(const KeyParameters & params) : params(params) {}
-
         /* Getters */
+        const ZZX & GetSecretKey() const {
+          return s;
+        }
         const ZZX & GetPublicKey() const {
           return u;
         }
         const ZZX & GetCiphertext() const {
           return c;
         }
+        const uint8_t * GetSharedKey() const {
+          return shared;
+        }
         const KeyParameters & GetParameters() const { 
           return params; 
         }
 
         /* Setters */
+        void SetSecretKey(const ZZX & s) {
+          this->s = s;
+        }
         void SetPublicKey(const ZZX & u) {
           this->u = u;
         }
         void SetCiphertext(const ZZX & c) {
           this->c = c;
         }
-
-        /* Equality */
-        bool operator== (const ServerboundPacket & packet) const {
-          return u == packet.u && c == packet.c && params == packet.params;
+        void SetSharedKey(const uint8_t shared[SHARED_KEY_BYTE_LENGTH]) {
+          memcpy(this->shared, shared, SHARED_KEY_BYTE_LENGTH);
         }
 
         /* Display to output stream */
-        friend std::ostream & operator<< (std::ostream & stream, const ServerboundPacket & packet) {
-          return stream << "[u = " << packet.u << ", c  = " << packet.c << "]";
+        friend std::ostream & operator<< (std::ostream & stream, const Client & client) {
+          return stream << 
+            "{s = " << client.s << 
+            ", u = " << client.u << 
+            ", c  = " << client.c << 
+            "}";
         }
     };
   }

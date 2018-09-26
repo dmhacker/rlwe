@@ -3,8 +3,8 @@
 #include <NTL/RR.h>
 #include <NTL/pair.h>
 
-#define ERROR_STANDARD_DEVIATION 3.192f
-#define DECOMPOSITION_BIT_COUNT 32
+#define DEFAULT_ERROR_STANDARD_DEVIATION 3.192f
+#define DEFAULT_DECOMPOSITION_BIT_COUNT 32
 
 using namespace NTL;
 
@@ -56,10 +56,10 @@ namespace rlwe {
     class KeyParameters {
       private:
         /* Given parameters */ 
-        long n;
+        uint32_t n;
         ZZ q;
         ZZ t;
-        long log_w;
+        uint32_t log_w;
         float sigma;
         /* Calculated */
         ZZ_pXModulus phi;
@@ -67,16 +67,14 @@ namespace rlwe {
         RR downscale;
         ZZ w;
         ZZ w_mask;
-        long l;
-        char ** pmat;
+        uint32_t l;
+        uint8_t ** pmat;
         size_t pmat_rows; 
       public:
         /* Constructors */
-        KeyParameters(long n, long q, long t) : 
-          KeyParameters(n, ZZ(q), ZZ(t)) {}
-        KeyParameters(long n, ZZ q, ZZ t) : 
-          KeyParameters(n, q, t, DECOMPOSITION_BIT_COUNT, ERROR_STANDARD_DEVIATION) {}
-        KeyParameters(long n, ZZ q, ZZ t, long log_w, float sigma);
+        KeyParameters(uint32_t n, uint32_t q, uint32_t t);
+        KeyParameters(uint32_t n, const ZZ & q, const ZZ & t);
+        KeyParameters(uint32_t n, const ZZ & q, const ZZ & t, uint32_t log_w, float sigma);
         
         /* Destructors */
         ~KeyParameters() {
@@ -91,14 +89,14 @@ namespace rlwe {
         const ZZ & GetPlainModulus() const { return t; }
         const ZZ & GetPlainToCoeffScalar() const { return delta; }
         const RR & GetCoeffToPlainScalar() const { return downscale; }
-        long GetPolyModulusDegree() const { return n; }
+        uint32_t GetPolyModulusDegree() const { return n; }
         const ZZ_pXModulus & GetPolyModulus() const { return phi; }
         float GetErrorStandardDeviation() const { return sigma; }
         const ZZ & GetDecompositionBase() const { return w; }
         const ZZ & GetDecompositionBitMask() const { return w_mask; }
-        long GetDecompositionBitCount() const { return log_w; }
-        long GetDecompositionTermCount() const { return l; }
-        char ** GetProbabilityMatrix() const { return pmat; }
+        uint32_t GetDecompositionBitCount() const { return log_w; }
+        uint32_t GetDecompositionTermCount() const { return l; }
+        uint8_t ** GetProbabilityMatrix() const { return pmat; }
         size_t GetProbabilityMatrixRows() const { return pmat_rows; }
 
         /* Equality */
