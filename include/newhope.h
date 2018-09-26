@@ -1,5 +1,6 @@
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>
+#include <NTL/pair.h>
 
 #define DEFAULT_POLY_MODULUS_DEGREE 1024
 #define DEFAULT_COEFF_MODULUS 12289
@@ -27,7 +28,7 @@ namespace rlwe {
     void WritePacket(uint8_t * packet, Client & client);
 
     /* Util functions */
-    void Parse(ZZX & a, const uint8_t seed[SEED_BYTE_LENGTH]);
+    void Parse(ZZX & a, size_t len, const ZZ & q, const uint8_t seed[SEED_BYTE_LENGTH]);
 
     class KeyParameters {
       private:
@@ -80,6 +81,9 @@ namespace rlwe {
         uint8_t shared[SHARED_KEY_BYTE_LENGTH];
         const KeyParameters & params;
       public:
+        /* Constructors */
+        Server(const KeyParameters & params) : params(params) {}
+
         /* Getters */
         const ZZX & GetSecretKey() const {
           return s;
@@ -126,9 +130,13 @@ namespace rlwe {
         ZZX s;
         ZZX u;
         ZZX c;
+        Pair<ZZX, ZZX> e;
         uint8_t shared[SHARED_KEY_BYTE_LENGTH];
         const KeyParameters & params;
       public:
+        /* Constructors */
+        Client(const KeyParameters & params) : params(params) {}
+
         /* Getters */
         const ZZX & GetSecretKey() const {
           return s;
@@ -138,6 +146,9 @@ namespace rlwe {
         }
         const ZZX & GetCiphertext() const {
           return c;
+        }
+        const Pair<ZZX, ZZX> & GetErrors() const {
+          return e;
         }
         const uint8_t * GetSharedKey() const {
           return shared;
@@ -155,6 +166,10 @@ namespace rlwe {
         }
         void SetCiphertext(const ZZX & c) {
           this->c = c;
+        }
+        void SetErrors(const ZZX & e1, const ZZX & e2) {
+          this->e.a = e1;
+          this->e.b = e2;
         }
         void SetSharedKey(const uint8_t shared[SHARED_KEY_BYTE_LENGTH]) {
           memcpy(this->shared, shared, SHARED_KEY_BYTE_LENGTH);

@@ -18,7 +18,7 @@ void newhope::GenerateKeys(Server & server) {
 
   // Parse seed into a polynomial
   ZZX a;
-  Parse(a, seed);
+  Parse(a, params.GetPolyModulusDegree(), params.GetCoeffModulus(), seed);
   ZZ_pX a_p = conv<ZZ_pX>(a);
 
   // s <- Gaussian distribution
@@ -46,6 +46,17 @@ void newhope::GenerateKeys(Client & client) {
 
   // s <- Gaussian distribution
   client.SetSecretKey(
+      KnuthYaoSample(
+        params.GetPolyModulusDegree(), 
+        params.GetProbabilityMatrix(), 
+        params.GetProbabilityMatrixRows()));
+
+  // e1, e2 <- Gaussian distribution 
+  client.SetErrors(
+      KnuthYaoSample(
+        params.GetPolyModulusDegree(), 
+        params.GetProbabilityMatrix(), 
+        params.GetProbabilityMatrixRows()), 
       KnuthYaoSample(
         params.GetPolyModulusDegree(), 
         params.GetProbabilityMatrix(), 
