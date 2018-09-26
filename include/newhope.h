@@ -17,14 +17,17 @@ namespace rlwe {
     class Client;
 
     /* Initialization procedures */
-    void Initialize(Server & server);
-    void Initialize(Client & client); 
+    void GenerateKeys(Server & server);
+    void GenerateKeys(Client & client); 
 
     /* Packet receiving/processing */
     void ReadPacket(Client & client, const uint8_t * packet);
     void ReadPacket(Server & server, const uint8_t * packet);
     void WritePacket(uint8_t * packet, Server & server);
     void WritePacket(uint8_t * packet, Client & client);
+
+    /* Util functions */
+    void Parse(ZZX & a, const uint8_t seed[SEED_BYTE_LENGTH]);
 
     class KeyParameters {
       private:
