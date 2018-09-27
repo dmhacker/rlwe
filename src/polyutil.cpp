@@ -1,14 +1,17 @@
 #include "polyutil.h"
 
 void rlwe::RoundPoly(ZZX & result, const ZZX & poly, const RR & scalar, const ZZ & mod) {
+  RR r;
   for (long i = 0; i <= deg(poly); i++) {
     // Convert each coefficient into their floating point equivalent before rounding 
-    RR r = conv<RR>(coeff(poly, i));
+    ZZ z = coeff(poly, i);
+    conv(r, z);
     r *= scalar;
     round(r, r);
 
     // Convert coefficient back to integer equivalent and perform modulo operation
-    SetCoeff(result, i, conv<ZZ>(r) % mod); 
+    conv(z, r);
+    SetCoeff(result, i, z % mod); 
   }
 }
 

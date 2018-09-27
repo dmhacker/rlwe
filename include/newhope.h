@@ -24,8 +24,8 @@ namespace rlwe {
     /* Packet receiving/processing */
     void ReadPacket(Client & client, const uint8_t * packet);
     void ReadPacket(Server & server, const uint8_t * packet);
-    void WritePacket(uint8_t * packet, Server & server);
-    void WritePacket(uint8_t * packet, Client & client);
+    void WritePacket(uint8_t * packet, const Server & server);
+    void WritePacket(uint8_t * packet, const Client & client);
 
     /* Util functions */
     void Parse(ZZX & a, size_t len, const ZZ & q, const uint8_t seed[SEED_BYTE_LENGTH]);

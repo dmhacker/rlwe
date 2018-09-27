@@ -9,6 +9,10 @@ using namespace rlwe::newhope;
 void newhope::GenerateKeys(Server & server) {
   const KeyParameters & params = server.GetParameters();
 
+  // Set global finite field
+  ZZ_pPush push;
+  ZZ_p::init(params.GetCoeffModulus());
+
   // Generate seed by getting randomness from /dev/urandom
   uint8_t seed[SEED_BYTE_LENGTH];
   FILE * random_source = fopen("/dev/urandom", "r");
