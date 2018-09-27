@@ -22,13 +22,17 @@ namespace rlwe {
     void GenerateKeys(Client & client); 
 
     /* Packet receiving/processing */
-    void ReadPacket(Client & client, const uint8_t * packet);
-    void ReadPacket(Server & server, const uint8_t * packet);
     void WritePacket(uint8_t * packet, const Server & server);
+    void ReadPacket(Client & client, const uint8_t * packet);
     void WritePacket(uint8_t * packet, const Client & client);
+    void ReadPacket(Server & server, const uint8_t * packet);
 
     /* Util functions */
     void Parse(ZZX & a, size_t len, const ZZ & q, const uint8_t seed[SEED_BYTE_LENGTH]);
+    void NHSEncode(ZZX & k, const uint8_t v[SHARED_KEY_BYTE_LENGTH], const ZZ & q);
+    void NHSDecode(uint8_t v[SHARED_KEY_BYTE_LENGTH], const ZZX & k, const ZZ & q);
+    void NHSCompress(ZZX & cc, const ZZX & c, const ZZ & q);
+    void NHSDecompress(ZZX & c, const ZZX & cc, const ZZ & q);
 
     class KeyParameters {
       private:

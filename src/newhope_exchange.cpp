@@ -2,7 +2,6 @@
 #include "sample.h"
 #include "keccak-tiny.h"
 
-#include <NTL/RR.h>
 #include <cassert>
 
 using namespace rlwe;
@@ -40,7 +39,7 @@ size_t CompressPolynomial(uint8_t * output, const ZZX & poly, size_t coeff_bit_l
   return i == 0 && bitpos == 0 ? 0 : i + 1;
 }
 
-void DecompressPolynomial(ZZX & poly, size_t polylen, const uint8_t * output, size_t coeff_bit_length) {
+size_t DecompressPolynomial(ZZX & poly, size_t polylen, const uint8_t * output, size_t coeff_bit_length) {
   clear(poly);
 
   size_t i = 0; // Keeps track of what output byte we are on
@@ -71,61 +70,18 @@ void DecompressPolynomial(ZZX & poly, size_t polylen, const uint8_t * output, si
 
     SetCoeff(poly, j, c);
   }
+
+  return i == 0 && bitpos == 0 ? 0 : i + 1;
 }
 
-void NHSEncode(ZZX & k, const uint8_t v[SHARED_KEY_BYTE_LENGTH], const ZZ & q) {
-  clear(k);
+void newhope::WritePacket(uint8_t * packet, const Server & server) {
+  const KeyParameters & params = server.GetParameters();
 
-  ZZ q2 = q / 2;
+  // Copy the seed into the packet first
+  memcpy(packet, server.GetSeed(), SEED_BYTE_LENGTH);
 
-  // Loop through each byte
-  for (size_t i = 0; i < SHARED_KEY_BYTE_LENGTH; i++) {
-    uint8_t byte = v[i];
-
-    // Loop through each bit 
-    for (size_t j = 0; j < 8; j++) {
-      size_t b = i * 8 + j;
-
-      // Set floor(q / 2) as coefficient if bit is 1, otherwise 0 is coefficient 
-      if ((byte >> (7 - j)) & 1) {
-        SetCoeff(k, b, q2);
-        SetCoeff(k, b + 256, q2);
-        SetCoeff(k, b + 512, q2);
-        SetCoeff(k, b + 768, q2);
-      }
-      else {
-        SetCoeff(k, b, 0);
-        SetCoeff(k, b + 256, 0);
-        SetCoeff(k, b + 512, 0);
-        SetCoeff(k, b + 768, 0);
-      }
-    }
-  }
-}
-
-void NHSCompress(ZZX & cc, const ZZX & c, const ZZ & q) {
-  clear(cc);
-
-  for (size_t i = 0; i <= deg(c); i++) {
-    SetCoeff(cc, i, ((coeff(c, i) * 8) / q) % 8);
-  }
-}
-
-void NHSDecompress(ZZX & c, const ZZX & cc, const ZZ & q) {
-  clear(c);
-
-  RR r;
-  for (size_t i = 0; i <= deg(cc); i++) {
-    // Convert coefficient to decimal version and perform rounding operation
-    ZZ z = coeff(cc, i) * q;
-    conv(r, z);
-    r /= 8;
-    round(r, r);
-
-    // Convert rounded coefficient back to integer equivalent 
-    conv(z, r);
-    SetCoeff(c, i, z);
-  }
+  // Encode the polynomial immediately after
+  CompressPolynomial(packet + SEED_BYTE_LENGTH, server.GetPublicKey(), NumBits(params.GetCoeffModulus()));
 }
 
 void newhope::ReadPacket(Client & client, const uint8_t * packet) {
@@ -194,20 +150,54 @@ void newhope::ReadPacket(Client & client, const uint8_t * packet) {
   client.SetSharedKey(v);
 }
 
-void newhope::ReadPacket(Server & server, const uint8_t * packet) {
+void newhope::WritePacket(uint8_t * packet, const Client & client) {
+  const KeyParameters & params = client.GetParameters();
 
+  // Encode the public key first
+  size_t ulen = CompressPolynomial(packet, client.GetPublicKey(), NumBits(params.GetCoeffModulus()));
+
+  // Enocde the ciphertext next; since it is compressed, each coefficient only requires 3 bits
+  CompressPolynomial(packet + ulen, client.GetCiphertext(), 3); 
 }
 
-void newhope::WritePacket(uint8_t * packet, const Server & server) {
+void newhope::ReadPacket(Server & server, const uint8_t * packet) {
   const KeyParameters & params = server.GetParameters();
 
-  // Copy the seed into the packet first
-  memcpy(packet, server.GetSeed(), SEED_BYTE_LENGTH);
+  // Set global finite field
+  ZZ_pPush push;
+  ZZ_p::init(params.GetCoeffModulus());
 
-  // Encode the polynomial immediately after
-  CompressPolynomial(packet + SEED_BYTE_LENGTH, server.GetPublicKey(), NumBits(params.GetCoeffModulus()));
-}
+  // Decode compressed public key 
+  ZZX u;
+  size_t ulen = DecompressPolynomial(u, params.GetPolyModulusDegree(), packet, NumBits(params.GetCoeffModulus()));
 
-void newhope::WritePacket(uint8_t * packet, const Client & client) {
-  
+  // Decode doubly-compressed ciphertext 
+  ZZX cc;
+  DecompressPolynomial(cc, params.GetPolyModulusDegree(), packet + ulen, 3);
+
+  // Decompress ciphertext
+  ZZX c;
+  NHSDecompress(c, cc, params.GetCoeffModulus());
+
+  // Convert ZZXs into their ZZ_pX equivalents
+  ZZ_pX u_p = conv<ZZ_pX>(u);
+  ZZ_pX c_p = conv<ZZ_pX>(c);
+  ZZ_pX s_p = conv<ZZ_pX>(server.GetSecretKey());
+
+  // k' = c' - u * s
+  ZZ_pX k_p;
+  MulMod(k_p, u_p, s_p, params.GetPolyModulus());
+  k_p *= -1;
+  k_p += c_p;
+  ZZX k = conv<ZZX>(k_p);
+
+  // v' = NHSDecode(k')
+  uint8_t v[SHARED_KEY_BYTE_LENGTH];
+  NHSDecode(v, k, params.GetCoeffModulus());
+
+  // micro = SHA3-256(v')
+  sha3_256(v, SHARED_KEY_BYTE_LENGTH, v, SHARED_KEY_BYTE_LENGTH);
+
+  // Update client object with the shared key 
+  server.SetSharedKey(v);
 }
