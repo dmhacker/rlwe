@@ -18,14 +18,22 @@ namespace rlwe {
     class Client;
 
     /* Initialization procedures */
-    void GenerateKeys(Server & server);
-    void GenerateKeys(Client & client); 
+    void Initialize(Server & server);
+    void Initialize(Client & client); 
+
+    /* Object-oriented variants */
+    Server CreateServer(const KeyParameters & params);
+    Client CreateClient(const KeyParameters & params);
 
     /* Packet receiving/processing */
     void WritePacket(uint8_t * packet, const Server & server);
     void ReadPacket(Client & client, const uint8_t * packet);
     void WritePacket(uint8_t * packet, const Client & client);
     void ReadPacket(Server & server, const uint8_t * packet);
+
+    /* Object-oriented variants */
+    uint8_t * CreatePacket(const Server & server);
+    uint8_t * CreatePacket(const Client & client);
 
     /* Util functions */
     void Parse(ZZX & a, size_t len, const ZZ & q, const uint8_t seed[SEED_BYTE_LENGTH]);

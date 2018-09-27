@@ -6,7 +6,7 @@
 using namespace rlwe;
 using namespace rlwe::newhope;
 
-void newhope::GenerateKeys(Server & server) {
+void newhope::Initialize(Server & server) {
   const KeyParameters & params = server.GetParameters();
 
   // Set global finite field
@@ -45,7 +45,7 @@ void newhope::GenerateKeys(Server & server) {
   server.SetPublicKey(b);
 }
 
-void newhope::GenerateKeys(Client & client) {
+void newhope::Initialize(Client & client) {
   const KeyParameters & params = client.GetParameters();
 
   // s <- Gaussian distribution
@@ -65,4 +65,16 @@ void newhope::GenerateKeys(Client & client) {
         params.GetPolyModulusDegree(), 
         params.GetProbabilityMatrix(), 
         params.GetProbabilityMatrixRows()));
+}
+
+Server newhope::CreateServer(const KeyParameters & params) {
+  Server server(params);
+  Initialize(server);
+  return server;
+}
+
+Client newhope::CreateClient(const KeyParameters & params) {
+  Client client(params);
+  Initialize(client);
+  return client;
 }

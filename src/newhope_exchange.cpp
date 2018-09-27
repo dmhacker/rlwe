@@ -201,3 +201,35 @@ void newhope::ReadPacket(Server & server, const uint8_t * packet) {
   // Update client object with the shared key 
   server.SetSharedKey(v);
 }
+
+uint8_t * CreatePacket(Server & server) {
+  const KeyParameters & params = server.GetParameters();
+
+  // Calculate number of bytes needed to represent public key 
+  size_t blen = params.GetPolyModulusDegree() * NumBits(params.GetCoeffModulus());
+  blen = (blen + 8 - 1) / 8;
+
+  // Allocate packet on the heap and write to it
+  uint8_t * packet = (uint8_t *) malloc(SEED_BYTE_LENGTH + blen);
+  WritePacket(packet, server);
+
+  return packet;
+}
+
+uint8_t * CreatePacket(Client & client) {
+  const KeyParameters & params = client.GetParameters();
+
+  // Calculate number of bytes needed to represent public key 
+  size_t ulen = params.GetPolyModulusDegree() * NumBits(params.GetCoeffModulus());
+  ulen = (ulen + 8 - 1) / 8;
+  
+  // Calculate number of bytes needed to represent compressed ciphertext
+  size_t clen = params.GetPolyModulusDegree() * 3;
+  clen = (clen + 8 - 1) / 8;
+
+  // Allocate packet on the heap and write to it
+  uint8_t * packet = (uint8_t *) malloc(ulen + clen);
+  WritePacket(packet, client);
+
+  return packet;
+}
