@@ -17,7 +17,7 @@ void newhope::Initialize(Server & server) {
   uint8_t seed[SEED_BYTE_LENGTH];
   FILE * random_source = fopen("/dev/urandom", "r");
   assert(random_source != NULL);
-  fread(seed, sizeof(uint8_t), SEED_BYTE_LENGTH, random_source);
+  fread(seed, 1, SEED_BYTE_LENGTH, random_source);
   fclose(random_source);
 
   // Parse seed into a polynomial
@@ -41,6 +41,7 @@ void newhope::Initialize(Server & server) {
   ZZX b = conv<ZZX>(b_p);
 
   // Update the server object with the new keys
+  server.SetSeed(seed);
   server.SetSecretKey(s);
   server.SetPublicKey(b);
 }

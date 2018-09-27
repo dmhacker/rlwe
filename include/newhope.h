@@ -37,6 +37,8 @@ namespace rlwe {
 
     /* Util functions */
     void Parse(ZZX & a, size_t len, const ZZ & q, const uint8_t seed[SEED_BYTE_LENGTH]);
+    size_t CompressPolynomial(uint8_t * output, const ZZX & poly, size_t coeff_bit_length);
+    size_t DecompressPolynomial(ZZX & poly, size_t polylen, const uint8_t * output, size_t coeff_bit_length);
     void NHSEncode(ZZX & k, const uint8_t v[SHARED_KEY_BYTE_LENGTH], const ZZ & q);
     void NHSDecode(uint8_t v[SHARED_KEY_BYTE_LENGTH], const ZZX & k, const ZZ & q);
     void NHSCompress(ZZX & cc, const ZZX & c, const ZZ & q);

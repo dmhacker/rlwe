@@ -7,73 +7,6 @@
 using namespace rlwe;
 using namespace rlwe::newhope;
 
-size_t CompressPolynomial(uint8_t * output, const ZZX & poly, size_t coeff_bit_length) {
-  size_t i = 0; // Keeps track of what output byte we are on
-  size_t bitpos = 0; // Keeps track of the bit position in the output byte
-
-  // Read each coefficient in order, starting with x^0, then x^1, x^2, etc.
-  for (size_t j = 0; j <= deg(poly); j++) {
-    ZZ c = coeff(poly, j);
-
-    // Loop through each bit in the coefficient starting with the LSB
-    for (size_t k = 0; k < coeff_bit_length; k++) {
-      // The mask is going to be a 1 bit in the position we want to edit
-      uint8_t mask = 1 << (7 - bitpos++);
-
-      // Set the bit in the output byte using the mask
-      if (bit(c, k)) {
-        output[i] |= mask;
-      }
-      else {
-        output[i] &= ~mask;
-      }
-
-      // If the bit position is 8, we move to the next byte
-      if (bitpos == 8) {
-        i++;
-        bitpos = 0; 
-      }
-    }
-  }
-
-  return i == 0 && bitpos == 0 ? 0 : i + 1;
-}
-
-size_t DecompressPolynomial(ZZX & poly, size_t polylen, const uint8_t * output, size_t coeff_bit_length) {
-  clear(poly);
-
-  size_t i = 0; // Keeps track of what output byte we are on
-  size_t bitpos = 0; // Keeps track of the bit position in the output byte
-
-  // Write each coefficient in order, starting with x^0, then x^1, x^2, etc.
-  for (size_t j = 0; j < polylen; j++) {
-    ZZ c;
-
-    // Loop through bits in little endian fashion 
-    for (size_t _ = 0; _ < coeff_bit_length; _++) {
-      // Extract the bit from the output byte
-      uint8_t byte = output[i];
-      uint8_t bit = (byte >> (7 - bitpos++)) & 1;
-
-      // Right shift coefficient to make room for new bit
-      c <<= 1;
-      if (bit) {
-        c &= 1;
-      }
-
-      // If the bit position is 8, we move to the next byte
-      if (bitpos == 8) {
-        i++;
-        bitpos = 0;
-      }
-    }
-
-    SetCoeff(poly, j, c);
-  }
-
-  return i == 0 && bitpos == 0 ? 0 : i + 1;
-}
-
 void newhope::WritePacket(uint8_t * packet, const Server & server) {
   const KeyParameters & params = server.GetParameters();
 
@@ -202,7 +135,7 @@ void newhope::ReadPacket(Server & server, const uint8_t * packet) {
   server.SetSharedKey(v);
 }
 
-uint8_t * CreatePacket(Server & server) {
+uint8_t * newhope::CreatePacket(const Server & server) {
   const KeyParameters & params = server.GetParameters();
 
   // Calculate number of bytes needed to represent public key 
@@ -216,7 +149,7 @@ uint8_t * CreatePacket(Server & server) {
   return packet;
 }
 
-uint8_t * CreatePacket(Client & client) {
+uint8_t * newhope::CreatePacket(const Client & client) {
   const KeyParameters & params = client.GetParameters();
 
   // Calculate number of bytes needed to represent public key 
