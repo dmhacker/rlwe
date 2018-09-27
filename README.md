@@ -7,10 +7,9 @@ Rather, it is intended to be used in an academic setting.
 
 Specifically, the library implements the ...
   * [Fan-Vercauterean](https://eprint.iacr.org/2012/144.pdf) fully homomorphic cryptosystem
-  * [NewHope-Simple](https://eprint.iacr.org/2015/1092.pdf) key exchange without reconciliation*
+  * [NewHope-Simple](https://eprint.iacr.org/2015/1092.pdf) key exchange without reconciliation
   * [Ring-TESLA](https://eprint.iacr.org/2016/030.pdf) digital signature algorithm
   * [Knuth-Yao](https://eprint.iacr.org/2017/988.pdf) algorithm for fast discrete noise sampling over a Gaussian distribution
-<br><sub><sup>* Implementation not finished yet</sup></sub>
 
 For anyone without significant background on RLWE, I would recommend checking out these links:
 * [Homomorphic Encryption from RLWE](https://cryptosith.org/michael/data/talks/2012-01-10-MSR-Cambridge.pdf) 
