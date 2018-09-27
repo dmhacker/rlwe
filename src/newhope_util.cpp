@@ -1,8 +1,6 @@
 #include "newhope.h"
 #include "keccak-tiny.h"
 
-#include <NTL/RR.h>
-
 using namespace rlwe;
 using namespace rlwe::newhope;
 
@@ -93,24 +91,18 @@ void newhope::NHSDecode(uint8_t v[SHARED_KEY_BYTE_LENGTH], const ZZX & k, const 
 void newhope::NHSCompress(ZZX & cc, const ZZX & c, const ZZ & q) {
   clear(cc);
 
+  ZZ q2 = q / 2;
   for (size_t i = 0; i <= deg(c); i++) {
-    SetCoeff(cc, i, ((coeff(c, i) * 8) / q) % 8);
+    ZZ z = (coeff(c, i) * 8 + q2) / q;
+    SetCoeff(cc, i, z % 8);
   }
 }
 
 void newhope::NHSDecompress(ZZX & c, const ZZX & cc, const ZZ & q) {
   clear(c);
 
-  RR r;
   for (size_t i = 0; i <= deg(cc); i++) {
-    // Convert coefficient to decimal version and perform rounding operation
-    ZZ z = coeff(cc, i) * q;
-    conv(r, z);
-    r /= 8;
-    round(r, r);
-
-    // Convert rounded coefficient back to integer equivalent 
-    conv(z, r);
+    ZZ z = (coeff(cc, i) * q + 4) / 8;
     SetCoeff(c, i, z);
   }
 }

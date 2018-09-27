@@ -6,7 +6,7 @@ using namespace NTL;
 
 namespace rlwe {
   // Scales each coefficient in the polynomial by a floating point number and then rounds the result
-  void RoundPoly(ZZX & result, const ZZX & poly, const RR & scalar, const ZZ & mod);
+  void RoundPoly(ZZX & result, const ZZX & poly, const ZZ & scalar, const ZZ & divisor, const ZZ & mod);
 
   // Centers coefficients in a polynomial so that they appear in ((-q - 1)/ 2, (q - 1)/2] instead of [0 ... q)
   void CenterPoly(ZZX & result, const ZZX & poly, const ZZ & mod);

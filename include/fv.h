@@ -1,6 +1,5 @@
 #include <NTL/ZZ.h>
 #include <NTL/ZZX.h>
-#include <NTL/RR.h>
 #include <NTL/pair.h>
 
 #define DEFAULT_ERROR_STANDARD_DEVIATION 3.192f
@@ -64,7 +63,6 @@ namespace rlwe {
         /* Calculated */
         ZZ_pXModulus phi;
         ZZ delta;
-        RR downscale;
         ZZ w;
         ZZ w_mask;
         uint32_t l;
@@ -88,7 +86,6 @@ namespace rlwe {
         const ZZ & GetCoeffModulus() const { return q; }
         const ZZ & GetPlainModulus() const { return t; }
         const ZZ & GetPlainToCoeffScalar() const { return delta; }
-        const RR & GetCoeffToPlainScalar() const { return downscale; }
         uint32_t GetPolyModulusDegree() const { return n; }
         const ZZ_pXModulus & GetPolyModulus() const { return phi; }
         float GetErrorStandardDeviation() const { return sigma; }

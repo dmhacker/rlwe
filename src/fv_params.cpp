@@ -12,8 +12,7 @@ KeyParameters::KeyParameters(uint32_t n, const ZZ & q, const ZZ & t) :
   KeyParameters(n, q, t, DEFAULT_DECOMPOSITION_BIT_COUNT, DEFAULT_ERROR_STANDARD_DEVIATION) {}
 
 KeyParameters::KeyParameters(uint32_t n, const ZZ & q, const ZZ & t, uint32_t log_w, float sigma) : 
-  n(n), q(q), t(t), log_w(log_w), sigma(sigma),
-  delta(q / t), downscale(conv<RR>(t) / conv<RR>(q))
+  n(n), q(q), t(t), log_w(log_w), sigma(sigma), delta(q / t) 
 {
   // Assert that n is even, assume that it is a power of 2
   assert(n % 2 == 0);

@@ -1,16 +1,10 @@
 #include "polyutil.h"
 
-void rlwe::RoundPoly(ZZX & result, const ZZX & poly, const RR & scalar, const ZZ & mod) {
-  RR r;
+void rlwe::RoundPoly(ZZX & result, const ZZX & poly, const ZZ & scalar, const ZZ & divisor, const ZZ & mod) {
+  ZZ div2 = divisor / 2;
   for (long i = 0; i <= deg(poly); i++) {
-    // Convert each coefficient into their floating point equivalent before rounding 
-    ZZ z = coeff(poly, i);
-    conv(r, z);
-    r *= scalar;
-    round(r, r);
-
-    // Convert coefficient back to integer equivalent and perform modulo operation
-    conv(z, r);
+    // See https://stackoverflow.com/questions/2422712/rounding-integer-division-instead-of-truncating 
+    ZZ z = (coeff(poly, i) * scalar + div2) / divisor;
     SetCoeff(result, i, z % mod); 
   }
 }
