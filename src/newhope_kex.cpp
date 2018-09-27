@@ -1,23 +1,24 @@
 #include "newhope.h"
 #include "sample.h"
 #include "keccak-tiny.h"
+#include "polyutil.h"
 
 #include <cassert>
 
 using namespace rlwe;
 using namespace rlwe::newhope;
 
-void newhope::WritePacket(uint8_t * packet, const Server & server) {
+void newhope::WritePacket(Packet & packet, const Server & server) {
   const KeyParameters & params = server.GetParameters();
 
   // Copy the seed into the packet first
-  memcpy(packet, server.GetSeed(), SEED_BYTE_LENGTH);
+  memcpy(packet.GetBytes(), server.GetSeed(), SEED_BYTE_LENGTH);
 
   // Encode the polynomial immediately after
-  CompressPolynomial(packet + SEED_BYTE_LENGTH, server.GetPublicKey(), NumBits(params.GetCoeffModulus()));
+  CompressPolynomial(packet.GetBytes() + SEED_BYTE_LENGTH, server.GetPublicKey(), NumBits(params.GetCoeffModulus()));
 }
 
-void newhope::ReadPacket(Client & client, const uint8_t * packet) {
+void newhope::ReadPacket(Client & client, const Packet & packet) {
   const KeyParameters & params = client.GetParameters();
 
   // Set global finite field
@@ -26,11 +27,11 @@ void newhope::ReadPacket(Client & client, const uint8_t * packet) {
 
   // Copy the seed out of the packet
   uint8_t seed[SEED_BYTE_LENGTH];
-  memcpy(seed, packet, SEED_BYTE_LENGTH);
+  memcpy(seed, packet.GetBytes(), SEED_BYTE_LENGTH);
 
   // Decode the compressed polynomial that follows the seed
   ZZX b;
-  DecompressPolynomial(b, params.GetPolyModulusDegree(), packet + SEED_BYTE_LENGTH, NumBits(params.GetCoeffModulus()));
+  DecompressPolynomial(b, params.GetPolyModulusDegree(), packet.GetBytes() + SEED_BYTE_LENGTH, NumBits(params.GetCoeffModulus()));
 
   // Parse seed into a polynomial 
   ZZX a;
@@ -45,7 +46,7 @@ void newhope::ReadPacket(Client & client, const uint8_t * packet) {
 
   // u = a * s + e'
   ZZ_pX u_p;
-  MulMod(u_p, a_p, s_p);
+  MulMod(u_p, a_p, s_p, params.GetPolyModulus());
   u_p += e1_p;
   ZZX u = conv<ZZX>(u_p);
 
@@ -53,7 +54,7 @@ void newhope::ReadPacket(Client & client, const uint8_t * packet) {
   uint8_t v[SHARED_KEY_BYTE_LENGTH];
   FILE * random_source = fopen("/dev/urandom", "r");
   assert(random_source != NULL);
-  fread(v, sizeof(uint8_t), SHARED_KEY_BYTE_LENGTH, random_source);
+  fread(v, 1, SHARED_KEY_BYTE_LENGTH, random_source);
   fclose(random_source);
 
   // v' = SHA3-256(v)
@@ -68,7 +69,7 @@ void newhope::ReadPacket(Client & client, const uint8_t * packet) {
   MulMod(c_p, b_p, s_p, params.GetPolyModulus());
   c_p += e2_p;
   c_p += conv<ZZ_pX>(k);
-  ZZX c = conv<ZZX>(c);
+  ZZX c = conv<ZZX>(c_p);
 
   // cc = NHSCompress(c)
   ZZX cc;
@@ -83,17 +84,17 @@ void newhope::ReadPacket(Client & client, const uint8_t * packet) {
   client.SetSharedKey(v);
 }
 
-void newhope::WritePacket(uint8_t * packet, const Client & client) {
+void newhope::WritePacket(Packet & packet, const Client & client) {
   const KeyParameters & params = client.GetParameters();
 
   // Encode the public key first
-  size_t ulen = CompressPolynomial(packet, client.GetPublicKey(), NumBits(params.GetCoeffModulus()));
+  size_t ulen = CompressPolynomial(packet.GetBytes(), client.GetPublicKey(), NumBits(params.GetCoeffModulus()));
 
   // Enocde the ciphertext next; since it is compressed, each coefficient only requires 3 bits
-  CompressPolynomial(packet + ulen, client.GetCiphertext(), 3); 
+  CompressPolynomial(packet.GetBytes() + ulen, client.GetCiphertext(), 3); 
 }
 
-void newhope::ReadPacket(Server & server, const uint8_t * packet) {
+void newhope::ReadPacket(Server & server, const Packet & packet) {
   const KeyParameters & params = server.GetParameters();
 
   // Set global finite field
@@ -102,11 +103,11 @@ void newhope::ReadPacket(Server & server, const uint8_t * packet) {
 
   // Decode compressed public key 
   ZZX u;
-  size_t ulen = DecompressPolynomial(u, params.GetPolyModulusDegree(), packet, NumBits(params.GetCoeffModulus()));
+  size_t ulen = DecompressPolynomial(u, params.GetPolyModulusDegree(), packet.GetBytes(), NumBits(params.GetCoeffModulus()));
 
   // Decode doubly-compressed ciphertext 
   ZZX cc;
-  DecompressPolynomial(cc, params.GetPolyModulusDegree(), packet + ulen, 3);
+  DecompressPolynomial(cc, params.GetPolyModulusDegree(), packet.GetBytes() + ulen, 3);
 
   // Decompress ciphertext
   ZZX c;
@@ -135,7 +136,7 @@ void newhope::ReadPacket(Server & server, const uint8_t * packet) {
   server.SetSharedKey(v);
 }
 
-uint8_t * newhope::CreatePacket(const Server & server) {
+Packet newhope::CreatePacket(const Server & server) {
   const KeyParameters & params = server.GetParameters();
 
   // Calculate number of bytes needed to represent public key 
@@ -143,13 +144,13 @@ uint8_t * newhope::CreatePacket(const Server & server) {
   blen = (blen + 8 - 1) / 8;
 
   // Allocate packet on the heap and write to it
-  uint8_t * packet = (uint8_t *) malloc(SEED_BYTE_LENGTH + blen);
+  Packet packet(SEED_BYTE_LENGTH + blen);
   WritePacket(packet, server);
 
   return packet;
 }
 
-uint8_t * newhope::CreatePacket(const Client & client) {
+Packet newhope::CreatePacket(const Client & client) {
   const KeyParameters & params = client.GetParameters();
 
   // Calculate number of bytes needed to represent public key 
@@ -161,7 +162,7 @@ uint8_t * newhope::CreatePacket(const Client & client) {
   clen = (clen + 8 - 1) / 8;
 
   // Allocate packet on the heap and write to it
-  uint8_t * packet = (uint8_t *) malloc(ulen + clen);
+  Packet packet(ulen + clen);
   WritePacket(packet, client);
 
   return packet;

@@ -141,11 +141,12 @@ void newhope::NHSEncode(ZZX & k, const uint8_t v[SHARED_KEY_BYTE_LENGTH], const 
 }
 
 void newhope::NHSDecode(uint8_t v[SHARED_KEY_BYTE_LENGTH], const ZZX & k, const ZZ & q) {
+  ZZ q2 = q / 2;
   for (size_t i = 0; i < 256; i++) {
     // t = sum(v[i + 256 * j] - floor(q / 2)] 
-    ZZ t = -2 * q;
+    ZZ t; 
     for (size_t j = 0; j < 4; j++) {
-      t += coeff(k, i + 256 * j);
+      t += abs(coeff(k, i + 256 * j) - q2);
     }
 
     // If t < q, then set bit to 1, otherwise set bit to 0

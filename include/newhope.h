@@ -16,6 +16,7 @@ namespace rlwe {
     class KeyParameters;
     class Server;
     class Client;
+    class Packet;
 
     /* Initialization procedures */
     void Initialize(Server & server);
@@ -26,14 +27,14 @@ namespace rlwe {
     Client CreateClient(const KeyParameters & params);
 
     /* Packet receiving/processing */
-    void WritePacket(uint8_t * packet, const Server & server);
-    void ReadPacket(Client & client, const uint8_t * packet);
-    void WritePacket(uint8_t * packet, const Client & client);
-    void ReadPacket(Server & server, const uint8_t * packet);
+    void WritePacket(Packet & packet, const Server & server);
+    void ReadPacket(Client & client, const Packet & packet);
+    void WritePacket(Packet & packet, const Client & client);
+    void ReadPacket(Server & server, const Packet & packet);
 
     /* Object-oriented variants */
-    uint8_t * CreatePacket(const Server & server);
-    uint8_t * CreatePacket(const Client & client);
+    Packet CreatePacket(const Server & server);
+    Packet CreatePacket(const Client & client);
 
     /* Util functions */
     void Parse(ZZX & a, size_t len, const ZZ & q, const uint8_t seed[SEED_BYTE_LENGTH]);
@@ -196,6 +197,30 @@ namespace rlwe {
             ", u = " << client.u << 
             ", c  = " << client.c << 
             "}";
+        }
+    };
+
+    /* Repesents a fixed, heap-allocated array of bytes */
+    /* Unlike other classes here, the array is directly modifiable */
+    class Packet {
+      private:
+        uint8_t * bytes;
+        size_t len;
+      public:
+        Packet(size_t len) : len(len) {
+          bytes = (uint8_t *) malloc(len);
+        }
+
+        ~Packet() {
+          free(bytes);
+        }
+
+        size_t GetLength() const {
+          return len;
+        }
+
+        uint8_t * GetBytes() const {
+          return bytes;
         }
     };
   }
