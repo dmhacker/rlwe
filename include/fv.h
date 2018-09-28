@@ -55,7 +55,7 @@ namespace rlwe {
     class KeyParameters {
       private:
         /* Given parameters */ 
-        uint32_t n;
+        size_t n;
         ZZ q;
         ZZ t;
         uint32_t log_w;
@@ -70,9 +70,9 @@ namespace rlwe {
         size_t pmat_rows; 
       public:
         /* Constructors */
-        KeyParameters(uint32_t n, uint32_t q, uint32_t t);
-        KeyParameters(uint32_t n, const ZZ & q, const ZZ & t);
-        KeyParameters(uint32_t n, const ZZ & q, const ZZ & t, uint32_t log_w, float sigma);
+        KeyParameters(size_t n, uint32_t q, uint32_t t);
+        KeyParameters(size_t n, const ZZ & q, const ZZ & t);
+        KeyParameters(size_t n, const ZZ & q, const ZZ & t, uint32_t log_w, float sigma);
         
         /* Destructors */
         ~KeyParameters() {
@@ -86,7 +86,7 @@ namespace rlwe {
         const ZZ & GetCoeffModulus() const { return q; }
         const ZZ & GetPlainModulus() const { return t; }
         const ZZ & GetPlainToCoeffScalar() const { return delta; }
-        uint32_t GetPolyModulusDegree() const { return n; }
+        size_t GetPolyModulusDegree() const { return n; }
         const ZZ_pXModulus & GetPolyModulus() const { return phi; }
         float GetErrorStandardDeviation() const { return sigma; }
         const ZZ & GetDecompositionBase() const { return w; }

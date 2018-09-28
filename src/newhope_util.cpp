@@ -39,7 +39,7 @@ void newhope::Parse(ZZX & a, size_t len, const ZZ & q, const uint8_t seed[SEED_B
   free(output);
 }
 
-size_t newhope::CompressPolynomial(uint8_t * output, const ZZX & poly, size_t coeff_bit_length) {
+size_t newhope::CompressPoly(uint8_t * output, size_t coeff_bit_length, const ZZX & poly) {
   size_t i = 0; // Keeps track of what output byte we are on
   size_t bitpos = 0; // Keeps track of the bit position in the output byte
 
@@ -71,7 +71,7 @@ size_t newhope::CompressPolynomial(uint8_t * output, const ZZX & poly, size_t co
   return i == 0 && bitpos == 0 ? 0 : (bitpos == 0 ? i : i + 1);
 }
 
-size_t newhope::DecompressPolynomial(ZZX & poly, size_t polylen, const uint8_t * output, size_t coeff_bit_length) {
+size_t newhope::DecompressPoly(ZZX & poly, size_t polylen, const uint8_t * output, size_t coeff_bit_length) {
   clear(poly);
 
   size_t i = 0; // Keeps track of what output byte we are on

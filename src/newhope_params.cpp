@@ -9,10 +9,10 @@ KeyParameters::KeyParameters() :
   KeyParameters(DEFAULT_POLY_MODULUS_DEGREE, ZZ(DEFAULT_COEFF_MODULUS), 
       DEFAULT_ERROR_STANDARD_DEVIATION) {}
         
-KeyParameters::KeyParameters(uint32_t n, const ZZ & q) : 
+KeyParameters::KeyParameters(size_t n, const ZZ & q) : 
   KeyParameters(n, q, DEFAULT_ERROR_STANDARD_DEVIATION) {}
 
-KeyParameters::KeyParameters(uint32_t n, const ZZ & q, float sigma) : 
+KeyParameters::KeyParameters(size_t n, const ZZ & q, float sigma) : 
   n(n), q(q), sigma(sigma) {
   // Assert that n is even, assume that it is a power of 2
   assert(n % 2 == 0);

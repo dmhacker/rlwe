@@ -20,7 +20,7 @@ KeyParameters::KeyParameters(const ZZX & a1, const ZZX & a2) :
       DEFAULT_LEAST_SIGNIFICANT_BITS, ZZ(DEFAULT_COEFF_MODULUS)) {}
 
 KeyParameters::KeyParameters(const ZZX & a1, const ZZX & a2, 
-    uint32_t n, float sigma, const ZZ & L, uint32_t w, 
+    size_t n, float sigma, const ZZ & L, uint32_t w, 
     const ZZ & B, const ZZ & U, uint32_t d, const ZZ & q) :
   a(a1, a2), n(n), sigma(sigma), L(L), w(w), B(B), U(U), d(d), q(q), pow_2d(power_ZZ(2, d))
 {

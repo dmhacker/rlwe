@@ -38,8 +38,8 @@ namespace rlwe {
 
     /* Util functions */
     void Parse(ZZX & a, size_t len, const ZZ & q, const uint8_t seed[SEED_BYTE_LENGTH]);
-    size_t CompressPolynomial(uint8_t * output, const ZZX & poly, size_t coeff_bit_length);
-    size_t DecompressPolynomial(ZZX & poly, size_t polylen, const uint8_t * output, size_t coeff_bit_length);
+    size_t CompressPoly(uint8_t * output, size_t coeff_bit_length, const ZZX & poly);
+    size_t DecompressPoly(ZZX & poly, size_t polylen, const uint8_t * output, size_t coeff_bit_length);
     void NHSEncode(ZZX & k, const uint8_t v[SHARED_KEY_BYTE_LENGTH], const ZZ & q);
     void NHSDecode(uint8_t v[SHARED_KEY_BYTE_LENGTH], const ZZX & k, const ZZ & q);
     void NHSCompress(ZZX & cc, const ZZX & c, const ZZ & q);
@@ -48,7 +48,7 @@ namespace rlwe {
     class KeyParameters {
       private:
         /* Given parameters */ 
-        uint32_t n;
+        size_t n;
         ZZ q;
         float sigma;
         /* Calculated */
@@ -58,8 +58,8 @@ namespace rlwe {
       public:
         /* Constructors */
         KeyParameters();
-        KeyParameters(uint32_t n, const ZZ & q); 
-        KeyParameters(uint32_t n, const ZZ & q, float sigma);
+        KeyParameters(size_t n, const ZZ & q); 
+        KeyParameters(size_t n, const ZZ & q, float sigma);
         
         /* Destructors */
         ~KeyParameters() {
@@ -71,7 +71,7 @@ namespace rlwe {
 
         /* Getters */
         const ZZ & GetCoeffModulus() const { return q; }
-        long GetPolyModulusDegree() const { return n; }
+        size_t GetPolyModulusDegree() const { return n; }
         const ZZ_pXModulus & GetPolyModulus() const { return phi; }
         float GetErrorStandardDeviation() const { return sigma; }
         uint8_t ** GetProbabilityMatrix() const { return pmat; }

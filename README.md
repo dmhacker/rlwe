@@ -72,7 +72,7 @@ Whenever operations are performed on them, they are usually converted to `NTL::Z
 The ring-TESLA implementation requires both a hashing function and an encoding function. 
 The hashing function used is SHA-256, as specified in the paper, and the encoding function uses the ChaCha20 stream cipher, with the key being the function input.
 The [libsodium](https://download.libsodium.org/doc/) library was used to provide secure & fast implementations of these algorithms.
-libsodium is also used as a source of cryptographically secure random data.
+libsodium is also used to procure cryptographically secure random data.
 
 The NewHope and NewHope-Simple key exchanges both require implementations of the SHA-3 and SHAKE-128 hashing algorithms. 
 A modified version of the [keccak-tiny](https://github.com/coruus/keccak-tiny) library has been included in the source code for this purpose, 

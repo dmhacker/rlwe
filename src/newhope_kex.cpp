@@ -16,7 +16,7 @@ void newhope::WritePacket(Packet & packet, const Server & server) {
   memcpy(packet.GetBytes(), server.GetSeed(), SEED_BYTE_LENGTH);
 
   // Encode the polynomial immediately after
-  CompressPolynomial(packet.GetBytes() + SEED_BYTE_LENGTH, server.GetPublicKey(), NumBits(params.GetCoeffModulus()));
+  CompressPoly(packet.GetBytes() + SEED_BYTE_LENGTH, NumBits(params.GetCoeffModulus()), server.GetPublicKey());
 }
 
 void newhope::ReadPacket(Client & client, const Packet & packet) {
@@ -32,7 +32,7 @@ void newhope::ReadPacket(Client & client, const Packet & packet) {
 
   // Decode the compressed polynomial that follows the seed
   ZZX b;
-  DecompressPolynomial(b, params.GetPolyModulusDegree(), packet.GetBytes() + SEED_BYTE_LENGTH, NumBits(params.GetCoeffModulus()));
+  DecompressPoly(b, params.GetPolyModulusDegree(), packet.GetBytes() + SEED_BYTE_LENGTH, NumBits(params.GetCoeffModulus()));
 
   // Parse seed into a polynomial 
   ZZX a;
@@ -86,10 +86,10 @@ void newhope::WritePacket(Packet & packet, const Client & client) {
   const KeyParameters & params = client.GetParameters();
 
   // Encode the public key first
-  size_t ulen = CompressPolynomial(packet.GetBytes(), client.GetPublicKey(), NumBits(params.GetCoeffModulus()));
+  size_t ulen = CompressPoly(packet.GetBytes(), NumBits(params.GetCoeffModulus()), client.GetPublicKey());
 
   // Enocde the ciphertext next; since it is compressed, each coefficient only requires 3 bits
-  CompressPolynomial(packet.GetBytes() + ulen, client.GetCiphertext(), 3); 
+  CompressPoly(packet.GetBytes() + ulen, 3, client.GetCiphertext()); 
 }
 
 void newhope::ReadPacket(Server & server, const Packet & packet) {
@@ -101,11 +101,11 @@ void newhope::ReadPacket(Server & server, const Packet & packet) {
 
   // Decode compressed public key 
   ZZX u;
-  size_t ulen = DecompressPolynomial(u, params.GetPolyModulusDegree(), packet.GetBytes(), NumBits(params.GetCoeffModulus()));
+  size_t ulen = DecompressPoly(u, params.GetPolyModulusDegree(), packet.GetBytes(), NumBits(params.GetCoeffModulus()));
 
   // Decode doubly-compressed ciphertext 
   ZZX cc;
-  DecompressPolynomial(cc, params.GetPolyModulusDegree(), packet.GetBytes() + ulen, 3);
+  DecompressPoly(cc, params.GetPolyModulusDegree(), packet.GetBytes() + ulen, 3);
 
   // Decompress ciphertext
   ZZX c;

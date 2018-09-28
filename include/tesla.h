@@ -44,7 +44,7 @@ namespace rlwe {
     class KeyParameters {
       private:
         /* Given parameters */ 
-        uint32_t n;
+        size_t n;
         float sigma;
         ZZ L;
         uint32_t w;
@@ -63,7 +63,7 @@ namespace rlwe {
         KeyParameters(); 
         KeyParameters(const ZZX & a1, const ZZX & a2);
         KeyParameters(const ZZX & a1, const ZZX & a2, 
-            uint32_t n, float sigma, const ZZ & L, uint32_t w, 
+            size_t n, float sigma, const ZZ & L, uint32_t w, 
             const ZZ & B, const ZZ & U, uint32_t d, const ZZ & q); 
 
         /* Destructors */
@@ -77,7 +77,7 @@ namespace rlwe {
         /* Getters */
         const Pair<ZZX, ZZX> & GetPolyConstants() const { return a; }
         const ZZ_pXModulus & GetPolyModulus() const { return phi; }
-        uint32_t GetPolyModulusDegree() const { return n; }
+        size_t GetPolyModulusDegree() const { return n; }
         float GetErrorStandardDeviation() const { return sigma; }
         const ZZ & GetErrorBound() const { return L; }
         uint32_t GetEncodingWeight() const { return w; }
