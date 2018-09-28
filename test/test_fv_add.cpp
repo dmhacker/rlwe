@@ -9,7 +9,7 @@ using namespace rlwe::fv;
 
 TEST_CASE("Homomorphic addition") {
   // Set up parameters
-  KeyParameters params(1024, 12289, 2);  
+  KeyParameters params;
 
   // Compute keys
   PrivateKey priv = GeneratePrivateKey(params);

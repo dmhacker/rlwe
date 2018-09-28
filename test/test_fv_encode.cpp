@@ -32,9 +32,9 @@ TEST_CASE("Encoding & decoding negative integer") {
   }
 }
 
-TEST_CASE("Encoding & decoding with integer addition") {
+TEST_CASE("Encoding & decoding with homomorphic integer addition") {
   // Set up parameters
-  KeyParameters params(16, 5767169, 29);  
+  KeyParameters params(1024, 5767169, 29);  
 
   // Compute keys
   PrivateKey priv = GeneratePrivateKey(params);

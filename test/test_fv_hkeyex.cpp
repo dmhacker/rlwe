@@ -8,8 +8,8 @@ using namespace rlwe::fv;
 #include <NTL/ZZ_pX.h>
 
 TEST_CASE("Experimental homomorphic key exchange") {
-  KeyParameters params(1024, 12289, 2);
-  KeyParameters leveled_params(params.GetPolyModulusDegree(), conv<ZZ>("2305843009213693951"), params.GetCoeffModulus());
+  KeyParameters params;
+  KeyParameters leveled_params(params.GetPolyModulusDegree(), ZZ(2305843009213693951ULL), params.GetCoeffModulus());
 
   NTL::ZZX a_shared = UniformSample(params.GetPolyModulusDegree(), ZZ(0), params.GetCoeffModulus()); 
 

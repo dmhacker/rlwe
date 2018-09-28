@@ -5,6 +5,7 @@
 
 using namespace rlwe::fv;
         
+// Mainly used for testing; it is recommended you choose the actual parameters to fit your use case
 KeyParameters::KeyParameters() :
   KeyParameters(DEFAULT_POLY_MODULUS_DEGREE,
       DEFAULT_COEFF_MODULUS, 

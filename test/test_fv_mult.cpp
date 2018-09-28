@@ -9,7 +9,7 @@ using namespace rlwe::fv;
 
 TEST_CASE("Homomorphic multiplication") {
   // Set up parameters
-  KeyParameters params(1024, conv<ZZ>("1152921504606830600"), ZZ(2));  
+  KeyParameters params(1024, ZZ(1152921504606830600ULL), ZZ(7));  
 
   // Compute keys
   PrivateKey priv = GeneratePrivateKey(params); 
@@ -43,7 +43,7 @@ TEST_CASE("Homomorphic multiplication") {
 
 TEST_CASE("Relinearization version 1") {
   // Set up parameters
-  KeyParameters params(2048, conv<ZZ>("1152921504606830600"), ZZ(2));  
+  KeyParameters params(1024, ZZ(1152921504606830600ULL), ZZ(7));  
 
   // Compute keys
   PrivateKey priv = GeneratePrivateKey(params);
