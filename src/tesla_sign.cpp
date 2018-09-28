@@ -55,9 +55,7 @@ void tesla::Sign(Signature & sig, const std::string & message, const SigningKey 
 
     // Assert that z is in the ring R_{B - U}
     bound = params.GetSignatureBound() - params.GetSignatureBoundAdjustment();
-    CenterPoly(z, z, params.GetCoeffModulus());
     if (!IsInRange(z, -bound, bound)) {
-      Sign(sig, message, signer); 
       continue;
     }
 
@@ -70,10 +68,9 @@ void tesla::Sign(Signature & sig, const std::string & message, const SigningKey 
     w1_p -= buffer;
     conv(w1, w1_p);
 
-    // d least significant bits in w1 are not small enough
-    CenterPoly(w1, w1, params.GetLSBValue());
-    if (!IsInRange(w1, -bound, bound)) {
-      Sign(sig, message, signer);
+    // d least significant bits in w1 need to be in the middle range 
+    AndPoly(w1, w1, params.GetLSBValue() - 1);
+    if (!IsInRange(w1, params.GetErrorBound(), bound)) {
       continue;
     }
 
@@ -83,9 +80,9 @@ void tesla::Sign(Signature & sig, const std::string & message, const SigningKey 
     w2_p -= buffer;
     conv(w2, w2_p);
 
-    // d least significant bits in w2 are not small enough
-    CenterPoly(w2, w2, params.GetLSBValue());
-    if (!IsInRange(w2, -bound, bound)) {
+    // d least significant bits in w2 need to be in the middle range 
+    AndPoly(w2, w2, params.GetLSBValue() - 1);
+    if (!IsInRange(w2, params.GetErrorBound(), bound)) {
       continue;
     }
 
