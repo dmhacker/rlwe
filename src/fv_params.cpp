@@ -5,6 +5,11 @@
 
 using namespace rlwe::fv;
         
+KeyParameters::KeyParameters() :
+  KeyParameters(DEFAULT_POLY_MODULUS_DEGREE,
+      DEFAULT_COEFF_MODULUS, 
+      DEFAULT_PLAINTEXT_MODULUS) {}
+
 KeyParameters::KeyParameters(size_t n, uint32_t q, uint32_t t) : 
   KeyParameters(n, ZZ(q), ZZ(t)) {}
 

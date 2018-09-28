@@ -2,6 +2,9 @@
 #include <NTL/ZZX.h>
 #include <NTL/pair.h>
 
+#define DEFAULT_POLY_MODULUS_DEGREE 1024
+#define DEFAULT_COEFF_MODULUS 12289
+#define DEFAULT_PLAINTEXT_MODULUS 7
 #define DEFAULT_ERROR_STANDARD_DEVIATION 3.192f
 #define DEFAULT_DECOMPOSITION_BIT_COUNT 32
 
@@ -70,6 +73,7 @@ namespace rlwe {
         size_t pmat_rows; 
       public:
         /* Constructors */
+        KeyParameters();
         KeyParameters(size_t n, uint32_t q, uint32_t t);
         KeyParameters(size_t n, const ZZ & q, const ZZ & t);
         KeyParameters(size_t n, const ZZ & q, const ZZ & t, uint32_t log_w, float sigma);
