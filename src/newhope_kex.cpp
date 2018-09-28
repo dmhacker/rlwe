@@ -4,6 +4,7 @@
 #include "polyutil.h"
 
 #include <cassert>
+#include <sodium.h>
 
 using namespace rlwe;
 using namespace rlwe::newhope;
@@ -50,12 +51,9 @@ void newhope::ReadPacket(Client & client, const Packet & packet) {
   u_p += e1_p;
   ZZX u = conv<ZZX>(u_p);
 
-  // Generate client key by getting randomness from /dev/urandom
+  // Generate client key randomly & securely 
   uint8_t v[SHARED_KEY_BYTE_LENGTH];
-  FILE * random_source = fopen("/dev/urandom", "r");
-  assert(random_source != NULL);
-  fread(v, 1, SHARED_KEY_BYTE_LENGTH, random_source);
-  fclose(random_source);
+  randombytes_buf(v, SHARED_KEY_BYTE_LENGTH);
 
   // v' = SHA3-256(v)
   sha3_256(v, SHARED_KEY_BYTE_LENGTH, v, SHARED_KEY_BYTE_LENGTH);

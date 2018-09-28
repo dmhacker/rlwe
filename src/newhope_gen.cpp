@@ -2,6 +2,7 @@
 #include "sample.h"
 
 #include <cassert>
+#include <sodium.h>
 
 using namespace rlwe;
 using namespace rlwe::newhope;
@@ -15,10 +16,7 @@ void newhope::Initialize(Server & server) {
 
   // Generate seed by getting randomness from /dev/urandom
   uint8_t seed[SEED_BYTE_LENGTH];
-  FILE * random_source = fopen("/dev/urandom", "r");
-  assert(random_source != NULL);
-  fread(seed, 1, SEED_BYTE_LENGTH, random_source);
-  fclose(random_source);
+  randombytes_buf(seed, SEED_BYTE_LENGTH);
 
   // Parse seed into a polynomial
   ZZX a;
