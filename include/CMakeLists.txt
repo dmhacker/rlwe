@@ -1,0 +1,3 @@
+file(GLOB HEADER_FILES RELATIVE "${CMAKE_SOURCE_DIR}/include" "*.h")
+
+install(FILES ${HEADER_FILES} DESTINATION include/rlwe)

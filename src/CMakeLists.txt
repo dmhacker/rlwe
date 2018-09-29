@@ -7,3 +7,5 @@ endif (BUILD_SHARED)
 if (BUILD_STATIC)
   add_library(rlwe STATIC ${SRC_FILES})
 endif (BUILD_STATIC)
+
+install(TARGETS rlwe LIBRARY DESTINATION lib) 
