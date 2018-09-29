@@ -1,8 +1,7 @@
 cmake_minimum_required(VERSION 2.8)
 project(rlwe)
 
-option(BUILD_SHARED "Build the shared version of the library" ON)
-option(BUILD_STATIC "Build the static version of the library" OFF)
+option(BUILD_SHARED "Build the shared version of the library" OFF)
 
 set(CMAKE_MODULE_PATH ${CMAKE_SOURCE_DIR}/modules)
 
