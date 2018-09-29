@@ -15,24 +15,24 @@ TEST_CASE("Verifying a signed message") {
   REQUIRE(Verify("test", sig, verif));
 }
 
-TEST_CASE("Verifying an incorrect message") {
+TEST_CASE("Rejecting an incorrect signature") {
   KeyParameters params;
 
   SigningKey signer = GenerateSigningKey(params);
   VerificationKey verif = GenerateVerificationKey(signer);
 
-  /* Signature sig = Sign("test", signer); */
-  /* REQUIRE(!Verify("different", sig, verif)); */
+  Signature sig = Sign("test", signer);
+  REQUIRE(!Verify("different", sig, verif));
 }
 
-TEST_CASE("Verifying an incorrect signature") {
+TEST_CASE("Rejecting a mismatched signature") {
   KeyParameters params;
 
   SigningKey signer = GenerateSigningKey(params);
   VerificationKey verif = GenerateVerificationKey(signer);
 
-  /* Signature sig1 = Sign("test", signer); */
-  /* Signature sig2 = Sign("different", signer); */
-  /* REQUIRE(!Verify("test", sig2, verif)); */
+  Signature sig1 = Sign("test", signer);
+  Signature sig2 = Sign("different", signer);
+  REQUIRE(!Verify("test", sig2, verif));
 }
 
